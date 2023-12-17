@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.home.HomeFragment">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ViewFlipper
+            android:id="@+id/v_flipper"
+            android:layout_width="match_parent"
+            android:layout_height="241dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="@dimen/margem_esquerda"
+            android:layout_marginTop="4dp"
+            android:layout_marginRight="@dimen/margem_direita"
+            app:layout_constraintBottom_toTopOf="@+id/scrowView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="MissingConstraints">
+
+        </ViewFlipper>
+
+    </androidx.cardview.widget.CardView>
+
+    <ScrollView
+        android:id="@+id/scrowView"
+        android:layout_width="387dp"
+        android:layout_height="326dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card_flipper">
+
+        <LinearLayout
+            android:id="@+id/layout_scrowView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <View
+                android:id="@+id/linhaSeparaMenus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"></View>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView_agentes"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/margem_esquerda"
+                android:layout_marginRight="@dimen/margem_direita"
+                android:fillViewport="true"
+                android:textAlignment="gravity"
+                app:cardBackgroundColor="#FFFFFFFF"
+                app:cardElevation="12dp"
+                app:cardUseCompatPadding="false">
+
+                <ImageButton
+                    android:id="@+id/imageButtonAgentes"
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/descricao_ag"
+                    android:foreground="@drawable/agentes_endemias_backgroun_removed"
+                    tools:layout_editor_absoluteY="312dp" />
+
+                <TextView
+                    android:id="@+id/txtAgentes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@id/imageButtonAgentes"
+                    android:layout_alignTop="@id/v_flipper"
+                    android:layout_marginLeft="110dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/agentes"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/txtDescricaoAgentes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/txtAgentes"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="107dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginTop="21dp"
+                    android:layout_marginEnd="35dp"
+                    android:text="@string/descricao_agentes" />
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView_TrabAgentes"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/margem_esquerda"
+                android:layout_marginTop="2dp"
+                android:layout_marginRight="@dimen/margem_direita"
+                android:textAlignment="gravity"
+                app:cardBackgroundColor="#FFFFFFFF"
+                app:cardElevation="12dp"
+                app:cardUseCompatPadding="false">
+
+                <ImageButton
+                    android:id="@+id/imageButtonTrabAgentes"
+                    android:layout_width="@dimen/largura_button"
+                    android:layout_height="@dimen/altura_button"
+                    android:contentDescription="@string/imagem_homem_camisa_verde_escrito_ace"
+                    android:foreground="@drawable/trabalho_de_campo_removebg"
+                    tools:layout_editor_absoluteY="312dp" />
+
+                <TextView
+                    android:id="@+id/txtTrabAgentes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@id/imageButtonAgentes"
+                    android:layout_alignTop="@id/v_flipper"
+                    android:layout_marginLeft="110dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/trabalhos_agentes"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/txtDescricaoTrabAgentes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/txtAgentes"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="107dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginTop="21dp"
+                    android:layout_marginEnd="35dp"
+                    android:text="@string/descricao_trabalhos" />
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView_Denuncias"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/margem_esquerda"
+                android:layout_marginTop="2dp"
+                android:layout_marginRight="@dimen/margem_direita"
+                android:textAlignment="gravity"
+                app:cardBackgroundColor="#FFFFFFFF"
+                app:cardElevation="12dp"
+                app:cardUseCompatPadding="false">
+
+                <ImageButton
+                    android:id="@+id/imageButtonDenuncias"
+                    android:layout_width="@dimen/largura_button"
+                    android:layout_height="@dimen/altura_button"
+                    android:contentDescription="@string/alto_falante"
+                    android:foreground="@drawable/denuncia_removebg"
+                    tools:layout_editor_absoluteY="312dp" />
+
+                <TextView
+                    android:id="@+id/txtDenuncias"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@id/imageButtonAgentes"
+                    android:layout_alignTop="@id/v_flipper"
+                    android:layout_marginLeft="110dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/denuncias"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/txtDescricaoDenuncias"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/txtAgentes"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="107dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginTop="21dp"
+                    android:layout_marginEnd="35dp"
+                    android:text="@string/descricao_denuncias" />
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/Dengue"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/margem_esquerda"
+                android:layout_marginTop="2dp"
+                android:layout_marginRight="@dimen/margem_direita"
+                android:textAlignment="gravity"
+                app:cardBackgroundColor="#FFFFFFFF"
+                app:cardElevation="12dp"
+                app:cardUseCompatPadding="false">
+
+                <ImageButton
+                    android:id="@+id/imageButtonDengue"
+                    android:layout_width="@dimen/largura_button"
+                    android:layout_height="@dimen/altura_button"
+                    android:contentDescription="@string/imagem_prenilongo_branco_e_preto"
+                    android:foreground="@drawable/aedes_aegypti_removebg"
+                    tools:layout_editor_absoluteY="312dp" />
+
+                <TextView
+                    android:id="@+id/txtInfoDengue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@id/imageButtonAgentes"
+                    android:layout_alignTop="@id/v_flipper"
+                    android:layout_marginLeft="110dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/informacoes_degue"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/txtDescricaoDengue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/txtAgentes"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="107dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginTop="35dp"
+                    android:layout_marginEnd="35dp"
+                    android:text="@string/descricao_informacoes" />
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView_Escorpiao"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/margem_esquerda"
+                android:layout_marginTop="2dp"
+                android:layout_marginRight="@dimen/margem_direita"
+                android:textAlignment="gravity"
+                app:cardBackgroundColor="#FFFFFFFF"
+                app:cardElevation="12dp"
+                app:cardUseCompatPadding="false">
+
+                <ImageButton
+                    android:id="@+id/imageButtonEscorpiao"
+                    android:layout_width="@dimen/largura_button"
+                    android:layout_height="@dimen/altura_button"
+                    android:contentDescription="@string/imagem_escorpiao"
+                    android:foreground="@drawable/escorpiao"
+                    tools:layout_editor_absoluteY="312dp" />
+
+                <TextView
+                    android:id="@+id/txtEscorpiao"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@id/imageButtonAgentes"
+                    android:layout_alignTop="@id/v_flipper"
+                    android:layout_marginLeft="110dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/informacoes_escorpiao"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/txtDescricaoEscorpiao"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/txtAgentes"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="107dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginTop="21dp"
+                    android:layout_marginEnd="35dp"
+                    android:text="@string/descricao_escorpiao" />
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView_empty_linha_fim_menu"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/margem_esquerda"
+                android:layout_marginTop="2dp"
+                android:layout_marginRight="@dimen/margem_direita"
+                android:textAlignment="gravity"
+                app:cardBackgroundColor="#FFFFFFFF"
+                app:cardElevation="12dp"
+                app:cardUseCompatPadding="false">
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

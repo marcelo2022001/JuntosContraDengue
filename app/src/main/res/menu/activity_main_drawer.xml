@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_minhas_reclamacoes"
+            android:icon="@drawable/reclamacao"
+            android:title="Minhas Reclamacoes" />
+        <item
+            android:id="@+id/nav_minhas_avaliacoes"
+            android:icon="@drawable/star"
+            android:title="Minhas Avaliações" />
+        <item
+            android:id="@+id/nav_telefones_uteis"
+            android:icon="@drawable/telefone_fixo"
+            android:title="Telefones Úteis" />
+        <item
+            android:id="@+id/nav_descarte_pneus"
+            android:icon="@drawable/pneu"
+            android:title="Descarte de Pneus" />
+        <item
+            android:id="@+id/nav_descarte_eletronicos"
+            android:icon="@drawable/recycling_electronic"
+            android:title="Descarte de Eletrônicos" />
+    </group>
+
+    <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_terms"
+                android:icon="@drawable/terms"
+                android:title="Termos de Uso e Privacidade" />
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@drawable/ic_menu_send"
+                android:title="Send" />
+        </menu>
+    </item>
+
+</menu>
