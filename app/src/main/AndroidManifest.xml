@@ -1,21 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <!-- Permissions for internet -->
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.JuntosContraDengue"
+        android:theme="@style/Theme.JuntosContraDengue.NoActionBar"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".AddAgentes"
+            android:exported="false" />
+        <activity
+            android:name=".AdminMain"
+            android:exported="false" />
+        <activity
+            android:name=".DescarteEletronicos"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".UploadTrabAgentes"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".Denuncias"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".DescartePneus"
+            android:exported="false" />
+        <activity
+            android:name=".TelaLoguin"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".TelaCadastro"
+            android:exported="false"
+            android:parentActivityName=".TelaLoguin" />
+        <activity
+            android:name=".TelefonesUteis"
+            android:exported="false"
+            android:label="@string/title_activity_telefones_uteis" />
+        <activity
+            android:name=".MinhasDenuncias"
+            android:exported="false"
+            android:label="@string/title_activity_minhas_denuncias"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".Escorpionismo"
+            android:exported="false"
+            android:label="@string/escorpionismo"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".Dengue"
+            android:exported="false"
+            android:label="@string/title_activity_dengue"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".TrabalhosAgentes"
+            android:exported="false"
+            android:label="Trabalhos dos Agentes"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".Agentes"
+            android:exported="false"
+            android:label="Agentes de Endemias"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.JuntosContraDengue.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

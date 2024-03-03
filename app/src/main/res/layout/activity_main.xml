@@ -20,6 +20,9 @@
         android:layout_gravity="start"
         android:layout_marginTop="?attr/actionBarSize"
         android:fitsSystemWindows="false"
+        app:itemIconTint="#000000"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
+
+
 </androidx.drawerlayout.widget.DrawerLayout>

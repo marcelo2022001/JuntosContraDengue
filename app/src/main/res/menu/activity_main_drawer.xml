@@ -7,7 +7,7 @@
         <item
             android:id="@+id/nav_minhas_reclamacoes"
             android:icon="@drawable/reclamacao"
-            android:title="Minhas Reclamacoes" />
+            android:title="Minhas Denúncias" />
         <item
             android:id="@+id/nav_minhas_avaliacoes"
             android:icon="@drawable/star"
@@ -18,24 +18,24 @@
             android:title="Telefones Úteis" />
         <item
             android:id="@+id/nav_descarte_pneus"
-            android:icon="@drawable/pneu"
+            android:icon="@drawable/icon_pneu"
             android:title="Descarte de Pneus" />
         <item
             android:id="@+id/nav_descarte_eletronicos"
-            android:icon="@drawable/recycling_electronic"
+            android:icon="@drawable/icon_lixo_eletronico"
             android:title="Descarte de Eletrônicos" />
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="Comunicação">
         <menu>
             <item
                 android:id="@+id/nav_terms"
-                android:icon="@drawable/terms"
+                android:icon="@drawable/icon_politica_privacidade"
                 android:title="Termos de Uso e Privacidade" />
             <item
                 android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:icon="@drawable/icon_send"
+                android:title="Copartilhar App" />
         </menu>
     </item>
 
