@@ -1,0 +1,4 @@
+- [x] Research modern activity transition APIs
+- [x] Implement `ActivityOptions` and `overrideActivityTransition` in `VideoIniciarAppActivity.java`
+- [x] Add transition to `iniciarEscolherLocalidade()` for consistency
+- [ ] Verify build and functionality
