@@ -1,0 +1,3 @@
+- [x] Move `layoutTutorial` in `fragment_home.xml`
+- [x] Update `MainActivity.java` with null checks and robust logic
+- [ ] Verify fix by building and running the app
