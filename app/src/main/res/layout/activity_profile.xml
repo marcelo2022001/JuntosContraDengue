@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProfileActivity">
+
+    <!-- TOOLBAR -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarProfile"
+        android:layout_width="match_parent"
+        android:layout_height="53dp"
+        android:background="?attr/colorPrimary"
+        android:theme="?attr/actionBarTheme"
+        app:navigationIcon="@drawable/arrow_back"
+        app:title="Configurações"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+
+    <!-- SCROLLVIEW -->
+    <ScrollView
+        android:id="@+id/scrollProfile"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/toolbarProfile"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- CARDVIEW -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewProfile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp">
+
+            <!-- CONTEÚDO DO CARD -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:padding="16dp">
+
+                <!-- IMAGEM PERFIL COM BORDA -->
+                <FrameLayout
+                    android:id="@+id/frameProfileImage"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/circle_border"
+                    android:padding="4dp"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/toolbarProfile"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <ImageView
+                        android:id="@+id/imgProfile"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="@null"
+                        android:src="@drawable/profile_icon" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/txtProfileNome"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nome"
+                    android:textSize="20sp"
+                    android:textColor="@color/black" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="8dp"
+                    android:textSize="18sp"
+                    android:gravity="bottom"
+                    android:text="CPF:">
+                </TextView>
+
+                <TextView
+                    android:id="@+id/txtProfileCpf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cpf"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black" />
+
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/edtProfileEndereco"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:inputType="textAutoComplete"
+                    android:background="@drawable/border_rounded_gray"
+                    android:minHeight="48dp"
+                    android:padding="8dp"
+                    android:hint="@string/endereco" />
+
+                <EditText
+                    android:id="@+id/edtProfileNumcasa"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:inputType="number"
+                    android:background="@drawable/border_rounded_gray"
+                    android:minHeight="48dp"
+                    android:padding="8dp"
+                    android:hint="@string/numero_da_casa" />
+
+                <EditText
+                    android:id="@+id/edtProfileConjunto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:inputType="textAutoComplete"
+                    android:background="@drawable/border_rounded_gray"
+                    android:minHeight="48dp"
+                    android:padding="8dp"
+                    android:hint="@string/conjunto" />
+
+                <EditText
+                    android:id="@+id/edtProfileTelefone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:minHeight="48dp"
+                    android:padding="8dp"
+                    android:hint="@string/telefone"
+                    android:inputType="phone"
+                    android:maxLength="15" />
+
+                <!-- CAMPO DE EMAIL COM ÁREA DE SUGESTÃO -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="12dp">
+
+                    <EditText
+                        android:id="@+id/edtProfileEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/border_rounded_gray"
+                        android:minHeight="48dp"
+                        android:padding="8dp"
+                        android:hint="@string/e_mail"
+                        android:inputType="textEmailAddress" />
+
+                    <!-- ÁREA DE SUGESTÃO DE EMAIL -->
+                    <LinearLayout
+                        android:id="@+id/suggestionLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:visibility="gone"
+                        android:layout_marginTop="4dp"
+                        android:padding="8dp"
+                        android:background="@drawable/border_suggestion">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_correction"
+                            android:layout_marginEnd="8dp"
+                            android:contentDescription="@string/sugestao" />
+
+                        <TextView
+                            android:id="@+id/txtSuggestion"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/sugestao_email"
+                            android:textColor="@color/green_500"
+                            android:textSize="14sp"
+                            android:paddingVertical="2dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnAcceptSuggestion"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:text="@string/corrigir"
+                            style="@style/Widget.MaterialComponents.Button"
+                            app:cornerRadius="16dp"
+                            app:backgroundTint="@color/green_500" />
+
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- BOTÕES -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="horizontal"
+                    android:layout_weight="2"
+                    android:layout_marginTop="24dp">
+
+                    <Button
+                        android:id="@+id/btnSalvarProfile"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="8dp"
+                        android:text="@string/salvar"
+                        android:layout_weight="1"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/botao_redondo_verde" />
+
+                    <!-- NOVO BOTÃO MUDAR SENHA -->
+                    <Button
+                        android:id="@+id/btnMudarSenhaProfile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/border_rounded_gray"
+                        android:text="@string/trocar_senha" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnExcluirConta"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:text="@string/excluir_conta" />
+
+                <TextView
+                    android:id="@+id/dtcadastroEm"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/data_do_cadastro"
+                    android:textColor="#151515"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/updateAt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/atualizado_em"
+                    android:textColor="#151515"
+                    android:textSize="14sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp">
+
+                </View>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

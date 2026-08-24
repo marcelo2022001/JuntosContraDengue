@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".TelefonesUteis">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarTelefoneUteis"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme" />
+
+    <!-- Banner de aviso offline -->
+    <TextView
+        android:id="@+id/txtAvisoOfflineTelefones"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFF3CD"
+        android:padding="8dp"
+        android:text="Você está offline. Exibindo telefones salvos localmente."
+        android:textAlignment="center"
+        android:textColor="#856404"
+        android:textSize="12sp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <EditText
+        android:id="@+id/edtPesquisaFone"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/border_rounded_gray"
+        android:drawableEnd="@drawable/lupa"
+        android:hint="@string/pesquisa"
+        android:inputType="textCapCharacters"
+        android:maxWidth="320dp"
+        android:minHeight="48dp"
+        android:paddingStart="10dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="10dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTelefones"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp" />
+</LinearLayout>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewAgentes"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:cardCornerRadius="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/img_agentes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/imagem_do_agente_de_saude"
+            android:src="@drawable/profile_icon">
+        </ImageView>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- largura flexível (0dp) em vez de 168dp fixo: usa todo o espaço que sobra
+         até a borda da tela, então o nome tem muito mais espaço antes de quebrar.
+         altura wrap_content em vez de 97dp fixo: cresce conforme o conteúdo,
+         então a função nunca fica cortada por falta de altura. -->
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        app:layout_constraintBottom_toBottomOf="@+id/cardViewAgentes"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/cardViewAgentes"
+        app:layout_constraintTop_toTopOf="@+id/cardViewAgentes">
+
+        <TextView
+            android:id="@+id/txt_nome_agente"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:gravity="start"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:text="@string/nome_do_servidor"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:textStyle="bold">
+        </TextView>
+
+        <TextView
+            android:id="@+id/txt_funcao_agente"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="@string/agente_de_combate_a_endemias"
+            android:textSize="15sp"
+            android:textColor="@color/black"
+            android:textStyle="italic">
+        </TextView>
+
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="16dp"
+        android:background="?actionBarDivider"
+        android:contentDescription="@string/funcao_do_agente_de_saude"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardViewAgentes">
+    </ImageView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

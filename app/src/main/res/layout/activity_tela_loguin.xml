@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".TelaLoguin">
+
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarLoguin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="Acessar conta">
+    </androidx.appcompat.widget.Toolbar>
+
+    <ImageView
+        android:id="@+id/imgTelaLoguin"
+        android:layout_width="237dp"
+        android:layout_height="130dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbarLoguin"
+        app:srcCompat="@drawable/agentes_endemias_backgroun_removed"
+        android:contentDescription="@string/imagem_duas_pessoas_de_colete_verde_amarelo" />
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView4"
+        android:layout_width="378dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imgTelaLoguin">
+
+        <LinearLayout
+            android:id="@+id/layoutLoginUsuario"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/contamos_com_voce"
+                android:textSize="24sp"
+                android:textStyle="bold|italic">
+            </TextView>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:fillViewport="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <EditText
+                        android:id="@+id/edtTxtCpfTelaLoguin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="20dp"
+                        android:maxWidth="320dp"
+                        android:background="@drawable/border_rounded_gray"
+                        android:hint="@string/cpf"
+                        android:imeOptions="actionDone"
+                        android:padding="8dp"
+                        android:selectAllOnFocus="true"
+                        android:singleLine="true"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/txtCpfTelaLoguin"
+                        android:autofillHints="cpf" />
+
+                    <EditText
+                        android:id="@+id/edtTxtSenhaTelaLoguin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="20dp"
+                        android:background="@drawable/border_rounded_gray"
+                        android:drawableEnd="@drawable/eye_closed"
+                        android:hint="@string/senha"
+                        android:maxWidth="320dp"
+                        android:imeOptions="actionDone"
+                        android:inputType="numberPassword"
+                        android:padding="8dp"
+                        android:selectAllOnFocus="true"
+                        android:singleLine="true"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/txtCpfTelaLoguin"
+                        android:autofillHints="password " />
+
+                    <Button
+                        android:id="@+id/btnEntrarTelaLoguin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:text="@string/entrar"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtRecupSenhaUsuario"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp"
+                        android:text="@string/esqueci_minha_senha">
+                    </TextView>
+
+                    <TextView
+                        android:id="@+id/txtCriarContaUsuario"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/nao_tem_uma_conta_cadastre_se"
+                        android:textStyle="bold">
+                    </TextView>
+
+
+                </LinearLayout>
+
+            </ScrollView>
+
+            <ProgressBar
+                android:id="@+id/pgLoadingUsuario"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="64dp"
+                android:layout_marginBottom="64dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/btnEntrarTelaLoguin"
+                app:layout_constraintStart_toStartOf="@+id/btnEntrarTelaLoguin"
+                app:layout_constraintTop_toBottomOf="@+id/btnEntrarTelaLoguin">
+            </ProgressBar>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".SubstituirSlider">
+
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarSubsSliders"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:title="SUBSTITUIR SLIDER"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <ImageView
+        android:id="@+id/imgViewSubsSliders"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbarSubsSliders" />
+
+    <ProgressBar
+        android:id="@+id/pBarSubstSlider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/imgViewSubsSliders"
+        app:layout_constraintEnd_toEndOf="@+id/imgViewSubsSliders"
+        app:layout_constraintStart_toStartOf="@+id/imgViewSubsSliders"
+        app:layout_constraintTop_toTopOf="@+id/imgViewSubsSliders">
+    </ProgressBar>
+
+    <!--Este será o botão de ação flutuante pai-->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/add_fab_ext_slider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="end|top"
+        android:textColor="@color/white"
+        app:icon="@drawable/baseline_add"
+        app:iconTint="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!--Botão de ação flutuante para adicionar imagem-->
+
+    <!--Texto do nome da ação para o botão adicionar imagem-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_slider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/white"
+        android:contentDescription="@string/substituir_sliders"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toTopOf="@+id/fab_salvar_slider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/baseline_add_a_photo"
+        app:tint="@color/black" />
+
+    <TextView
+        android:id="@+id/txt_add_slider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="@string/buscar_imagem"
+        app:layout_constraintBottom_toBottomOf="@+id/fab_add_slider"
+        app:layout_constraintEnd_toStartOf="@+id/fab_add_slider"
+        app:layout_constraintTop_toTopOf="@+id/fab_add_slider" />
+
+    <!--Botão de ação flutuante para salvar imagem-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_salvar_slider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/white"
+        android:contentDescription="@string/app_name"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toTopOf="@+id/add_fab_ext_slider"
+        app:layout_constraintEnd_toEndOf="@+id/add_fab_ext_slider"
+        app:srcCompat="@drawable/baseline_archive"
+        app:tint="@color/black" />
+
+    <!--Texto do nome da ação para o salvar imagem-->
+    <TextView
+        android:id="@+id/txt_add_salvar_slider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="@string/salvar_imagem"
+        app:layout_constraintBottom_toBottomOf="@+id/fab_salvar_slider"
+        app:layout_constraintEnd_toStartOf="@+id/fab_salvar_slider"
+        app:layout_constraintTop_toTopOf="@+id/fab_salvar_slider" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

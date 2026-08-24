@@ -4,38 +4,48 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="none">
+
+        <item
+            android:id="@+id/nav_configuracoes"
+            android:icon="@drawable/ic_admin_panel_settings"
+            android:title="@string/minha_conta" />
         <item
             android:id="@+id/nav_minhas_reclamacoes"
             android:icon="@drawable/reclamacao"
-            android:title="Minhas Denúncias" />
-        <item
-            android:id="@+id/nav_minhas_avaliacoes"
-            android:icon="@drawable/star"
-            android:title="Minhas Avaliações" />
+            android:title="@string/minhas_denuncias" />
+
         <item
             android:id="@+id/nav_telefones_uteis"
             android:icon="@drawable/telefone_fixo"
-            android:title="Telefones Úteis" />
+            android:title="@string/telefones_uteis" />
         <item
             android:id="@+id/nav_descarte_pneus"
             android:icon="@drawable/icon_pneu"
-            android:title="Descarte de Pneus" />
+            android:title="@string/descarte_de_pneus" />
         <item
             android:id="@+id/nav_descarte_eletronicos"
-            android:icon="@drawable/icon_lixo_eletronico"
-            android:title="Descarte de Eletrônicos" />
+            android:icon="@drawable/recycling_electronic"
+            android:title="@string/descarte_de_eletronicos" />
+        <item
+            android:id="@+id/nav_sair"
+            android:icon="@drawable/sair"
+            android:title="@string/sair" />
     </group>
 
-    <item android:title="Comunicação">
+    <item android:title="@string/comunicacao">
         <menu>
             <item
                 android:id="@+id/nav_terms"
                 android:icon="@drawable/icon_politica_privacidade"
-                android:title="Termos de Uso e Privacidade" />
+                android:title="@string/termos_de_uso_e_privacidade" />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/icon_send"
-                android:title="Copartilhar App" />
+                android:title="@string/compartilhar_app" />
+            <item
+                android:id="@+id/nav_sobre"
+                android:icon="@drawable/icons_informacoes_72x72"
+                android:title="@string/sobre_o_aplicativo" />
         </menu>
     </item>
 

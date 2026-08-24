@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:fitsSystemWindows="true"
+    tools:context=".CriarCadastroAgente">
+
+    <!-- Toolbar fixada no topo -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tbCriarCadAgenteAdmin"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/arrow_back"
+        app:title="CADASTROS"
+        app:titleTextColor="@android:color/white" />
+
+    <!-- CardView da imagem de perfil -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewAgentesCad"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_marginTop="32dp"
+        app:cardCornerRadius="65dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tbCriarCadAgenteAdmin">
+
+        <ImageView
+            android:id="@+id/imgCriarCadAgenteAdmin"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/camera"
+            android:contentDescription="@string/descricao_icone_camera" />
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- ScrollView para permitir rolagem quando o conteúdo for grande -->
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardViewAgentesCad">
+
+
+    <!-- CardView principal com ScrollView -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <EditText
+                    android:id="@+id/edtNomeCriarCadAgenteAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:hint="@string/nome_completo"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:autofillHints="Nome completo"/>
+
+                <EditText
+                    android:id="@+id/edtCpfCriarCadAgenteAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:hint="@string/cpf"
+                    android:inputType="number"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:autofillHints="CPF"/>
+
+                <EditText
+                    android:id="@+id/edtFuncaoCadAgenteAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:hint="@string/funcao"
+                    android:inputType="text"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:text=""
+                    android:autofillHints="Função" />
+
+                <EditText
+                    android:id="@+id/edtEmailCriarCadAgenteAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:hint="@string/e_mail"
+                    android:inputType="textEmailAddress"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:autofillHints="Email" />
+
+                <EditText
+                    android:id="@+id/edtConfirmeEmailCriarCadAgenteAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:hint="@string/confirme_seu_e_mail"
+                    android:inputType="textEmailAddress"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:autofillHints="Confirme email" />
+
+                <EditText
+                    android:id="@+id/edtTelefoneCriarCadAgenteAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:hint="@string/telefone"
+                    android:inputType="phone"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:autofillHints="Senha" />
+
+                <EditText
+                    android:id="@+id/edtSenhaCriarCadAgenteAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:drawableEnd="@drawable/eye_closed"
+                    android:drawablePadding="8dp"
+                    android:hint="@string/senha"
+                    android:inputType="number"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:autofillHints="Confirme sua senha"/>
+
+                <EditText
+                    android:id="@+id/edtConfirmarSenhaCriarCadAgenteAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:drawableEnd="@drawable/eye_closed"
+                    android:drawablePadding="8dp"
+                    android:hint="@string/confirme_sua_senha"
+                    android:inputType="number"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:autofillHints="Selecione aceite os termos"/>
+
+                <CheckBox
+                    android:id="@+id/checkBoxCriarCadAgenteAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/eu_li_e_aceito_os_termos_de_uso"
+                    android:textColor="#FF9800" />
+
+                <TextView
+                    android:id="@+id/ler_termos_cad_agentes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/ler_termos_de_uso"
+                    android:textColor="@color/light_blue_900"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnCriarContaCadAgenteAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:enabled="false"
+                    android:text="@string/criar_conta"
+                    android:textAllCaps="false"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+         </androidx.cardview.widget.CardView>
+
+    </ScrollView>
+
+    <!-- Fragment container -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

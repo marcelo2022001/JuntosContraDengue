@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_add_sliders"
+            android:icon="@drawable/add_image"
+            android:title="@string/adicionar_sliders" />
+        <item
+            android:id="@+id/nav_add_fones_uteis"
+            android:icon="@drawable/add_telefone"
+            android:title="@string/adicionar_telefones" />
+        <item
+            android:id="@+id/nav_locais_descartes"
+            android:icon="@drawable/terra_reciclagem"
+            android:title="@string/adicionar_locais_de_descartes" />
+        <item
+            android:id="@+id/nav_excluir_telefones"
+            android:icon="@drawable/baseline_delete"
+            android:title="@string/excluir_telefones_uteis" />
+        <item
+            android:id="@+id/nav_excluir_locais_eletronicos"
+            android:icon="@drawable/icon_lixo_eletronico"
+            android:title="@string/excluir_locais_de_descarte_de_eletronicos" />
+        <item
+            android:id="@+id/nav_excluir_locais_pneus"
+            android:icon="@drawable/icon_pneus"
+            android:title="@string/excluir_locais_de_descarte_de_pneus" />
+
+        <item
+            android:id="@+id/nav_sair_admin"
+            android:icon="@drawable/sair_icon"
+            android:title="@string/sair" />
+    </group>
+
+    <item android:title="@string/comunicacao">
+        <menu>
+            <item
+                android:id="@+id/nav_terms_adm"
+                android:icon="@drawable/icon_politica_privacidade"
+                android:title="@string/termos_de_uso_e_privacidade" />
+            <item
+                android:id="@+id/nav_send_adm"
+                android:icon="@drawable/icon_send"
+                android:title="@string/compartilhar_app" />
+            <item
+                android:id="@+id/nav_compras"
+                android:icon="@drawable/icon_carrinho_compras"
+                android:title="@string/compras" />
+        </menu>
+    </item>
+
+</menu>

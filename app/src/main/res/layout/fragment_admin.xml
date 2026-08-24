@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_admin"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F4F4"
+    tools:context=".ui.home.AdminFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2.6"
+        android:orientation="vertical"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/layoutAdmin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/layoutInicioMainAdmin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/crdViewImgEnviarMsgTodosApp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:fillViewport="true"
+                    android:textAlignment="gravity">
+
+                    <LinearLayout
+                        android:id="@+id/linLayouEnviarMsgTodosApp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="top"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/btn_tela_admin_EnviarMsgTodosApp"
+                            android:layout_width="match_parent"
+                            android:layout_height="86dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/imagem_mesagem_push"
+                            android:contentDescription="@string/enviar_mensagens_a_todos_usuario_app_do_municipio" />
+
+                        <TextView
+                            android:id="@+id/txtEnviarMsgTodosApp"
+                            android:layout_width="130dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/mensagens_aos_usuarios"
+                            android:textColor="@color/black"
+                            android:textSize="18sp"
+                            android:onClick="onClickMensagensPushAdmin"/>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/crdViewRecla"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:fillViewport="true"
+                    android:textAlignment="gravity">
+
+                    <LinearLayout
+                        android:id="@+id/linLayouIntoCardViewRecla"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="top"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/btn_tela_admin_acomp_reclamacoes"
+                            android:layout_width="102dp"
+                            android:layout_height="86dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/reclamacao"
+                            android:contentDescription="@string/btn_acompanhar_reclamacoes"
+                            android:onClick="onClickAdminAcompanharReclamacoes">
+                        </ImageButton>
+
+                        <TextView
+                            android:id="@+id/txtReclama"
+                            android:layout_width="130dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/acompanhar_as_reclamacoes"
+                            android:textColor="@color/black"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutBtnAddImgTela"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/crdViewImgRemoveSlidersMain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:fillViewport="true"
+                    android:textAlignment="gravity">
+
+                </androidx.cardview.widget.CardView>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutAddAgentes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/crdViewImgAddAgentes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:fillViewport="true"
+                    android:textAlignment="gravity">
+
+                    <LinearLayout
+                        android:id="@+id/linLayouAddAgentes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="top"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/btn_tela_admin_add_agentes"
+                            android:layout_width="102dp"
+                            android:layout_height="86dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/agentes_endemias_add"
+                            android:contentDescription="@string/btn_adicionar_agentes"
+                            android:onClick="onClickAdminAddAgentes">
+                        </ImageButton>
+
+                        <TextView
+                            android:id="@+id/txtImgRemoveSlidersMainAddAgentes"
+                            android:layout_width="130dp"
+                            android:layout_height="wrap_content"
+                            android:background="@color/white"
+                            android:gravity="center"
+                            android:text="@string/adicionar_agentes"
+                            android:textColor="@color/black"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/crdViewImgRemoveAgentes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:fillViewport="true"
+                    android:textAlignment="gravity">
+
+                    <LinearLayout
+                        android:id="@+id/linLayouRemoveAgentes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="top"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/btn_tela_admin_remove_agentes"
+                            android:layout_width="102dp"
+                            android:layout_height="86dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/agentes_endemias_remove"
+                            android:contentDescription="@string/exclui_agentes"
+                            android:onClick="onClickAdminRemoveAgentes">
+                        </ImageButton>
+
+                        <TextView
+                            android:id="@+id/txtRemoveAgentes"
+                            android:layout_width="130dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/remove_agentes"
+                            android:textColor="@color/black"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutBtnAddImgTrabAgentes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/crdViewImgAddTrabAgentes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:fillViewport="true"
+                    android:textAlignment="gravity">
+
+                    <LinearLayout
+                        android:id="@+id/linLayouAddTrabAgentes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="top"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/btn_tela_admin_add_trab_agentes"
+                            android:layout_width="102dp"
+                            android:layout_height="86dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/trab_endemias_add"
+                            android:contentDescription="@string/add_image_trab_agentes"
+                            android:onClick="onClickAdminAddTrabAgentes">
+                        </ImageButton>
+
+                        <TextView
+                            android:id="@+id/txtAddTrabAgentes"
+                            android:layout_width="130dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/add_trabalhos_dos_agentes"
+                            android:textColor="@color/black"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/crdViewRemoveImgTrabAgentes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:fillViewport="true"
+                    android:textAlignment="gravity">
+
+                    <LinearLayout
+                        android:id="@+id/linLayouRemoveImgTrabAgentes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="top"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/btn_tela_admin_remove_trab_agentes"
+                            android:layout_width="102dp"
+                            android:layout_height="86dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/trab_endemias_remove"
+                            android:contentDescription="@string/remove_imagens_dos_trabalhos_feitos"
+                            android:onClick="onClickAdminRemoveTrabAgentes">
+                        </ImageButton>
+
+                        <TextView
+                            android:id="@+id/txtRemoveImgTrabAgentes"
+                            android:layout_width="130dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/remove_trab_dos_agentes"
+                            android:textColor="@color/black"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutBtnEnviarMsgTodosApp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/crdViewVideoIni"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:fillViewport="true"
+                    android:textAlignment="gravity">
+
+                    <LinearLayout
+                        android:id="@+id/linLayouIntoCardViewVideoIni"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="top"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/btn_tela_admin_add_video"
+                            android:layout_width="102dp"
+                            android:layout_height="86dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/video_icon"
+                            android:contentDescription="@string/adiciona_video_ao_abrir_o_app"
+                            android:onClick="onClickAdminAddVideoInicioApp">
+                        </ImageButton>
+
+                        <TextView
+                            android:id="@+id/txtVideoIni"
+                            android:layout_width="130dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/add_video_ao_abrir_app"
+                            android:textColor="@color/black"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/crdViewConfigAdmin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:fillViewport="true"
+                    android:textAlignment="gravity">
+
+                    <LinearLayout
+                        android:id="@+id/linLayouConfigAdmin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="top"
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/btn_tela_admin_ConfigAdmin"
+                            android:layout_width="102dp"
+                            android:layout_height="86dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/config"
+                            android:contentDescription="@string/configuracoes_cadastro_dos_administradores"
+                            android:onClick="onClickAdminProfile">
+                        </ImageButton>
+
+                        <TextView
+                            android:id="@+id/txtConfigAdmin"
+                            android:layout_width="130dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/configuracoes_da_conta"
+                            android:textColor="@color/black"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AddLocalDescartesPneusEletronicos">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tbInformarLocaisDescartes"
+        android:layout_width="match_parent"
+        android:layout_height="53dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="32dp"
+        android:background="?attr/colorPrimary"
+        android:gravity="center"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/arrow_back"
+        app:title="Adicionar locais de descartes">
+    </androidx.appcompat.widget.Toolbar>
+
+    <ScrollView
+        android:id="@+id/scViewInformarLocaisDescartes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/tbInformarLocaisDescartes">
+
+        <LinearLayout
+            android:id="@+id/ltInformarLocaisDescartes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/scViewInformarLocaisDescartes">
+
+            <EditText
+                android:id="@+id/localInformarLocaisDescartes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/border_rounded_gray"
+                android:hint="@string/secretaria"
+                android:inputType="textAutoComplete"
+                android:padding="8dp"
+                android:textSize="20sp">
+            </EditText>
+
+            <EditText
+                android:id="@+id/enderecoInformarLocaisDescartes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/border_rounded_gray"
+                android:hint="@string/endereco_completo"
+                android:padding="8dp"
+                android:textSize="20sp">
+            </EditText>
+
+            <EditText
+                android:id="@+id/referenciaInformarLocaisDescartes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/border_rounded_gray"
+                android:hint="@string/referencia"
+                android:inputType="textAutoComplete"
+                android:padding="8dp"
+                android:textSize="20sp">
+            </EditText>
+
+            <EditText
+                android:id="@+id/foneInformarLocaisDescartes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:inputType="number"
+                android:background="@drawable/border_rounded_gray"
+                android:hint="@string/telefone_celular"
+                android:padding="8dp"
+                android:textSize="20sp">
+            </EditText>
+
+            <EditText
+                android:id="@+id/foneFixoInformarLocaisDescartes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/border_rounded_gray"
+                android:hint="@string/numero_telefone_fixo"
+                android:padding="8dp"
+                android:inputType="number"
+                android:textSize="20sp">
+            </EditText>
+
+            <EditText
+                android:id="@+id/horarioInformarLocaisDescartes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/border_rounded_gray"
+                android:hint="@string/horario_atendimento"
+                android:padding="8dp"
+                android:inputType="textAutoComplete"
+                android:textSize="20sp">
+            </EditText>
+
+            <CheckBox
+                android:id="@+id/ckbInformarLocaisDescartesEletronicos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="@string/eletronicos" />
+
+            <CheckBox
+                android:id="@+id/ckbInformarLocaisDescartesPneus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pneus" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="45dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/border_rounded_gray"
+                android:text="@string/salvar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+            </Button>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

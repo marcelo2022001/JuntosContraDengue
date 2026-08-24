@@ -1,0 +1,10 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FAF9F9"/> <!-- cor do sólido -->
+            <corners android:radius="12dp"/> <!-- valor do arredondamento das bordas -->
+            <stroke android:color="#E2DEDE"
+                   android:width="2dp"/> <!-- cor da borda e tamanho dela -->
+        </shape>
+    </item>
+</selector>

@@ -1,0 +1,66 @@
+
+📄 Termos de Uso – Aplicativo Juntos Contra Dengue
+
+1. Definições
+
+Administrador: Usuário com permissões para gerenciar postagens, moderar conteúdo e acessar funcionalidades administrativas do aplicativo.
+
+Agente: Usuário com permissões limitadas, designado para auxiliar na moderação e gestão de conteúdo.
+
+Usuário: Usuário com acesso às funcionalidades básicas do aplicativo, podendo interagir com o conteúdo disponível.
+
+Aplicativo: Plataforma digital [Nome do Aplicativo], disponibilizada pela empresa [Nome da Empresa], inscrita no CNPJ nº [CNPJ], com sede em [Endereço].
+
+2. Objeto
+
+O presente Termo estabelece as condições de uso do Aplicativo, que oferece aos Administradores a capacidade de gerenciar conteúdos e aos Usuários a interação com o conteúdo disponibilizado.
+
+3. Gratuidade e Limitações
+
+O Aplicativo é disponibilizado gratuitamente aos Administradores e Usuários, com acesso a funcionalidades básicas. No entanto, a versão gratuita apresenta as seguintes limitações:
+
+Armazenamento de Dados: O banco de dados do Aplicativo possui um limite gratuito de 1 GB. Caso este limite seja atingido, o Administrador será notificado e poderá optar por adquirir espaço adicional.
+
+Licenciamento de Administradores: O Aplicativo permite a inclusão de 1 Administrador e até 3 Agentes por projeto. Para adicionar mais Administradores ou Agentes, será necessário adquirir licenças adicionais.
+
+4. Funcionalidades Adicionais
+
+4.1. Compra de Espaço Adicional para Armazenamento
+
+Espaço Extra: O Administrador pode adquirir espaço adicional para o banco de dados, com preços a partir de US$5 por GB/mês, conforme a tabela de preços do Firebase Realtime Database ou Firestore.
+
+Notificação: O Administrador será notificado quando o limite de 1 GB for atingido e terá a opção de adquirir espaço adicional diretamente pelo painel administrativo do Aplicativo.
+
+4.2. Licenciamento de Administradores e Agentes
+
+Licenças Adicionais: Para adicionar mais Administradores ou Agentes, o Administrador deverá adquirir licenças adicionais, com preços e condições disponíveis no painel administrativo do Aplicativo.
+
+Limitações: O número máximo de Administradores e Agentes permitidos dependerá do plano adquirido pelo Administrador.
+
+5. Responsabilidades dos Administradores
+
+Os Administradores são responsáveis por:
+
+Criar, editar e excluir postagens.
+
+Moderar comentários e interações dos Usuários.
+
+Garantir que o conteúdo publicado esteja em conformidade com as políticas do Aplicativo e com a legislação vigente.
+
+6. Responsabilidades dos Usuários
+
+Os Usuários comprometem-se a:
+
+Utilizar o Aplicativo de forma ética e legal.
+
+Não publicar conteúdo ofensivo, ilegal ou que infrinja direitos de terceiros.
+
+Respeitar as regras de convivência estabelecidas pela comunidade do Aplicativo.
+
+7. Alterações nos Termos
+
+A empresa reserva-se o direito de alterar estes Termos de Uso a qualquer momento. Alterações significativas serão comunicadas aos usuários por meio de notificações no Aplicativo ou por e-mail.
+
+8. Aceite
+
+Ao utilizar o Aplicativo, o usuário declara ter lido, compreendido e aceitado os termos aqui estabelecidos.

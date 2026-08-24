@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardViewExcluirPreCadastros"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="3dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginTop="6dp"
+    app:cardBackgroundColor="#E3E0E0"
+    app:cardCornerRadius="1dp"
+    app:cardUseCompatPadding="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txt_nome_pre_cadastro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/nome"
+                android:textSize="18sp">
+
+            </TextView>
+
+            <TextView
+                android:id="@+id/txt_exclui_nome_pre_cadastro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/nome_agente"
+                android:textSize="18sp"
+                android:textStyle="bold">
+            </TextView>
+
+            <TextView
+                android:id="@+id/txt_funcao_pre_cadastro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/funcao"
+                android:textSize="18sp">
+            </TextView>
+
+            <TextView
+                android:id="@+id/txt_exclui_funcao_pre_cadastros"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/administrador"
+                android:textSize="18sp"
+                android:textStyle="bold">
+            </TextView>
+
+            <TextView
+                android:id="@+id/txt_data_cadastro_pre_cadastro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/data_do_cadastro"
+                android:textSize="18sp">
+            </TextView>
+
+            <TextView
+                android:id="@+id/txt_excluir_pre_cadastros_data_cadastro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/data_do_pre_cadastro"
+                android:textSize="18sp"
+                android:textStyle="bold">
+            </TextView>
+
+            <Button
+                android:id="@+id/btn_excluir_pre_cadastros"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="46dp"
+                android:maxWidth="342dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/excluir_pre_cadastro" />
+
+        </LinearLayout>
+
+</androidx.cardview.widget.CardView>

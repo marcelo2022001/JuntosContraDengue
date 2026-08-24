@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FullscreenActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarFullScreen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <VideoView
+            android:id="@+id/videoFullScreen"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:keepScreenOn="true"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/toolbarFullScreen"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <ImageView
+            android:id="@+id/imgViewFullScreen"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/toolbarFullScreen"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="@string/todo" />
+
+        <!-- Legenda com nome/função, só aparece quando esses extras vierem no Intent
+            (ex.: aberta a partir da tela de Agentes). Outras telas que abrem esta
+            Activity sem mandar "nome"/"funcao" continuam sem esse painel. -->
+        <LinearLayout
+            android:id="@+id/painelInfoAgente"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="16dp"
+            android:background="@drawable/gradiente_legenda_fullscreen"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:id="@+id/txtNomeFullscreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:shadowColor="#000000"
+            android:shadowRadius="4"
+            android:shadowDx="0"
+            android:shadowDy="1" />
+
+        <TextView
+            android:id="@+id/txtFuncaoFullscreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            android:shadowColor="#000000"
+            android:shadowRadius="4"
+            android:shadowDx="0"
+            android:shadowDy="1" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

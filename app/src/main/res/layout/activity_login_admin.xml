@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/loginAdmin"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:fitsSystemWindows="true"
+    tools:context=".ActivityLoginAdmin">
+
+    <!-- Toolbar no topo -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarLoguinAdmin"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/arrow_back"
+        app:title="Acessar conta Administrador"
+        app:titleTextColor="@android:color/white" />
+
+    <!-- Imagem central -->
+    <ImageView
+        android:id="@+id/imgTelaLoguinAdmin"
+        android:layout_width="237dp"
+        android:layout_height="136dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbarLoguinAdmin"
+        app:srcCompat="@drawable/man_female_person"
+        android:contentDescription="@string/icone_homem_e_mulher" />
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imgTelaLoguinAdmin">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+                <!-- Campo de E-mail -->
+                <EditText
+                    android:id="@+id/edtTxtEmailTelaLoguinAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:hint="@string/e_mail"
+                    android:imeOptions="actionDone"
+                    android:inputType="textEmailAddress"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:selectAllOnFocus="true"
+                    android:singleLine="true"
+                    android:textSize="16sp" />
+
+                <!-- Campo de Senha -->
+                <EditText
+                    android:id="@+id/edtTxtSenhaTelaLoguinAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:drawableEnd="@drawable/eye_closed"
+                    android:drawablePadding="8dp"
+                    android:hint="@string/senha"
+                    android:imeOptions="actionDone"
+                    android:inputType="numberPassword"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:selectAllOnFocus="true"
+                    android:singleLine="true"
+                    android:textSize="16sp" />
+
+                <!-- Botão ENTRAR -->
+                <Button
+                    android:id="@+id/btnEntrarTelaLoguinAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="16dp"
+                    android:backgroundTint="@color/purple_500"
+                    android:text="@string/entrar"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textAllCaps="false" />
+
+                <!-- Esqueci minha senha -->
+                <TextView
+                    android:id="@+id/txtRecupSenhaLoguinAdmin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:text="@string/esqueci_minha_senha"
+                    android:textStyle="bold" />
+
+                <!-- Separador OU -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="24dp">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="2dp"
+                        android:layout_weight="1"
+                        android:background="@color/light_gray" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:text="@string/palavra_ou"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="2dp"
+                        android:layout_weight="1"
+                        android:background="@color/light_gray" />
+
+                </LinearLayout>
+
+                <!-- Título Pré-Cadastro -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/concluir_pre_cadastro"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <!-- Campo CPF -->
+                <EditText
+                    android:id="@+id/edtTxtConcluirPreCadastro"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/border_rounded_gray"
+                    android:hint="@string/digite_seu_cpf"
+                    android:inputType="number"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:textSize="16sp" />
+
+                <!-- Botões CONTINUAR e CANCELAR -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <Button
+                        android:id="@+id/btnContinuarPreCadastro"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/teal_700"
+                        android:text="@string/continuar"
+                        android:textColor="@android:color/white"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/btnCancelarPreCadastro"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/gray"
+                        android:text="@string/cancelar"
+                        android:textColor="@android:color/white"
+                        android:textAllCaps="false" />
+
+                </LinearLayout>
+
+                <!-- ProgressBar -->
+                <ProgressBar
+                    android:id="@+id/loadingLoguinAdmin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

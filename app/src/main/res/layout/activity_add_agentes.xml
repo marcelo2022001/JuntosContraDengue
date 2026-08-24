@@ -2,8 +2,228 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutCadAgente"
+    android:layout_gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".AddAgentes">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarAddAgentes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/arrow_back"
+        app:popupTheme="@style/Theme.JuntosContraDengue.PopupOverlay"
+        app:title="Adicionar Agente" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewCad"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/toolbarAddAgentes"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:cardElevation="6dp"
+        app:cardUseCompatPadding="true">
+
+    <ScrollView
+        android:id="@+id/scrowViewAddIn"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#F3C863"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp"
+                android:layout_margin="8dp">
+
+                <TextView
+                android:id="@+id/txtAddAgente"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/black"
+                android:layout_marginHorizontal="16dp"
+                android:text="@string/aviso_admin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            </androidx.cardview.widget.CardView>
+
+            <EditText
+                android:id="@+id/edtCpfCadAgentes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:autofillHints="CPF"
+                android:ems="10"
+                android:hint="@string/cpf"
+                android:inputType="number"
+                android:textSize="24sp" />
+
+            <EditText
+                android:id="@+id/edtNomeCadAgentes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:autofillHints="Nome"
+                android:ems="10"
+                android:hint="@string/nome"
+                android:inputType="textAutoComplete"
+                android:textSize="24sp" />
+
+            <RadioGroup
+                android:id="@+id/rdGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/radioButtonSelOpcao"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/selecione_uma_funcao_abaixo" />
+
+                <RadioButton
+                    android:id="@+id/radioButtonAdmin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/administrador" />
+
+                <RadioButton
+                    android:id="@+id/radioButtonAgente"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/agente_de_endemias" />
+
+                <RadioButton
+                    android:id="@+id/radioButtonOutros"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/outros" />
+
+            </RadioGroup>
+
+            <EditText
+                android:id="@+id/edtOutrosCadAgentes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:autofillHints="CPF"
+                android:ems="10"
+                android:hint="@string/funcao"
+                android:inputType="textAutoComplete"
+                android:textSize="24sp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="@+id/edtCadNomeAgente_admin"
+                app:layout_constraintStart_toStartOf="@+id/edtCadNomeAgente_admin"
+                app:layout_constraintTop_toBottomOf="@+id/edtCadNomeAgente_admin" />
+
+
+            <CheckBox
+                android:id="@+id/chekBoxMostrarImagemAgente"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:visibility="gone"
+                android:text="@string/mostrar_na_tela_agentes_de_vigilancia_em_saude" />
+
+            <TextView
+                android:id="@+id/msgSobreFotoSeAparecera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:textColor="@color/black"
+                android:visibility="gone"
+                android:text="@string/mostrar_imagem"
+                app:drawableStartCompat="@drawable/alerts_sirene">
+            </TextView>
+
+            <LinearLayout
+                android:id="@+id/layoutButtonAdminAgentes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/radioGroup">
+
+                <Button
+                    android:id="@+id/btnCadAgentes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_weight="1"
+                    android:text="@string/adicionar" />
+
+                <Button
+                    android:id="@+id/btnCancelCadAgentes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_weight="1"
+                    android:text="@string/cancelar" />
+            </LinearLayout>
+
+            <!-- Link -->
+            <TextView
+                android:id="@+id/TextViewLinkIcones"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginHorizontal="16dp"
+                android:autoLink="web"
+                android:gravity="center"
+                android:text="@string/download_dos_icones"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

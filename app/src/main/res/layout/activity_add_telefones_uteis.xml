@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AddTelefonesUteis"
+    android:fitsSystemWindows="true">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarAddTelefonesUteis"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:title="Adicionar telefones"
+        app:navigationIcon="@drawable/arrow_back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/lavender_border"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarAddTelefonesUteis">
+
+        <EditText
+            android:id="@+id/edtTxtAddTelefonesUteisLocal"
+            android:layout_width="match_parent"
+            android:layout_height="47dp"
+            android:hint="@string/local"
+            android:paddingStart="10dp"
+            android:background="@drawable/border_rounded_gray"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/edtTxtAddTelefonesUteisTelefone"
+            android:layout_width="match_parent"
+            android:layout_height="47dp"
+            android:paddingStart="10dp"
+            android:hint="@string/telefone"
+            android:background="@drawable/border_rounded_gray"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <ProgressBar
+            android:id="@+id/progressBarAddTelefoneUteis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/lavender"
+            android:visibility="invisible" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_cancelar_AddTelefoneUteis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_weight="2"
+                android:text="@string/cancelar">
+            </Button>
+
+            <Button
+                android:id="@+id/btn_enviar_add_AddTelefoneUteis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_weight="2"
+                android:text="@string/enviar">
+            </Button>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

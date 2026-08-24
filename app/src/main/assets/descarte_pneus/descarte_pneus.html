@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descarte Consciente de Pneus</title>
+    <style>
+                  /* ================================            RESET         ================================= */          * {             margin: 0;             padding: 0;             box-sizing: border-box;         }          html {             width: 100%;             min-height: 100%;             overflow-x: hidden;         }          body {             width: 100%;             min-height: 100vh;              font-family:                 'Segoe UI',                 Tahoma,                 Geneva,                 Verdana,                 sans-serif;              line-height: 1.6;             color: #333;              background:                 linear-gradient(                     135deg,                     #f5f7fa 0%,                     #e4edf5 100%                 );              overflow-x: hidden;             overflow-y: auto;              -webkit-overflow-scrolling: touch;         }           /* ================================            HEADER         ================================= */          .main-header {             width: 100%;              background:                 linear-gradient(                     135deg,                     #2c3e50 0%,                     #34495e 100%                 );              color: white;              padding: 30px 20px;              text-align: center;              position: relative;              overflow: hidden;         }          .main-header h1 {             font-size: 32px;             font-weight: 700;              margin-bottom: 10px;              text-shadow:                 2px 2px 4px rgba(0,0,0,0.2);         }          .main-header h6 {             color: #d4e6f1;         }          .header-subtitle {             font-size: 18px;              opacity: 0.9;              color: #d4e6f1;              max-width: 800px;              margin: 0 auto;         }           /* ================================            CONTEÚDO PRINCIPAL         ================================= */          .main-content {             width: 100%;             max-width: 1200px;              margin: 0 auto;              padding:                 30px 20px 40px;         }           /* ================================            SEÇÕES         ================================= */          .content-section {             width: 100%;              background: white;              border-radius: 16px;              padding: 30px;              margin-bottom: 30px;              box-shadow:                 0 8px 30px rgba(0,0,0,0.08);              border:                 1px solid rgba(0,0,0,0.05);         }           /* ================================            TÍTULOS         ================================= */          .section-title {             color: #2c3e50;              font-size: 26px;              font-weight: 700;              margin-bottom: 20px;              padding-bottom: 15px;              border-bottom:                 3px solid #3498db;              display: flex;              align-items: center;              gap: 15px;         }          .subsection-title {             color: #2980b9;              font-size: 22px;              font-weight: 600;              margin:                 25px 0 15px;              padding-left: 10px;              border-left:                 4px solid #f39c12;         }           /* ================================            PARÁGRAFOS         ================================= */          p {             font-size: 16px;              margin-bottom: 15px;              text-align: justify;              color: #444;         }           /* ================================            ALERTA         ================================= */          .warning-box {             background:                 linear-gradient(                     135deg,                     #ffebee 0%,                     #ffcdd2 100%                 );              border-left:                 5px solid #e74c3c;              padding: 20px;              margin:                 25px 0;              border-radius: 10px;              box-shadow:                 0 4px 15px                 rgba(231,76,60,0.1);         }          .warning-title {             color: #c0392b;              font-size: 18px;              font-weight: 700;              margin-bottom: 10px;              display: flex;              align-items: center;              gap: 10px;         }           /* ================================            BENEFÍCIOS         ================================= */          .benefits-list {             width: 100%;              background:                 #d5f4e6;              border-radius: 12px;              padding: 25px;              margin:                 30px 0;         }          .benefits-title {             color: #27ae60;              font-size: 22px;              margin-bottom: 20px;              display: flex;              align-items: center;              gap: 10px;         }          .benefits-grid {             width: 100%;              display: grid;              grid-template-columns:                 repeat(                     auto-fit,                     minmax(250px, 1fr)                 );              gap: 20px;         }          .benefit-item {             background: white;              padding: 15px;              border-radius: 8px;              display: flex;              align-items: center;              gap: 15px;              min-width: 0;         }          .benefit-icon {             font-size: 24px;              color: #27ae60;              flex-shrink: 0;         }           /* ================================            DICAS         ================================= */          .tips-grid {             width: 100%;              display: grid;              grid-template-columns:                 repeat(                     auto-fit,                     minmax(280px, 1fr)                 );              gap: 25px;              margin:                 30px 0;         }          .tip-card {             width: 100%;              background:                 #e8f4fc;              border-radius: 12px;              padding: 25px;              position: relative;              border:                 2px solid #d4e6f1;              min-height: 200px;              display: flex;              flex-direction: column;         }          .tip-number {             position: absolute;              top: -15px;             left: -15px;              background:                 #3498db;              color: white;              width: 40px;             height: 40px;              border-radius: 50%;              display: flex;              align-items: center;              justify-content: center;              font-weight: bold;              font-size: 18px;              box-shadow:                 0 4px 10px                 rgba(52,152,219,0.3);         }          .tip-title {             color: #2c3e50;              font-size: 20px;              margin-bottom: 15px;              padding-bottom: 10px;              border-bottom:                 2px solid #3498db;         }           /* ================================            GALERIA         ================================= */          .image-gallery {             width: 100%;              margin:                 10px 0 20px;         }          .gallery-title {             text-align: center;              color: #2c3e50;              font-size: 20px;              margin-bottom: 20px;              font-weight: 600;         }           /*            IMPORTANTE:            Não usamos overflow no BODY.            Somente esta área possui rolagem horizontal.         */          .scroll-container {             width: 100%;              display: flex;              flex-direction: row;              gap: 15px;              padding: 15px;              background:                 #f8f9fa;              border-radius: 12px;              overflow-x: auto;              overflow-y: hidden;              -webkit-overflow-scrolling: touch;              scrollbar-width: thin;              scrollbar-color:                 #3498db                 #f1f1f1;         }          .scroll-container img {             display: block;              flex: 0 0 auto;              height: 250px;              width: auto;              max-width: none;              border-radius: 10px;              box-shadow:                 0 4px 15px                 rgba(0,0,0,0.15);              border:                 3px solid white;         }          .image-caption {             text-align: center;              font-size: 14px;              color: #666;              margin-top: 10px;              font-style: italic;         }           /* ================================            FOOTER         ================================= */          .footer {             width: 100%;              text-align: center;              padding:                 30px 20px;              background:                 linear-gradient(                     135deg,                     #2c3e50 0%,                     #34495e 100%                 );              margin-top: 10px;         }          .footer-content {             width: 100%;              max-width: 800px;              margin: 0 auto;         }          .footer p {             color: white !important;              text-align: center;              margin-bottom: 10px;         }          .footer strong {             color: white;         }           /* ================================            RESPONSIVIDADE         ================================= */          @media (max-width: 768px) {              .main-header {                 padding:                     25px 15px;             }              .main-header h1 {                 font-size: 24px;             }              .header-subtitle {                 font-size: 16px;             }              .main-content {                 padding:                     20px 15px 30px;             }              .content-section {                 padding: 20px;             }              .section-title {                 font-size: 21px;             }              .subsection-title {                 font-size: 19px;             }              .benefits-grid {                 grid-template-columns: 1fr;             }              .tips-grid {                 grid-template-columns: 1fr;             }              .tip-card {                 min-height: auto;             }              .scroll-container img {                 height: 200px;             }         }           @media (max-width: 480px) {              .main-header {                 padding:                     20px 15px;             }              .main-header h1 {                 font-size: 21px;             }              .header-subtitle {                 font-size: 15px;             }              .main-content {                 padding:                     15px 10px 25px;             }              .content-section {                 padding:                     18px 15px;             }              .section-title {                 font-size: 19px;             }              p {                 font-size: 15px;             }              .scroll-container {                 padding: 10px;                 gap: 10px;             }              .scroll-container img {                 height: 180px;             }         }
+    </style>
+</head>
+<body>
+<!-- =====================================          CABEÇALHO     ====================================== -->
+<header class="main-header"><h1> ♻️ Descarte Consciente de Pneus </h1>
+    <p class="header-subtitle"> Guia completo para descartar ou reutilizar pneus velhos de forma
+        sustentável e responsável </p></header>
+<!-- =====================================          CONTEÚDO     ====================================== -->
+<main class="main-content">           <!-- INTRODUÇÃO -->
+    <section class="content-section"><h2 class="section-title"><span>🚗</span> O que fazer com pneus
+        velhos? </h2>
+        <p> Pneus são fabricados com materiais extremamente resistentes. Após a data de fabricação,
+            possuem vida útil de aproximadamente 5 a 6 anos. Após esse período, precisam ser
+            substituídos por novos ou por estepes temporários. </p>
+        <p> Mas você já refletiu sobre o destino dos pneus que não podem mais ser utilizados?
+            Sabemos que descartá-los na natureza não é uma opção viável, pois podem levar até
+            <strong>600 anos para se decompor</strong> completamente. </p>
+        <p> Quando descartados corretamente, os pneus podem ganhar novas funções, transformando-se
+            em asfalto de borracha, móveis criativos ou diversos outros produtos sustentáveis. </p>
+    </section>           <!-- RISCOS -->
+    <section class="content-section"><h2 class="section-title"><span>⚠️</span> Riscos do Descarte
+        Inadequado </h2>
+        <p> Os pneus são produzidos com borrachas especiais, poliéster, aço e nylon — materiais que
+            podem gerar sérios problemas ambientais quando descartados incorretamente. </p>
+        <div class="warning-box">
+            <div class="warning-title"><span>🦟</span> ALERTA DE SAÚDE PÚBLICA</div>
+            <p> Pneus abandonados acumulam água e tornam-se criadouros perfeitos para mosquitos
+                transmissores de doenças, como o <strong>Aedes aegypti</strong>, vetor da dengue,
+                zika e chikungunya. Este é um grave problema de saúde pública que pode ser evitado
+                com o descarte adequado. </p></div>
+        <p> Além dos riscos à saúde, pneus descartados inadequadamente: </p>
+        <ul style="                 padding-left: 25px;                 margin: 15px 0;                 color: #444;             ">
+            <li style="margin-bottom:8px;"> 💀 Contaminam solo e rios durante séculos</li>
+            <li style="margin-bottom:8px;"> 🌊 Contribuem para entupimento de redes de esgoto</li>
+            <li style="margin-bottom:8px;"> 🏙️ Aumentam riscos de enchentes urbanas</li>
+            <li style="margin-bottom:8px;"> 🔥 Podem causar incêndios de difícil controle</li>
+        </ul>
+    </section>           <!-- DESCARTE CORRETO -->
+    <section class="content-section"><h2 class="section-title"><span>✅</span> Como Descartar
+        Corretamente? </h2>
+        <p> Existem diversas alternativas sustentáveis para o reaproveitamento de pneus. Desde
+            opções criativas domésticas até transformações industriais em produtos de valor. </p>
+        <div class="benefits-list"><h3 class="benefits-title"><span>♻️</span> O que os pneus podem
+            se tornar? </h3>
+            <div class="benefits-grid">
+                <div class="benefit-item"><span class="benefit-icon">                             🛣️                         </span>
+                    <span>                             Asfalto de borracha para ruas                         </span>
+                </div>
+                <div class="benefit-item"><span class="benefit-icon">                             🏟️                         </span>
+                    <span>                             Pisos para quadras esportivas                         </span>
+                </div>
+                <div class="benefit-item"><span
+                        class="benefit-icon">                             👟                         </span>
+                    <span>                             Solados de calçados                         </span>
+                </div>
+                <div class="benefit-item"><span
+                        class="benefit-icon">                             🏡                         </span>
+                    <span>                             Gramado sintético                         </span>
+                </div>
+                <div class="benefit-item"><span
+                        class="benefit-icon">                             🔥                         </span>
+                    <span>                             Combustível alternativo                         </span>
+                </div>
+                <div class="benefit-item"><span
+                        class="benefit-icon">                             🪑                         </span>
+                    <span>                             Móveis e decoração                         </span>
+                </div>
+            </div>
+        </div>               <!-- DICAS -->
+        <div class="tips-grid">
+            <div class="tip-card">
+                <div class="tip-number"> 1</div>
+                <div><h4 class="tip-title"> Entregue em pontos de coleta </h4>
+                    <p> Procure pontos de coleta ou serviços municipais que recebam pneus usados. O
+                        encaminhamento correto evita que esses materiais sejam abandonados em
+                        terrenos ou vias públicas. </p></div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-number"> 2</div>
+                <div><h4 class="tip-title"> Procure estabelecimentos </h4>
+                    <p> Borracharias, lojas de pneus e outros estabelecimentos podem orientar sobre
+                        o destino adequado dos pneus usados. </p></div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-number"> 3</div>
+                <div><h4 class="tip-title"> Nunca abandone pneus </h4>
+                    <p> Evite deixar pneus em terrenos, calçadas, ruas, rios ou locais descobertos
+                        onde possam acumular água. </p></div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-number"> 4</div>
+                <div><h4 class="tip-title"> Faça Você Mesmo </h4>
+                    <p> Com criatividade e algumas ferramentas, transforme pneus velhos em objetos
+                        úteis e decorativos para sua casa ou jardim. </p></div>
+            </div>
+        </div>
+    </section>
+    <!-- =====================================              GALERIA         ====================================== -->
+    <section class="content-section">
+        <div class="image-gallery"><h3 class="gallery-title"> Ideias Criativas de Reutilização </h3>
+            <div class="scroll-container"><img
+                    src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fpneus%2Fimagens%2Fimg1.jpeg?alt=media&token=d2423e31-899b-4c28-9116-40674d51c842"
+                    alt="Pneus como vasos para flores"> <img
+                    src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fpneus%2Fimagens%2Fimg2.jpeg?alt=media&token=8a5d4e92-3db7-444a-b4e5-d4a529b6e474"
+                    alt="Pneus como lixeiras"> <img
+                    src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fpneus%2Fimagens%2Fimg3.jpeg?alt=media&token=eeb44b72-423f-4221-9ce3-42bbd155eccb"
+                    alt="Pneus como balanços"> <img
+                    src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fpneus%2Fimagens%2Fimg4.jpeg?alt=media&token=5cc9ec96-8d51-4b78-a28f-1714e2266c54"
+                    alt="Pneus em pé como vasos para flores"></div>
+            <p class="image-caption"> Exemplos de reaproveitamento criativo → </p></div>
+        <p style="                 text-align:center;                 margin-top:20px;                 font-weight:600;                 color:#27ae60;             ">
+            🌿 <em> Com um pouco de imaginação, um pneu velho pode ganhar nova vida e
+            propósito! </em></p></section>
+</main>
+<!-- =====================================          RODAPÉ     ====================================== -->
+<footer class="footer">
+    <div class="footer-content"><p> ♻️ <strong> Descarte Consciente - Preserve o Meio
+        Ambiente </strong></p>
+        <p style="                 margin-top:10px;                 font-size:13px;             ">
+            Para mais informações sobre pontos de coleta em sua cidade, consulte a prefeitura
+            municipal. <br> Juntos podemos construir um futuro mais sustentável! </p>
+        <p style="                 margin-top:15px;                 font-size:12px;                 opacity:0.8;             ">
+            Guia informativo sobre descarte responsável de pneus | Contribua para um planeta mais
+            limpo </p></div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".VisualizarResposta">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tbVisualizarResposta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="RESPOSTA DA RECLAMAÇÃO" />
+
+    <ScrollView
+        android:id="@+id/scrowResponder"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tbVisualizarResposta">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbarVisualReclaUsuario">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stateListAnimator="@drawable/button_style_custom"
+                app:cardCornerRadius="7dp"
+                app:cardElevation="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="6dp"
+                        android:text="@string/reclamacao_atendida_por"
+                        android:textColor="#090808"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/txtViewReclamacaoAtendidaPor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="6dp"
+                        android:textColor="#090808"
+                        android:textSize="18sp" />
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="6dp"
+                        android:text="@string/resposta"
+                        android:textColor="#090808"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/txtInputLayoutVisualizarRespostaReclamacao"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:counterEnabled="true"
+                        app:errorEnabled="true"
+                        app:errorTextAppearance="@style/ErrorText"
+                        app:counterMaxLength="560">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/txtInputEditVisualizarResposta"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="6dp"
+                            android:padding="16dp"
+                            android:paddingBottom="8dp"
+                            android:text="@string/cuidados_sobre_escorpioes"
+                            android:textColor="@color/black">
+                        </com.google.android.material.textfield.TextInputEditText>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <HorizontalScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_view_scrollResposta_usuario"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"
+                android:stateListAnimator="@drawable/button_style_custom"
+                app:cardBackgroundColor="#EEF6F5"
+                app:cardCornerRadius="7dp"
+                app:cardElevation="10dp">
+
+                <TextView
+                    android:id="@+id/txtVisualizarImagensVisitaUsers"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textSize="20sp"
+                    android:text="@string/imagens_da_visita"
+                    android:textColor="@color/black"
+                    android:textStyle="bold">
+                </TextView>
+
+                <GridLayout
+                    android:id="@+id/grdResponderUsuarioImagens"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="4"
+                    android:padding="16dp"
+                    android:rowCount="1">
+
+                    <ImageView
+                        android:id="@+id/image_1_responder_reclamacao_users"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginTop="16dp"
+                        android:visibility="gone"
+                        android:layout_marginEnd="8dp"
+                        android:background="#EAEBEC"
+                        android:src="@drawable/baseline_add">
+                    </ImageView>
+
+                    <ImageView
+                        android:id="@+id/image_2_responder_reclamacao_users"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginTop="16dp"
+                        android:visibility="gone"
+                        android:layout_marginEnd="8dp"
+                        android:background="#EAEBEC"
+                        android:src="@drawable/baseline_add">
+                    </ImageView>
+
+                    <ImageView
+                        android:id="@+id/image_3_responder_reclamacao_users"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginTop="16dp"
+                        android:visibility="gone"
+                        android:layout_marginEnd="8dp"
+                        android:background="#EAEBEC"
+                        android:src="@drawable/baseline_add">
+                    </ImageView>
+
+                    <ImageView
+                        android:id="@+id/image_4_responder_reclamacao_users"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:visibility="gone"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="#EAEBEC"
+                        android:src="@drawable/baseline_add">
+                    </ImageView>
+
+                </GridLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            </HorizontalScrollView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_view_responder_reclamacao"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:stateListAnimator="@drawable/button_style_custom"
+                app:cardCornerRadius="7dp"
+                app:cardElevation="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtV_reclamacao_resolvida_responder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:textSize="20sp"
+                    android:text="@string/sua_reclamacao_foi_resolvida"
+                    android:textColor="@color/black"
+                    android:textStyle="bold">
+                </TextView>
+
+                <RadioGroup
+                    android:id="@+id/rg_reclamacao_resolvida"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/radioButtonReclamação_resolvidaSim"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/sim" />
+
+                    <RadioButton
+                        android:id="@+id/radioButtonReclamação_resolvidaNao"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/nao" />
+                </RadioGroup>
+
+                    <Button
+                        android:id="@+id/btnResponderReclamacaoUsers"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:text="@string/enviar">
+                    </Button>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

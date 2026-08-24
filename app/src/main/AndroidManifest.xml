@@ -1,71 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <!-- Permissions for internet -->
-    <uses-feature
-        android:name="android.hardware.telephony"
-        android:required="false" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
+        android:minSdkVersion="34" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" /> <!-- Permissions for internet -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Permissions for telephone -->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
+        android:name=".JuntosContraDengueApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.JuntosContraDengue.NoActionBar"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".AddAgentes"
+            android:name=".SobreAplicativo"
             android:exported="false" />
         <activity
-            android:name=".AdminMain"
+            android:name=".SolicitacaoPlano"
+            android:windowSoftInputMode="stateHidden"
+            android:exported="false" />
+        <activity
+            android:name=".FullScreenVisualizarMidiaReclamacoes"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+
+        <service
+            android:name=".extras.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".ActivityAdminPush"
+            android:windowSoftInputMode="stateHidden"
+            android:exported="false" />
+        <activity
+            android:name=".ResponderDenunciaActivity"
+            android:exported="false"
+            android:parentActivityName=".AdminActivity" />
+        <activity
+            android:name=".ExcluirPreCadastro"
+            android:exported="false"
+            android:parentActivityName=".AdminActivity" />
+        <activity
+            android:name=".ExcluirProfissionaisPreCadastro"
+            android:exported="false"
+            android:parentActivityName=".AdminActivity" />
+        <activity
+            android:name=".EscolherLocalidadeActivity"
+            android:exported="true"
+            android:label="JUNTOS CONTRA A DENGUE">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.JuntosContraDengue.NoActionBar" />
+        <activity
+            android:name=".ActivityLoginAdmin"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".ActivityLoginAgentes"
+            android:exported="false"
+            android:windowSoftInputMode="stateHidden"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".CriarCadastroAgente"
+            android:exported="false"
+            android:parentActivityName=".ActivityLoginAgentes" />
+        <activity
+            android:name=".VideoIniciarAppActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TermosDeUsoActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".EscolherPerfilLogin"
             android:exported="false" />
         <activity
             android:name=".DescarteEletronicos"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".UploadTrabAgentes"
+            android:name=".Denunciar"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".Denuncias"
-            android:exported="false"
-            android:parentActivityName=".MainActivity" />
+            android:hardwareAccelerated="false"
+            android:label="Denúncias"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".DescartePneus"
-            android:exported="false" />
-        <activity
-            android:name=".TelaLoguin"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".TelaCadastro"
-            android:exported="false"
-            android:parentActivityName=".TelaLoguin" />
         <activity
             android:name=".TelefonesUteis"
             android:exported="false"
-            android:label="@string/title_activity_telefones_uteis" />
-        <activity
-            android:name=".MinhasDenuncias"
-            android:exported="false"
-            android:label="@string/title_activity_minhas_denuncias"
+            android:label="@string/title_activity_telefones_uteis"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".Escorpionismo"
@@ -85,18 +158,121 @@
         <activity
             android:name=".Agentes"
             android:exported="false"
-            android:label="Agentes de Endemias"
+            android:label="Equipe de Campo"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.JuntosContraDengue.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:name=".TelaLoguin"
+            android:exported="false"
+            android:label="Entrar na Conta"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity
+            android:name=".TelaDeCadastro"
+            android:exported="false"
+            android:parentActivityName=".TelaLoguin" />
+        <activity
+            android:name=".AdminActivity"
+            android:exported="false"
+            android:label="Painel de configurações"
+            android:theme="@style/Theme.JuntosContraDengue.NoActionBar" />
+        <activity
+            android:name=".ListDenunciasUsuarios"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".VisualizarDenunciasAgentes"
+            android:exported="false" />
+        <activity
+            android:name=".ListarReclamacoesAgentes"
+            android:exported="false"
+            android:parentActivityName=".AdminActivity" />
+        <activity
+            android:name=".AddLocalDescartesPneusEletronicos"
+            android:exported="false"
+            android:parentActivityName=".AdminActivity" />
+        <activity
+            android:name=".SubstituirVideoInicialActivity"
+            android:exported="false"
+            android:parentActivityName=".AdminActivity" />
+        <activity
+            android:name=".AddTelefonesUteis"
+            android:exported="false"
+            android:parentActivityName=".AdminActivity" />
+        <activity
+            android:name=".AddAgentes"
+            android:exported="false"
+            android:windowSoftInputMode="stateHidden"
+            android:parentActivityName=".AdminActivity" />
+        <activity
+            android:name=".AddSlidersMain"
+            android:exported="false"
+            android:label="Adicionar sliders"
+            android:parentActivityName=".AdminActivity" />
+        <activity
+            android:name=".UploadTrabAgentes"
+            android:exported="false"
+            android:label="Upload dos trabalhos realizados" />
+        <activity
+            android:name=".SubstituirSlider"
+            android:exported="false" />
+        <activity
+            android:name=".ListarReclamacoesUsuarios"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".VisualizarResposta"
+            android:exported="false" />
+        <activity
+            android:name=".ExcluirAgentesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ExcluirTrabAgentesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ExcluirTelefonesUteisActivity"
+            android:windowSoftInputMode="stateHidden"
+            android:exported="false"
+            android:parentActivityName=".AdminActivity" />
+        <activity
+            android:name=".ExcluirLocaisDescartesEletronicosActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ExcluirLocaisDescartesPneus"
+            android:exported="false"
+            android:parentActivityName=".AdminActivity" />
+        <activity
+            android:name=".AgentesMainActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".SemInternetActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FullscreenActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:exported="false"
+            android:label="JUNTOS CONTRA A DENGUE"
+            android:parentActivityName=".TrabalhosAgentes"
+            android:theme="@style/Theme.JuntosContraDengue.Fullscreen" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <activity
+            android:name=".ActivityVisualizarDenunciasUsuario"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".FullscreenImageActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    tools:context=".ExcluirProfissionaisPreCadastro">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarExcluirAgentes"
+        android:layout_width="match_parent"
+        android:layout_height="53dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="32dp"
+        android:background="?attr/colorPrimary"
+        android:gravity="center"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/arrow_back"
+        app:title="Excluir usuários">
+    </androidx.appcompat.widget.Toolbar>
+
+    <ImageView
+        android:id="@+id/exclamacaoExcluirAdmin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/alert_exclamacao_azul"
+        app:layout_constraintBottom_toBottomOf="@+id/btExcluirAdmin"
+        app:layout_constraintStart_toEndOf="@+id/btExcluirAdmin"
+        app:layout_constraintTop_toTopOf="@+id/btExcluirAdmin"
+        android:contentDescription="@string/todo">
+    </ImageView>
+
+    <Button
+        android:id="@+id/btExcluirAdmin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:enabled="false"
+        android:text="@string/excluir_administradores"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarExcluirAgentes" />
+
+    <Button
+        android:id="@+id/btExcluirAgentes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/excluir_agentes"
+        app:layout_constraintEnd_toEndOf="@+id/btExcluirAdmin"
+        app:layout_constraintStart_toStartOf="@+id/btExcluirAdmin"
+        app:layout_constraintTop_toBottomOf="@+id/btExcluirAdmin" />
+
+    <Button
+        android:id="@+id/btExcluirPreCadastroAdmins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:enabled="false"
+        android:text="@string/excluir_pre_cadastro_administrador"
+        app:layout_constraintEnd_toEndOf="@+id/btExcluirAgentes"
+        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintStart_toStartOf="@+id/btExcluirAgentes"
+        app:layout_constraintTop_toBottomOf="@+id/btExcluirAgentes" />
+
+    <Button
+        android:id="@+id/btExcluirPreCadastroAgentes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:enabled="false"
+        android:text="@string/excluir_pre_cadastro_agentes"
+        app:layout_constraintEnd_toEndOf="@+id/btExcluirPreCadastroAdmins"
+        app:layout_constraintStart_toStartOf="@+id/btExcluirPreCadastroAdmins"
+        app:layout_constraintTop_toBottomOf="@+id/btExcluirPreCadastroAdmins" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

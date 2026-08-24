@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Resíduos Eletrônicos - Descarte Consciente</title>
+    <style>
+        /* --- ESTILOS GERAIS --- */           *
+        {               margin: 0;               padding: 0;               box-sizing: border-box;           }            body {               font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;               line-height: 1.6;               color: #333;               background: linear-gradient(135deg, #f0f4f8 0%, #e1e8f0 100%);               min-height: 100vh;           }                      p {             color: white;           }            /* --- HEADER --- */           .main-header {               background: linear-gradient(135deg, #1a237e 0%, #283593 100%);               color: white;               padding: 35px 20px;               text-align: center;               position: relative;               overflow: hidden;           }            .main-header::before {               content: "💻";               position: absolute;               font-size: 150px;               opacity: 0.1;               right: 30px;               top: 50%;               transform: translateY(-50%);           }            .main-header h1 {               font-size: 36px;               font-weight: 800;               margin-bottom: 15px;               text-shadow: 2px 2px 6px rgba(0,0,0,0.3);           }            .header-subtitle {               font-size: 20px;               opacity: 0.9;               max-width: 800px;               margin: 0 auto;               color: white;               font-weight: 800;           }            /* --- CONTEÚDO PRINCIPAL --- */           .main-content {               max-width: 1200px;               margin: 0 auto;               padding: 40px 20px;           }            .content-section {               background: white;               border-radius: 20px;               padding: 35px;               margin-bottom: 40px;               box-shadow: 0 10px 40px rgba(0,0,0,0.1);               border: 1px solid rgba(0,0,0,0.05);           }            /* --- TÍTULOS --- */           .section-title {               color: #283593;               font-size: 28px;               font-weight: 700;               margin-bottom: 25px;               padding-bottom: 15px;               border-bottom: 3px solid #5c6bc0;               display: flex;               align-items: center;               gap: 15px;           }            .section-title::before {               font-size: 32px;           }            .subsection-title {               color: #3949ab;               font-size: 24px;               font-weight: 600;               margin: 30px 0 20px;               padding-left: 15px;               border-left: 5px solid #ff9800;           }            /* --- PARÁGRAFOS --- */           p {               font-size: 16px;               margin-bottom: 20px;               text-align: justify;               color: black;               line-height: 1.8;           }            /* --- DESTAQUES DE TEXTO --- */           .term-highlight {               background: linear-gradient(120deg, #e3f2fd 0%, #bbdefb 100%);               border-left: 4px solid #2196f3;               padding: 25px;               margin: 25px 0;               border-radius: 12px;               position: relative;           }            .term-title {               color: #1976d2;               font-size: 20px;               font-weight: 700;               margin-bottom: 15px;               display: flex;               align-items: center;               gap: 10px;           }            /* --- GALERIA DE IMAGENS --- */           .image-gallery {               margin: 40px 0;           }            .gallery-title {               text-align: center;               color: #283593;               font-size: 22px;               margin-bottom: 25px;               font-weight: 600;           }            .scroll-container {               background: #f8f9fa;               border-radius: 15px;               padding: 25px;               overflow-x: auto;               white-space: nowrap;               scrollbar-width: thin;               scrollbar-color: #5c6bc0 #f1f1f1;               box-shadow: inset 0 3px 15px rgba(0,0,0,0.1);               border: 2px solid #e8eaf6;           }            .scroll-container::-webkit-scrollbar {               height: 10px;           }            .scroll-container::-webkit-scrollbar-track {               background: #f1f1f1;               border-radius: 5px;           }            .scroll-container::-webkit-scrollbar-thumb {               background: linear-gradient(135deg, #5c6bc0 0%, #3949ab 100%);               border-radius: 5px;           }            .scroll-container img {               height: 280px;               width: auto;               margin-right: 20px;               border-radius: 12px;               box-shadow: 0 6px 20px rgba(0,0,0,0.2);               border: 4px solid white;               transition: all 0.3s ease;               cursor: pointer;           }            .scroll-container img:hover {               transform: translateY(-8px) scale(1.05);               box-shadow: 0 12px 30px rgba(0,0,0,0.25);           }            .image-caption {               text-align: center;               font-size: 15px;               color: #666;               margin-top: 15px;               font-style: italic;           }            /* --- COMPARATIVO LIXO VS RESÍDUO --- */           .comparison-section {               display: grid;               grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));               gap: 30px;               margin: 40px 0;           }            .comparison-card {               background: white;               border-radius: 15px;               padding: 30px;               position: relative;               border: 2px solid;               transition: transform 0.3s ease;           }            .comparison-card:hover {               transform: translateY(-8px);           }            .lixo-card {               border-color: #f44336;               background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);           }            .residuo-card {               border-color: #4caf50;               background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);           }            .card-icon {               font-size: 40px;               margin-bottom: 20px;           }            .lixo-card .card-icon {               color: #d32f2f;           }            .residuo-card .card-icon {               color: #388e3c;           }            .card-title {               font-size: 22px;               font-weight: 700;               margin-bottom: 20px;               color: #1a237e;           }            /* --- LISTAS --- */           .feature-list {               list-style: none;               padding-left: 0;               margin: 20px 0;           }            .feature-list li {               padding: 12px 0 12px 40px;               position: relative;               margin-bottom: 10px;           }            .feature-list li:before {               content: "✓";               position: absolute;               left: 0;               color: #4caf50;               font-size: 20px;               font-weight: bold;           }            .warning-list li:before {               content: "⚠️";               color: #f44336;           }            /* --- SEÇÃO DE IMPACTOS --- */           .impact-section {               background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);               border-radius: 15px;               padding: 30px;               margin: 40px 0;               border-left: 6px solid #ff9800;           }            .impact-grid {               display: grid;               grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));               gap: 20px;               margin-top: 25px;           }            .impact-item {               background: white;               padding: 20px;               border-radius: 10px;               text-align: center;               box-shadow: 0 4px 15px rgba(0,0,0,0.1);           }            .impact-icon {               font-size: 32px;               margin-bottom: 15px;           }            /* --- ALERTA IMPORTANTE --- */           .alert-box {               background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);               border: 3px solid #f44336;               border-radius: 15px;               padding: 25px;               margin: 40px 0;               position: relative;               overflow: hidden;           }            .alert-box::before {               content: "⚠️";               position: absolute;               font-size: 80px;               opacity: 0.2;               right: 20px;               top: 20px;           }            .alert-title {               color: #c62828;               font-size: 22px;               font-weight: 700;               margin-bottom: 15px;           }            /* --- LINKS --- */           .resource-link {               display: inline-flex;               align-items: center;               gap: 10px;               padding: 12px 20px;               background: #e3f2fd;               color: #1565c0;               text-decoration: none;               border-radius: 8px;               margin: 10px 0;               transition: all 0.3s ease;               border: 2px solid #bbdefb;           }            .resource-link:hover {               background: #bbdefb;               transform: translateX(5px);               box-shadow: 0 4px 15px rgba(21, 101, 192, 0.2);           }            /* --- FOOTER --- */           .footer {               text-align: center;               padding: 30px 20px;               color: white;               background: linear-gradient(135deg, #1a237e 0%, #283593 60%);               margin-top: 60px;           }            .footer-content {               max-width: 800px;               margin: 0 auto;           }            .footer-title {               font-size: 20px;               font-weight: 600;               margin-bottom: 15px;           }            .stats-grid {               display: grid;               grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));               gap: 20px;               margin: 30px 0;           }            .stat-item {               background: rgba(255, 255, 255, 0.1);               padding: 20px;               color: #9acd32;               border-radius: 10px;               backdrop-filter: blur(10px);           }            .stat-number {               font-size: 28px;               font-weight: 700;               color: red;               margin-bottom: 10px;           }            /* --- RESPONSIVIDADE --- */           @media (max-width: 768px) {               .main-header h1 {                   font-size: 28px;               }                .header-subtitle {                   font-size: 16px;               }                .section-title {                   font-size: 24px;               }                .content-section {                   padding: 25px;               }                .scroll-container img {                   height: 220px;               }                .comparison-section {                   grid-template-columns: 1fr;               }                .impact-grid {                   grid-template-columns: 1fr;               }           }            @media (max-width: 480px) {               .main-header {                   padding: 25px 15px;               }                .main-content {                   padding: 20px 15px;               }                .scroll-container img {                   height: 180px;                   margin-right: 10px;               }                .section-title {                   font-size: 22px;               }           }            /* --- ANIMAÇÕES --- */           @keyframes fadeInUp {               from {                   opacity: 0;                   transform: translateY(40px);               }               to {                   opacity: 1;                   transform: translateY(0);               }           }            .content-section {               animation: fadeInUp 0.6s ease forwards;           }            .comparison-card {               animation: fadeInUp 0.8s ease forwards;           }
+    </style>
+</head>
+<body>
+<header class="main-header"><h1>📱 Resíduos Eletrônicos</h1>
+    <p class="header-subtitle">Guia completo sobre descarte consciente e gestão responsável de
+        equipamentos eletroeletrônicos</p></header>
+<main class="main-content">      <!-- SEÇÃO: COMPARATIVO LIXO VS RESÍDUO -->
+    <section class="content-section"><h2 class="section-title"><span>🔄</span> Entendendo a Diferença
+    </h2>
+        <div class="comparison-section">
+            <div class="comparison-card lixo-card">
+                <div class="card-icon">🗑️</div>
+                <h3 class="card-title">Lixo</h3>
+                <p>Materiais descartados que não possuem valor econômico ou utilidade aparente. São
+                    materiais deteriorados sem potencial para reutilização, reciclagem ou
+                    compostagem.</p>
+                <ul class="feature-list warning-list">
+                    <li>Destino final: aterros sanitários</li>
+                    <li>Alto custo para os cofres públicos</li>
+                    <li>Aumenta impostos da população</li>
+                    <li>Necessita de novos aterros constantemente</li>
+                </ul>
+            </div>
+            <div class="comparison-card residuo-card">
+                <div class="card-icon">♻️</div>
+                <h3 class="card-title">Resíduo</h3>
+                <p>Materiais resultantes de atividades humanas que podem ter valor econômico ou
+                    potencial de reaproveitamento, reciclagem ou transformação em novos
+                    produtos.</p>
+                <ul class="feature-list">
+                    <li>Pode ser reintroduzido na cadeia produtiva</li>
+                    <li>Base da economia circular</li>
+                    <li>Minimiza exploração de recursos naturais</li>
+                    <li>Maximiza eficiência dos materiais</li>
+                </ul>
+            </div>
+        </div>
+    </section>      <!-- GALERIA DE IMAGENS -->
+    <section class="content-section">
+        <div class="image-gallery"><h3 class="gallery-title">Equipamentos Eletrônicos que se
+            Transformam em Resíduos</h3>
+            <div class="scroll-container"><img
+                    src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fe-lixo%2Fimagens%2Fimg1.jpeg?alt=media&token=5c0b05d8-a022-4802-b744-2c32246b6a33"
+                    alt="Teclado, Celulares, Câmeras digitais"> <img
+                    src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fe-lixo%2Fimagens%2Fimg2.jpeg?alt=media&token=b223b0dd-c385-493c-b13c-5c9153ed7e0b"
+                    alt="Cesto de lixo com eletrônicos"> <img
+                    src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fe-lixo%2Fimagens%2Fimg3.jpeg?alt=media&token=da8cb497-09c0-4468-95f1-0e9c73981425"
+                    alt="Cesto de lixo como símbolo reciclável com eletrônicos"> <img
+                    src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fe-lixo%2Fimagens%2Fimg4.jpeg?alt=media&token=f346b555-f05d-407a-b769-3530543d2c44"
+                    alt="Eletrônicos diversos"> <img
+                    src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fe-lixo%2Fimagens%2Fimg6.jpeg?alt=media&token=74884af8-5ca6-4ea6-b197-adeae526d3ed"
+                    alt="Televisões"> <img
+                    src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fe-lixo%2Fimagens%2Fimg7.jpeg?alt=media&token=3c311652-f168-4272-8000-3dfa4b73a67a"
+                    alt="Caminhão branco de coleta de reciclados com eletrônicos"></div>
+            <p class="image-caption">Arraste horizontalmente para visualizar mais equipamentos →</p>
+        </div>
+    </section>      <!-- SEÇÃO: RESÍDUOS ELETRÔNICOS -->
+    <section class="content-section"><h2 class="section-title"><span>🔌</span> Por que "Resíduo
+        Eletrônico"? </h2>
+        <div class="term-highlight">
+            <div class="term-title"><span>💡</span> Definição Importante</div>
+            <p><strong>Resíduo eletrônico</strong> refere-se a todos os produtos eletrônicos
+                descartados que chegaram ao fim de sua vida útil ou não são mais úteis para seus
+                proprietários. Popularmente conhecido como "e-lixo".</p></div>
+        <h3 class="subsection-title">Componentes e Riscos</h3>
+        <div class="impact-section"><h4 style="color: #ff9800; margin-bottom: 20px;">⚠️ Perigos
+            Envolvidos</h4>
+            <div class="impact-grid">
+                <div class="impact-item">
+                    <div class="impact-icon">☠️</div>
+                    <p><strong>Substâncias Tóxicas</strong><br>Chumbo, cádmio, mercúrio e outros
+                        metais pesados</p></div>
+                <div class="impact-item">
+                    <div class="impact-icon">🌍</div>
+                    <p><strong>Contaminação</strong><br>Solo e lençóis freáticos comprometidos</p>
+                </div>
+                <div class="impact-item">
+                    <div class="impact-icon">💎</div>
+                    <p><strong>Valor Perdido</strong><br>Ouro, prata, cobre e outros metais
+                        preciosos</p></div>
+                <div class="impact-item">
+                    <div class="impact-icon">🏥</div>
+                    <p><strong>Riscos à Saúde</strong><br>Problemas neurológicos, respiratórios e
+                        cancerígenos</p></div>
+            </div>
+        </div>
+        <div class="alert-box">
+            <div class="alert-title">📊 Dados Alarmantes</div>
+            <p>Segundo o relatório <em>The Global E-Waste Monitor</em> da ONU, o <strong>Brasil
+                produz aproximadamente 1,5 milhão de toneladas de resíduos eletrônicos por
+                ano</strong>. Cerca de 70% dos metais pesados encontrados em aterros sanitários são
+                provenientes de equipamentos eletrônicos descartados incorretamente.</p></div>
+    </section>      <!-- SEÇÃO: LEGISLAÇÃO E RESPONSABILIDADE -->
+    <section class="content-section"><h2 class="section-title"><span>⚖️</span> Marco Legal e
+        Responsabilidades </h2>
+        <div style="background: #f3e5f5; padding: 25px; border-radius: 12px; margin: 25px 0; border-left: 5px solid #9c27b0;">
+            <h4 style="color: #7b1fa2; margin-bottom: 15px;">📋 Política Nacional de Resíduos Sólidos
+                (PNRS)</h4>
+            <p><strong>Lei 12.305/2010</strong> - Estabelece a responsabilidade compartilhada pela
+                logística reversa de produtos eletroeletrônicos, pilhas e baterias entre
+                fabricantes, importadores, comerciantes, distribuidores e consumidores.</p></div>
+        <h3 class="subsection-title">O Que Diz a Lei?</h3>
+        <div style="display: flex; flex-direction: column; gap: 20px; margin: 25px 0;">
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: #e8f5e9; padding: 20px; border-radius: 10px;">
+                <span style="font-size: 24px;">🏭</span>
+                <div><strong>Responsabilidade dos Fabricantes:</strong> Implementar sistemas de
+                    logística reversa e recolhimento de produtos pós-consumo.
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: #e3f2fd; padding: 20px; border-radius: 10px;">
+                <span style="font-size: 24px;">🛒</span>
+                <div><strong>Papel dos Comerciantes:</strong> Disponibilizar pontos de coleta e
+                    orientar consumidores sobre o descarte adequado.
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 15px; background: #fff3e0; padding: 20px; border-radius: 10px;">
+                <span style="font-size: 24px;">👥</span>
+                <div><strong>Dever dos Consumidores:</strong> Descarte consciente em locais
+                    apropriados e participação ativa na coleta seletiva.
+                </div>
+            </div>
+        </div>
+        <a href="https://www.in.gov.br/web/dou/-/instrucao-normativa-n-24-de-21-de-novembro-de-2019-229118595"
+           target="_blank" class="resource-link"> 📄 Instrução Normativa nº 24/2019 - Ibama </a> <a
+                href="https://greeneletron.org.br/blog/tudo-o-que-voce-precisa-saber-sobre-o-lixo-eletronico/"
+                target="_blank" class="resource-link"> 🌐 Green Eletron - Mais informações </a>
+    </section>      <!-- SEÇÃO: OBSOLESCÊNCIA PROGRAMADA -->
+    <section class="content-section"><h2 class="section-title"><span>📈</span> Obsolescência
+        Programada </h2>
+        <p style="font-size: 18px; color: #d84315; font-weight: 600; margin-bottom: 20px;"> ⏰ "A
+            técnica que encurta a vida útil dos produtos para estimular o consumo" </p>
+        <div style="background: #fff8e1; padding: 25px; border-radius: 12px; margin: 25px 0; border: 2px dashed #ffb300;">
+            <h4 style="color: #ff8f00; margin-bottom: 15px;">📅 Origem Histórica</h4>
+            <p>Conceito surgido entre 1929-1930 durante a Grande Depressão, com o objetivo de
+                estimular o consumo e recuperar a economia através do <strong>Cartel
+                    Phoebus</strong>, que reduziu a vida útil das lâmpadas de 2.500 para 1.000
+                horas.</p></div>
+        <h3 class="subsection-title">Consequências Ambientais</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 25px 0;">
+            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div style="font-size: 32px; color: #f44336; margin-bottom: 15px;">📱</div>
+                <p><strong>Aceleração do Descarte</strong><br>Substituição precoce de equipamentos
+                    em perfeito estado</p></div>
+            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div style="font-size: 32px; color: #4caf50; margin-bottom: 15px;">💎</div>
+                <p><strong>Desperdício de Recursos</strong><br>Metais preciosos e matérias-primas
+                    valiosas descartadas</p></div>
+            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div style="font-size: 32px; color: #2196f3; margin-bottom: 15px;">🌳</div>
+                <p><strong>Pressão Ambiental</strong><br>Aumento da mineração e exploração de
+                    recursos naturais</p></div>
+        </div>
+    </section>
+</main>
+<footer class="footer">
+    <div class="footer-content"><h3 class="footer-title">♻️ Faça sua Parte</h3>
+        <div class="stats-grid">
+            <div class="stat-item"> Consuma com consciência! Opte por produtos duráveis e repare ao
+                invés de substituir. <p style="color: #FFA500;"><b> Você sabia:</b></p>
+                <div class="stat-number">1,5 Milhão</div>
+                <p style="color: #E52B50"><strong>toneladas de e-lixo por ano no Brasil</strong></p>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">70%</div>
+                <p style="color: #E52B50"><strong>dos metais pesados em aterros são de
+                    eletrônicos</strong></p></div>
+            <div class="stat-item">
+                <div class="stat-number">+ 600</div>
+                <p style="color: #E52B50"><strong>anos para decomposição de componentes
+                    eletrônicos</strong></p></div>
+        </div>
+        <p style="margin-top: 25px; opacity: 0.9; color: white"><strong style="color:#FFA500">Descarte
+            Consciente:</strong> Procure pontos de coleta autorizados, doe equipamentos que ainda
+            funcionem e exija das empresas a implementação da logística reversa. </p>
+        <p style="margin-top: 20px; font-size: 14px; opacity: 0.7; color: white"> Fontes: ONU,
+            CETEM, Green Eletron, eCycle | Atualizado em 2024 </p>
+        <p style="margin-top: 15px; font-size: 13px; opacity: 0.8; color: white"> Juntos podemos
+            transformar resíduos em recursos e construir um futuro mais sustentável! </p></div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de Escorpiões: Prevenção e Cuidados</title>
+    <style>
+        /* --- RESET E CONFIGURAÇÕES GERAIS --- */         * {             box-sizing: border-box;             margin: 0;             padding: 0;         }          body {             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);             color: #333;             line-height: 1.6;             min-height: 100vh;         }          /* --- HEADER --- */         .main-header {             background: linear-gradient(135deg, #d97706 0%, #b45309 100%);             padding: 25px 20px;             text-align: center;             box-shadow: 0 4px 12px rgba(0,0,0,0.1);             position: relative;             overflow: hidden;         }          .main-header::before {             content: "🦂";             position: absolute;             font-size: 80px;             opacity: 0.1;             right: 20px;             top: 50%;             transform: translateY(-50%);         }          .main-header h1 {             color: white;             font-size: 28px;             font-weight: 700;             margin-bottom: 10px;             text-shadow: 1px 1px 3px rgba(0,0,0,0.2);         }          .header-subtitle {             color: rgba(255,255,255,0.9);             font-size: 16px;             font-weight: 400;         }          /* --- CONTEÚDO PRINCIPAL --- */         .main-content {             max-width: 1000px;             margin: 0 auto;             padding: 25px 20px;         }          .content-card {             background: white;             border-radius: 16px;             padding: 25px;             margin-bottom: 30px;             box-shadow: 0 6px 15px rgba(0,0,0,0.08);             border: 1px solid rgba(0,0,0,0.05);             transition: transform 0.3s ease, box-shadow 0.3s ease;         }          .content-card:hover {             transform: translateY(-3px);             box-shadow: 0 10px 25px rgba(0,0,0,0.12);         }          /* --- TÍTULOS E TIPOGRAFIA --- */         .section-title {             font-size: 24px;             font-weight: 700;             color: #b45309;             margin-bottom: 20px;             display: flex;             align-items: center;             gap: 12px;             padding-bottom: 12px;             border-bottom: 2px solid #fde68a;         }          .subsection-title {             font-size: 20px;             font-weight: 600;             color: #92400e;             margin: 20px 0 15px;             display: flex;             align-items: center;             gap: 10px;         }          /* --- SLIDESHOW --- */         .slideshow-container {             max-width: 800px;             position: relative;             margin: 30px auto;             border-radius: 16px;             overflow: hidden;             box-shadow: 0 8px 25px rgba(0,0,0,0.15);             border: 3px solid white;             background: #f8f9fa;             min-height: 420px;         }          .mySlides {             display: none;             width: 100%;             height: 100%;         }          .mySlides img {             width: 100%;             height: 400px;             object-fit: cover;             display: block;         }          .slide-text {             position: absolute;             bottom: 0;             width: 100%;             background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);             color: white;             padding: 20px 15px 10px;             font-size: 16px;             font-weight: 600;             text-align: center;         }          /* --- BOTÕES DE NAVEGAÇÃO --- */         .nav-btn {             cursor: pointer;             position: absolute;             top: 50%;             transform: translateY(-50%);             width: 50px;             height: 50px;             background: rgba(212, 107, 8, 0.85);             color: white;             font-size: 22px;             border: none;             display: flex;             align-items: center;             justify-content: center;             transition: all 0.3s ease;             z-index: 100;         }          .nav-btn:hover {             background: rgba(180, 83, 9, 1);             transform: translateY(-50%) scale(1.1);         }          .nav-btn.prev {             left: 0;             border-radius: 0 8px 8px 0;         }          .nav-btn.next {             right: 0;             border-radius: 8px 0 0 8px;         }          /* --- PONTOS DE NAVEGAÇÃO --- */         .dots-container {             text-align: center;             padding: 15px 0;             background: white;             max-width: 800px;             margin: 0 auto;             border-radius: 0 0 16px 16px;         }          .dot {             cursor: pointer;             height: 14px;             width: 14px;             margin: 0 6px;             background-color: #d1d5db;             border-radius: 50%;             display: inline-block;             transition: all 0.3s ease;         }          .dot.active, .dot:hover {             background-color: #d97706;             transform: scale(1.2);         }          /* --- GRID E LAYOUT --- */         .info-grid {             display: grid;             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));             gap: 20px;             margin: 25px 0;         }          .info-card {             background: #fffbeb;             border-left: 4px solid #f59e0b;             padding: 20px;             border-radius: 10px;         }          .info-card h3 {             color: #92400e;             font-size: 18px;             margin-bottom: 15px;             display: flex;             align-items: center;             gap: 8px;         }          /* --- LISTAS --- */         .styled-list {             list-style: none;             padding-left: 0;         }          .styled-list li {             padding: 8px 0 8px 30px;             position: relative;             margin-bottom: 5px;         }          .styled-list li:before {             content: "🦂";             position: absolute;             left: 0;             color: #d97706;             font-size: 14px;         }          .danger-list li:before {             content: "⚠️";         }          /* --- ÁREA DE ALERTA --- */         .alert-section {             background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);             border-left: 5px solid #dc2626;             padding: 25px;             border-radius: 12px;             margin: 30px 0;         }          .warning-box {             background: #fff3cd;             border: 2px solid #ffc107;             padding: 20px;             border-radius: 10px;             text-align: center;             margin-top: 25px;             font-weight: 600;         }          /* --- LINKS --- */         .links-section {             background: #f8f9fa;             padding: 25px;             border-radius: 12px;             margin-top: 40px;         }          .resource-link {             display: flex;             align-items: center;             gap: 12px;             padding: 12px 15px;             background: white;             border-radius: 8px;             margin-bottom: 12px;             text-decoration: none;             color: #1e40af;             border: 1px solid #dbeafe;             transition: all 0.3s ease;         }          .resource-link:hover {             background: #eff6ff;             transform: translateX(5px);             border-color: #93c5fd;         }          .resource-link:before {             content: "📄";             font-size: 18px;         }          /* --- RESPONSIVIDADE --- */         @media (max-width: 768px) {             .main-header h1 {                 font-size: 22px;             }              .section-title {                 font-size: 20px;             }              .mySlides img {                 height: 300px;             }              .nav-btn {                 width: 40px;                 height: 40px;                 font-size: 18px;             }              .content-card {                 padding: 20px;             }              .info-grid {                 grid-template-columns: 1fr;             }              .slideshow-container {                 min-height: 350px;             }         }          @media (max-width: 480px) {             .main-content {                 padding: 15px;             }              .mySlides img {                 height: 250px;             }              .slide-text {                 font-size: 14px;                 padding: 15px 10px 8px;             }              .slideshow-container {                 min-height: 300px;             }         }          /* --- ANIMAÇÕES --- */         @keyframes fadeIn {             from { opacity: 0; transform: translateY(20px); }             to { opacity: 1; transform: translateY(0); }         }          .content-card {             animation: fadeIn 0.5s ease forwards;         }          /* --- ANIMAÇÃO DO SLIDE --- */         .fade {             animation-name: fade;             animation-duration: 1.5s;         }          @keyframes fade {             from {opacity: 0.4}             to {opacity: 1}         }          /* --- RODAPÉ --- */         .footer {             text-align: center;             padding: 20px;             color: #6b7280;             font-size: 14px;             margin-top: 40px;             border-top: 1px solid #e5e7eb;         }
+    </style>
+</head>
+
+<body>
+<header class="main-header">
+    <h1>🦂 Escorpiões no Brasil</h1>
+    <p class="header-subtitle">Guia Completo de Prevenção, Identificação e Primeiros Socorros</p>
+</header>
+<main class="main-content">
+    <!-- SEÇÃO 1: INTRODUÇÃO -->
+    <section class="content-card">
+        <h2 class="section-title">             <span style="font-size: 28px;">🔬</span> Conhecendo as Espécies         </h2>
+        <p>Os escorpiões do gênero <strong>Tityus</strong> são os mais relevantes em termos de saúde pública no Brasil. São espécies notáveis por sua toxicidade e ampla distribuição, principalmente em áreas urbanas.</p>
+        <div class="info-grid">
+            <div class="info-card">
+                <h3><span>🟡</span> Tityus serrulatus</h3>
+                <p><strong>Escorpião Amarelo:</strong> O mais perigoso da América do Sul. Cor amarelo-clara uniforme, reprodução por partenogênese.</p>
+            </div>
+            <div class="info-card">
+                <h3><span>🟤</span> Tityus bahiensis</h3>
+                <p><strong>Escorpião Marrom:</strong> Causa mais acidentes em São Paulo. Tronco escuro, comum em várias regiões do Brasil.</p>
+            </div>
+            <div class="info-card">
+                <h3><span>🟡</span> Tityus stigmurus</h3>
+                <p><strong>Amarelo do Nordeste:</strong> Comum na região Nordeste, com mancha escura na cauda. Veneno clinicamente importante.</p>
+            </div>
+            <div class="info-card">
+                <h3><span>⚫</span> Tityus paraensis</h3>
+                <p><strong>Escorpião-preto-da-Amazônia:</strong> Comum na Região Norte, principalmente no Pará e Amapá.</p>
+            </div>
+        </div>
+    </section>
+    <!-- CARROSSEL DE ESPÉCIES -->
+    <div class="slideshow-container" id="species-carrossel">
+        <div class="mySlides fade"> <img src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fescorpiao%2Fimagens%2FTityus%20Serrulatus.png?alt=media&token=af420a35-6151-4358-a970-2f5c6b4cdf50" alt="Escorpião Amarelo">
+            <div class="slide-text">Tityus serrulatus (Escorpião Amarelo) - O mais perigoso</div>
+        </div>
+        <div class="mySlides fade"> <img src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fescorpiao%2Fimagens%2FTityus%20bahiensis.png?alt=media&token=d2db41b0-f908-475d-9d86-6790f883992e" alt="Escorpião Marrom">
+            <div class="slide-text">Tityus bahiensis (Escorpião Marrom) - Tronco escuro</div>
+        </div>
+        <div class="mySlides fade"> <img src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fescorpiao%2Fimagens%2FTityus%20stigmurus.png?alt=media&token=339f59e1-22cb-4abe-b7e7-27d1e3f6fd9c" alt="Escorpião do Nordeste">
+            <div class="slide-text">Tityus stigmurus (Amarelo do Nordeste) - Mancha central</div>
+        </div>
+        <div class="mySlides fade"> <img src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fescorpiao%2Fimagens%2FTityus%20paraensis.png?alt=media&token=406c69d0-82ec-4847-920a-473b22c9c9b9" alt="Tityus paraensis">
+            <div class="slide-text">Tityus paraensis (Escorpião-preto-da-Amazônia)</div>
+        </div>
+        <button class="nav-btn prev" onclick="plusSlides(-1, 'species-carrossel')">‹</button>
+        <button class="nav-btn next" onclick="plusSlides(1, 'species-carrossel')">›</button>
+    </div>
+    <div id="species-dots" class="dots-container"> <span class="dot" onclick="currentSlide(1, 'species-carrossel')"></span> <span class="dot" onclick="currentSlide(2, 'species-carrossel')"></span> <span class="dot" onclick="currentSlide(3, 'species-carrossel')"></span> <span class="dot" onclick="currentSlide(4, 'species-carrossel')"></span>            </div>
+    <!-- SEÇÃO 2: HÁBITOS -->
+    <section class="content-card">
+        <h2 class="section-title">             <span style="font-size: 28px;">🌙</span> Hábitos e Onde Encontrá-los         </h2>
+        <ul class="styled-list">
+            <li><strong>Abrigos Escuros e Úmidos:</strong> Procuram lugares quentes, úmidos e escuros durante o dia (entulhos, pilhas de tijolos, lixo, caixas de gordura, ralos).</li>
+            <li><strong>Dentro de Casa:</strong> Escondem-se em sapatos, roupas, toalhas, atrás de rodapés, quadros e móveis.</li>
+            <li><strong>Alimentação:</strong> Predadores que se alimentam principalmente de baratas e outros insetos.</li>
+            <li><strong>Reprodução:</strong> A fêmea do escorpião amarelo pode se reproduzir sem macho (partenogênese), acelerando infestações.</li>
+        </ul>
+    </section>
+    <!-- SEÇÃO 3: PREVENÇÃO -->
+    <section class="content-card">
+        <h2 class="section-title">             <span style="font-size: 28px;">🛡️</span> Prevenção e Cuidados         </h2>
+        <p style="margin-bottom: 20px;">A prevenção é a única forma eficaz de evitar acidentes. As medidas focam em eliminar abrigos e evitar o acesso à residência.</p>
+        <div class="info-grid">
+            <div class="info-card">
+                <h3><span>🏠</span> Controle Domiciliar</h3>
+                <ul class="styled-list">
+                    <li>Vedar soleiras de portas e janelas</li>
+                    <li>Usar telas em ralos e caixas de gordura</li>
+                    <li>Manter lixo em recipientes fechados</li>
+                    <li>Sacudir roupas e sapatos antes de usar</li>
+                    <li>Manter camas afastadas das paredes</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3><span>🌳</span> Controle Ambiental</h3>
+                <ul class="styled-list">
+                    <li>Manter jardins e quintais limpos</li>
+                    <li>Não acumular material de construção</li>
+                    <li>Controlar população de baratas</li>
+                    <li>Rebocar paredes e muros</li>
+                    <li>Vedar frestas e buracos</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    <!-- SEÇÃO 4: PRIMEIROS SOCORROS -->
+    <section class="alert-section">
+        <h2 class="section-title" style="color: #dc2626;">             <span style="font-size: 28px;">🚨</span> O Que Fazer em Caso de Acidente         </h2>
+        <div style="margin: 25px 0;">
+            <h3 class="subsection-title" style="color: #059669;">                 <span style="font-size: 22px;">✅</span> Primeiros Socorros             </h3>
+            <ul class="styled-list">
+                <li><strong>Lavar o local:</strong> Com água e sabão</li>
+                <li><strong>Aplicar compressas mornas:</strong> Para aliviar a dor</li>
+                <li><strong>Procurar ajuda imediata:</strong> Dirija-se ao hospital ou UPA mais próximo</li>
+                <li><strong>Identificar o escorpião:</strong> Se possível e seguro, leve para identificação</li>
+            </ul>
+        </div>
+        <div>
+            <h3 class="subsection-title" style="color: #dc2626;">                 <span style="font-size: 22px;">❌</span> O Que NÃO Fazer             </h3>
+            <ul class="styled-list danger-list">
+                <li>NÃO cortar ou furar o local da picada</li>
+                <li>NÃO aplicar álcool, querosene ou outras substâncias</li>
+                <li>NÃO chupar o veneno</li>
+                <li>NÃO fazer torniquetes</li>
+            </ul>
+        </div>
+        <div class="warning-box">
+            <p>⚠️ <strong>ATENÇÃO:</strong> Crianças e idosos são prioridade devido ao maior risco de complicações. O soro antiescorpiônico só é aplicado em hospitais após avaliação médica.</p>
+        </div>
+    </section>
+    <!-- CARROSSEL DE CUIDADOS -->
+    <section class="content-card">
+        <h2 class="section-title">             <span style="font-size: 28px;">🏡</span> Cuidados Básicos em Casa         </h2>
+        <div class="slideshow-container" id="care-carrossel">
+            <div class="mySlides fade"> <img src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fescorpiao%2Fimagens%2Fprevencoes%2FPortas.jpg?alt=media&token=3589d78b-5f1e-48c5-ab74-fe09a3d59911" alt="Porta com Veda Porta Rolinho"
+            />
+                <div class="slide-text">Porta com Veda Porta Rolinho</div>
+            </div>
+            <div class="mySlides fade"> <img src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fescorpiao%2Fimagens%2Fprevencoes%2FRalo.jpg?alt=media&token=7920ddaf-7ab6-4915-8546-8792bb105952" alt="Ralo com tela ou sistema abre e fecha"
+            />
+                <div class="slide-text">Ralo com tela ou sistema abre e fecha</div>
+            </div>
+            <div class="mySlides fade"> <img src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fescorpiao%2Fimagens%2Fprevencoes%2FCaixas_esgoto.jpg?alt=media&token=e8f6114a-8b95-4f6f-886d-a2a4e57ab2df"
+                                             alt="Tampas de caixas de gorduras lacradas" />
+                <div class="slide-text">Tampas de caixas de gorduras lacradas</div>
+            </div>
+            <div class="mySlides fade"> <img src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fescorpiao%2Fimagens%2Fprevencoes%2FSifao.jpg?alt=media&token=9445f995-0562-4bdd-91c0-0cfeeab13e6d" alt="Sifão em forma de V"
+            />
+                <div class="slide-text">Sifão em forma de V</div>
+            </div>
+            <div class="mySlides fade"> <img src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fescorpiao%2Fimagens%2Fprevencoes%2FCaixa_organizadora_brinquedos.jpg?alt=media&token=4c30439b-bc68-454b-a84c-0daeb62ac694"
+                                             alt="Caixa organizadora de brinquedos" />
+                <div class="slide-text">Caixa organizadora de brinquedos</div>
+            </div>
+            <div class="mySlides fade"> <img src="https://firebasestorage.googleapis.com/v0/b/juntos-contra-dengue.firebasestorage.app/o/config_app_material_educativo%2Fescorpiao%2Fimagens%2Fprevencoes%2FValvula_retencao.jpg?alt=media&token=1e81bda9-5c90-428d-9ca7-6b7f8b8af763"
+                                             alt="Válvula de retenção" />
+                <div class="slide-text">Válvula de retenção</div>
+            </div>
+            <button class="nav-btn prev" onclick="plusSlides(-1, 'care-carrossel')">‹</button>
+            <button class="nav-btn next" onclick="plusSlides(1, 'care-carrossel')">›</button>
+        </div>
+        <div id="care-dots" class="dots-container"> <span class="dot" onclick="currentSlide(1, 'care-carrossel')"></span> <span class="dot" onclick="currentSlide(2, 'care-carrossel')"></span> <span class="dot" onclick="currentSlide(3, 'care-carrossel')"></span> <span class="dot" onclick="currentSlide(4, 'care-carrossel')"></span>                <span class="dot" onclick="currentSlide(5, 'care-carrossel')"></span> <span class="dot" onclick="currentSlide(6, 'care-carrossel')"></span> </div>
+    </section>
+    <!-- SEÇÃO DE RECURSOS -->
+    <section class="links-section">
+        <h2 class="section-title">             <span style="font-size: 28px;">📚</span> Saiba Mais         </h2> <a href="https://www.youtube.com/watch?v=_QnFEkUAbko" target="_blank" class="resource-link">             Aula 1 - Escorpião - Manejo e Controle         </a> <a href="https://youtu.be/DJLMMQB2zUA?t=740" target="_blank" class="resource-link">             Aula 2 - Escorpião - Manejo e Controle         </a>            <a href="https://bvsms.saude.gov.br/bvs/publicacoes/manual_controle_escorpioes.pdf" target="_system" class="resource-link">             Manual de Controle de Escorpiões - Ministério da Saúde         </a> </section>
+</main>
+<footer class="footer">
+    <p>Guia informativo sobre escorpiões no Brasil | Para emergências, ligue 192 (SAMU)</p>
+    <p style="margin-top: 8px; font-size: 12px; opacity: 0.7;">Consulte sempre um profissional de saúde em caso de acidente</p>
+</footer>
+<script>
+    // Objeto para armazenar o índice e o temporizador de CADA carrossel     let slideIndexMap = {};     let slideTimerMap = {};      // Função de inicialização     window.onload = function() {         // Inicializa ambos os carrosséis         initCarousels('species-carrossel');         initCarousels('care-carrossel');     }      function initCarousels(id) {         slideIndexMap[id] = 1;         showSlides(1, id);          // Inicia o auto-play (5000ms = 5 segundos)         slideTimerMap[id] = setInterval(function(){ plusSlides(1, id) }, 5000);     }      // Função chamada pelos botões (Anterior/Próximo)     function plusSlides(n, id) {         // Reinicia o timer do carrossel específico ao clicar         clearInterval(slideTimerMap[id]);         slideTimerMap[id] = setInterval(function(){ plusSlides(1, id) }, 5000);          slideIndexMap[id] += n;         showSlides(slideIndexMap[id], id);     }      // Função chamada quando o usuário clica em um ponto (dot)     function currentSlide(n, id) {         // Reinicia o timer do carrossel específico ao clicar         clearInterval(slideTimerMap[id]);         slideTimerMap[id] = setInterval(function(){ plusSlides(1, id) }, 5000);          slideIndexMap[id] = n;         showSlides(n, id);     }      // Função principal de exibição     function showSlides(n, id) {         let i;          // Seleciona os slides e pontos específicos daquele carrossel         let slides = document.getElementById(id).getElementsByClassName("mySlides");          // Obtém os dots correspondentes         let dotContainerId;         if (id === 'species-carrossel') {             dotContainerId = 'species-dots';         } else if (id === 'care-carrossel') {             dotContainerId = 'care-dots';         }          let dots = document.getElementById(dotContainerId).getElementsByClassName("dot");          let slideIndex = slideIndexMap[id];          // Lógica cíclica         if (n > slides.length) { slideIndex = 1; }         if (n < 1) { slideIndex = slides.length; }          // Armazena o índice atualizado         slideIndexMap[id] = slideIndex;          // 1. Esconde todas as imagens         for (i = 0; i < slides.length; i++) {             slides[i].style.display = "none";         }          // 2. Remove o destaque (classe 'active') de todos os pontos         for (i = 0; i < dots.length; i++) {             dots[i].className = dots[i].className.replace(" active", "");         }          // 3. Mostra a imagem atual com animação fade         if (slides[slideIndex-1]) {             slides[slideIndex-1].style.display = "block";             slides[slideIndex-1].className = slides[slideIndex-1].className.replace(" fade", "") + " fade";              // Adiciona o destaque (classe 'active') no ponto correspondente             if (dots[slideIndex-1]) {                 dots[slideIndex-1].className += " active";             }         }     }
+</script>
+</body>
+
+</html>

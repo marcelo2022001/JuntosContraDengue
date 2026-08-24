@@ -1,148 +1,318 @@
 <resources>
-    <string name="app_name">Juntos Contra Dengue</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
-
-    <string name="agentes"><b>Agentes de endemias</b></string>
-    <string name="descricao_agentes">Conheça e avalie os agentes de endemias. caso fique com dúvida em relação ao agente, basta verificar aqui no APP.</string>
-    <string name="trabalhos_agentes"><b>Trabalhos de campo</b></string>
-    <string name="descricao_trabalhos">Veja fotos e videos de alguns trabalhos feitos pelos os agentes de endemias.</string>
-    <string name="denuncias"><b>Denúncia/Reclamação</b></string>
-    <string name="descricao_denuncias">Faça ser ouvido, faça aqui a sua reclamação para possiveis locais de criadoros de dengue.</string>
-    <string name="informacoes_degue"><b>Informações sobre Dengue, Zika e chikungunya</b></string>
-    <string name="descricao_informacoes">Informações sobre Dengue, Zika e chikungunya, contagio e sintomas.</string>
-    <string name="informacoes_escorpiao"><b>Informações sobre escorpiões</b></string>
-    <string name="descricao_escorpiao">Informações sobre escorpiões, prevenção e primeiros socorros.</string>
-    <string name="descricao_ag">Imagem-desenho agentes de endemias </string>
-    <string name="title_activity_main2">MainActivity2</string>
-    <string name="entrar_conta">Entrar na Conta</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
-    <string name="imagem_escorpiao">Imagem escorpiao</string>
-    <string name="imagem_prenilongo_branco_e_preto">Imagem prenilongo branco e preto</string>
-    <string name="alto_falante">Alto falante</string>
-    <string name="imagem_homem_camisa_verde_escrito_ace">Imagem homem camisa verde escrito ace</string>
-    <string name="abrir_menu_lateral">abrir menu lateral</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_trabalhos_agentes">TrabalhosAgentes</string>
-    <string name="large_text">
-        "Material is the metaphor.\n\n"
-
-        "A material metaphor is the unifying theory of a rationalized space and a system of motion."
-        "The material is grounded in tactile reality, inspired by the study of paper and ink, yet "
-        "technologically advanced and open to imagination and magic.\n"
-        "Surfaces and edges of the material provide visual cues that are grounded in reality. The "
-        "use of familiar tactile attributes helps users quickly understand affordances. Yet the "
-        "flexibility of the material creates new affordances that supercede those in the physical "
-        "world, without breaking the rules of physics.\n"
-        "The fundamentals of light, surface, and movement are key to conveying how objects move, "
-        "interact, and exist in space and in relation to each other. Realistic lighting shows "
-        "seams, divides space, and indicates moving parts.\n\n"
-
-        "Bold, graphic, intentional.\n\n"
-
-        "The foundational elements of print based design typography, grids, space, scale, color, "
-        "and use of imagery guide visual treatments. These elements do far more than please the "
-        "eye. They create hierarchy, meaning, and focus. Deliberate color choices, edge to edge "
-        "imagery, large scale typography, and intentional white space create a bold and graphic "
-        "interface that immerse the user in the experience.\n"
-        "An emphasis on user actions makes core functionality immediately apparent and provides "
-        "waypoints for the user.\n\n"
-
-        "Motion provides meaning.\n\n"
-
-        "Motion respects and reinforces the user as the prime mover. Primary user actions are "
-        "inflection points that initiate motion, transforming the whole design.\n"
-        "All action takes place in a single environment. Objects are presented to the user without "
-        "breaking the continuity of experience even as they transform and reorganize.\n"
-        "Motion is meaningful and appropriate, serving to focus attention and maintain continuity. "
-        "Feedback is subtle yet clear. Transitions are efﬁcient yet coherent.\n\n"
-
-        "3D world.\n\n"
-
-        "The material environment is a 3D space, which means all objects have x, y, and z "
-        "dimensions. The z-axis is perpendicularly aligned to the plane of the display, with the "
-        "positive z-axis extending towards the viewer. Every sheet of material occupies a single "
-        "position along the z-axis and has a standard 1dp thickness.\n"
-        "On the web, the z-axis is used for layering and not for perspective. The 3D world is "
-        "emulated by manipulating the y-axis.\n\n"
-
-        "Light and shadow.\n\n"
-
-        "Within the material environment, virtual lights illuminate the scene. Key lights create "
-        "directional shadows, while ambient light creates soft shadows from all angles.\n"
-        "Shadows in the material environment are cast by these two light sources. In Android "
-        "development, shadows occur when light sources are blocked by sheets of material at "
-        "various positions along the z-axis. On the web, shadows are depicted by manipulating the "
-        "y-axis only. The following example shows the card with a height of 6dp.\n\n"
-
-        "Resting elevation.\n\n"
-
-        "All material objects, regardless of size, have a resting elevation, or default elevation "
-        "that does not change. If an object changes elevation, it should return to its resting "
-        "elevation as soon as possible.\n\n"
-
-        "Component elevations.\n\n"
-
-        "The resting elevation for a component type is consistent across apps (e.g., FAB elevation "
-        "does not vary from 6dp in one app to 16dp in another app).\n"
-        "Components may have different resting elevations across platforms, depending on the depth "
-        "of the environment (e.g., TV has a greater depth than mobile or desktop).\n\n"
-
-        "Responsive elevation and dynamic elevation offsets.\n\n"
-
-        "Some component types have responsive elevation, meaning they change elevation in response "
-        "to user input (e.g., normal, focused, and pressed) or system events. These elevation "
-        "changes are consistently implemented using dynamic elevation offsets.\n"
-        "Dynamic elevation offsets are the goal elevation that a component moves towards, relative "
-        "to the component’s resting state. They ensure that elevation changes are consistent "
-        "across actions and component types. For example, all components that lift on press have "
-        "the same elevation change relative to their resting elevation.\n"
-        "Once the input event is completed or cancelled, the component will return to its resting "
-        "elevation.\n\n"
-
-        "Avoiding elevation interference.\n\n"
-
-        "Components with responsive elevations may encounter other components as they move between "
-        "their resting elevations and dynamic elevation offsets. Because material cannot pass "
-        "through other material, components avoid interfering with one another any number of ways, "
-        "whether on a per component basis or using the entire app layout.\n"
-        "On a component level, components can move or be removed before they cause interference. "
-        "For example, a floating action button (FAB) can disappear or move off screen before a "
-        "user picks up a card, or it can move if a snackbar appears.\n"
-        "On the layout level, design your app layout to minimize opportunities for interference. "
-        "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
-        "when a user tries to pick up one of cards.\n\n"
-    </string>
-    <string name="title_activity_dengue">Dengue</string>
-    <string name="title_activity_escorpiao">Escorpiao</string>
-    <string name="title_activity_escorpioes">Escorpioes</string>
-    <string name="title_activity_minhas_denuncias">Minhas Denuncias</string>
-    <string name="title_activity_telefones_uteis">Telefones Uteis</string>
-    <string name="escorpionismo">Escorpionismo</string>
-
-    <string name="numero">Número</string>
-    <string name="digite_cpf">Digite o CPF</string>
-    <string name="telefone">Telefone</string>
-    <string name="endereco">Endereço</string>
     <string name="cpf">CPF</string>
     <string name="nome">Nome</string>
-    <string name="tela_de_cadastro">TELA DE CADASTRO</string>
-    <string name="cadastrar">Cadastrar</string>
-    <string name="aceito_os_termos_e_a_politica_de_privacidade_do_aplicativo">Aceito os termos e a politica de privacidade do aplicativo</string>
-    <string name="como_gostaria_de_ser_chamado">Como gostaria de ser chamado</string>
-    <string name="continuar">CONTINUAR</string>
-    <string name="local">local</string>
-    <string name="local_de_entrega_dos_pneus">Local de entrega dos pneus usados</string>
+    <string name="sim">Sim</string>
+    <string name="nao">Não</string>
+    <string name="adiciona_video_ao_abrir_o_app">Adiciona video ao abrir o app</string>
+    <string name="remove_imagens_dos_trabalhos_feitos">Remove imagens dos trabalhos feitos</string>
+    <string name="add_image_trab_agentes">Add image trab. agentes</string>
+    <string name="exclui_agentes">Excluir agentes</string>
+    <string name="configuracoes_cadastro_dos_administradores">Configurações cadastro dos administradores</string>
+    <string name="btn_acompanhar_reclamacoes">Botão acompanhar reclamações</string>
+    <string name="configuracoes_da_conta">Configurações da conta</string>
+    <string name="add_video_ao_abrir_app">Add video ao abrir app</string>
+    <string name="add_trabalhos_dos_agentes">Add trabalhos dos agentes</string>
+    <string name="adicionar_agentes">Adicionar agentes</string>
+    <string name="remove_agentes">Remove agentes</string>
+    <string name="remove_trab_dos_agentes">Remove trab. dos agentes</string>
+    <string name="btn_adicionar_agentes">Botão adicionar agentes</string>
+    <string name="texto_responder">RESPONDER</string>
+    <string name="informacoes_escorpiao"><b>Informações sobre escorpiões</b></string>
+    <string name="fechar_video">Fechar vídeo</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="selecione_estado">Selecione um estado</string>
+    <string name="selecione_municipio">Selecione um município</string>
+    <string name="agente_de_endemias">Agente de Endemias</string>
+    <string name="agentes_dengue"><b>Agentes</b></string>
+    <string name="administrador">Administrador</string>
+    <string name="administradores">Administradores</string>
+    <string name="administradores_extras">Administradores Extras</string>
+    <string name="agentes_extras">Agentes Extras</string>
     <string name="seta_para_cima">seta para cima</string>
-    <string name="imagem_trabalhos_agentes">imagem trabalhos agentes</string>
+    <string name="enviar">ENVIAR</string>
+    <string name="cuidados_sobre_escorpioes">Olá, Realizamos a vistoria no local informado e foram identificadas condições favoráveis ao aparecimento de escorpiões. As orientações necessárias foram repassadas, e foram adotadas medidas preventivas para reduzir o risco, como a eliminação de possíveis abrigos. Reforçamos a importância de manter o ambiente limpo, evitar o acúmulo de entulhos, vedar ralos e frestas, além de manter quintais e áreas externas organizadas. Caso haja novo aparecimento ou em situação de emergência, entre em contato com a Vigilância em Saúde do município. Atenciosamente,</string>
+    <string name="cancelar">CANCELAR</string>
+    <string name="enviar_notificacao">Enviar Notificação</string>
+    <string name="titulo_da_notificacao">Título da Notificação</string>
+    <string name="mensagem_corpo_do_texto">Mensagem (Corpo do texto)</string>
+    <string name="aviso_esta_mensagem_sera_enviada_para_todos_os_usuarios">Aviso: Esta mensagem será enviada para todos os usuários que instalaram o app e que escolheram sua região.</string>
+    <string name="cancelar_notificaco">CANCELAR NOTIFICAÇÃO</string>
+    <string name="disparar_notificacao">DISPARAR NOTIFICAÇÃO</string>
+    <string name="acompanhar_as_reclamacoes">Acompanhar as reclamações</string>
+    <string name="plano_gratuito">PLANO GRATUITO</string>
+    <string name="sem_trabalhos_para_excluir">Sem trabalhos para excluir</string>
+    <string name="telefones_uteis_compras">• Telefones úteis</string>
+    <string name="_2_administrador">• 2 Administradores</string>
+    <string name="_6_agentes">• 6 Agentes</string>
+    <string name="reclamacoes">• Reclamações</string>
+    <string name="telefones_uteis">Telefones úteis</string>
+    <string name="galeria_de_trabalhos">• Galeria de trabalhos</string>
+    <string name="plano_individual">PLANO INDIVIDUAL</string>
+    <string name="assinar">ASSINAR</string>
+    <string name="plano_basico">PLANO BÁSICO</string>
+    <string name="escolha_a_quantidade_ideal_de_administradores_e_agentes">• Escolha a quantidade ideal de administradores e agentes</string>
+    <string name="plano_municipal">PLANO MUNICIPAL</string>
+    <string name="_3_administradores">• 3 Administradores</string>
+    <string name="_10_agentes">• 10 Agentes</string>
+    <string name="nome_completo">Nome Completo</string>
+    <string name="e_mail">E-mail</string>
+    <string name="local_de_entrega_dos_pneus">Onde entregar pneus usados</string>
+    <string name="local_entrega_de_eletronico">Onde entregar eletrônicos usados</string>
+    <string name="confirme_seu_e_mail">Confirme seu e-mail</string>
+    <string name="telefone">Telefone</string>
+    <string name="senha">Senha</string>
+    <string name="confirme_sua_senha">Confirme sua senha</string>
+    <string name="eu_li_e_aceito_os_termos_de_uso">ACEITO OS TERMOS DE USO</string>
+    <string name="ler_termos_de_uso">LER TERMOS DE USO</string>
+    <string name="criar_conta">CRIAR CONTA</string>
+    <string name="funcao">Função</string>
+    <string name="descricao_icone_camera">Imagem camera toda preta para clicar e escolher uma imagem da pessoa</string>
+    <string name="icone_video_para_selecionar_video">Icone video para selecionar video</string>
+    <string name="icone_camera_para_selecionar_imagem">Icone camera para selecionar imagem</string>
+    <string name="endereco">Endereço</string>
+    <string name="numero">Número</string>
+    <string name="reclamacao">Reclamação</string>
+    <string name="referencia">Referência</string>
+    <string name="carregando_precos">Carregando preços...</string>
+    <!-- Escolher Localidade -->
+    <string name="escolher_localidade_title">Selecione sua localidade</string>
+    <string name="continuar">Continuar</string>
+    <string name="localizacao_automatica">📍 Localização detectada automaticamente</string>
+    <string name="excluir_administradores">EXCLUIR ADMINISTRADORES</string>
+    <string name="excluir_agentes">EXCLUIR AGENTES</string>
+    <string name="excluir_pre_cadastro_administrador">EXCLUIR PRÉ CADASTRO ADMINISTRADOR</string>
+    <string name="excluir_pre_cadastro_agentes">EXCLUIR PRÉ CADASTRO AGENTES</string>
+    <string name="todo">TODO</string>
+    <string name="pesquisa">Pesquisa</string>
+    <string name="endereco_completo">Avenida/Rua, número</string>
+    <string name="secretaria">Secretaria</string>
+    <string name="telefone_celular">Número telefone celular</string>
+    <string name="numero_telefone_fixo">Número telefone fixo</string>
+    <string name="horario_atendimento">Das 7:00 as 11:00 horas e das 13:00 as 17:00 horas</string>
+    <string name="eletronicos">Eletrônicos</string>
+    <string name="pneus">Pneus</string>
+    <string name="salvar">SALVAR</string>
+    <string name="entrar">ENTRAR</string>
+    <string name="esqueci_minha_senha">Esqueci minha senha</string>
+    <string name="palavra_ou">OU</string>
+    <string name="concluir_pre_cadastro">Concluir Pré-Cadastro</string>
+    <string name="digite_seu_cpf">Digite seu CPF</string>
+    <string name="icone_homem_e_mulher">Icone homem e mulher</string>
+    <string name="login">LOGIN</string>
+    <string name="adicionar_trabalhos_de_campo">Adicionar trabalhos de campo</string>
+    <string name="sair">Sair</string>
+    <string name="agente_de_combate_a_endemias">Agente de Combate a Endemias</string>
+    <string name="adicionar_locais_dos_trabalhos_realizados">Adicionar locais dos trabalhos realizados</string>
+    <string name="excluir_trabalhos_realizados">Excluir trabalhos realizados</string>
+    <string name="configuracoes">Configurações</string>
+    <string name="numero_da_casa">Número da casa</string>
+    <string name="conjunto">Conjunto</string>
+    <string name="sugestao">Sugestão</string>
+    <string name="titulo_da_imagem">Titulo da imagem</string>
+    <string name="botao_enviar_imagem">botao enviar imagem</string>
+    <string name="nada_para_ver">Nada para ver.\n Tente:\n 1- Ativar a internet. \n 2- Espere adicionar conteúdo.</string>
+    <string name="sugestao_email">Você quis dizer: exemplo@gmail.com?</string>
+    <string name="corrigir">Corrigir</string>
+    <string name="contamos_com_voce">Contamos com Você!</string>
+    <string name="excluir_conta">EXCLUIR CONTA</string>
+    <string name="data_do_cadastro">Data do cadastro</string>
+    <string-array name="opcoes_status_reclamacoes">
+        <item>Todos</item>
+        <item>Aguardando resposta</item>
+        <item>Respondido</item>
+        <item>Resolvido</item>
+        <item>Não resolvido</item>
+    </string-array>
+    <string name="atualizado_em">Atualizado em:</string>
+    <string name="resposta">Resposta:</string>
+    <string name="entrar_na_conta_usuario">ENTRAR COMO USUÁRIO</string>
+    <string name="entrar_na_conta_agente_endemias">ENTRAR COMO AGENTE DE ENDEMIAS</string>
+    <string name="entrar_na_conta_admin">ENTRAR COMO ADMINISTRADOR</string>
+    <string name="app_name">Juntos Contra Dengue</string>
+    <string name="tentar_novamente">TENTAR NOVAMENTE</string>
+    <string name="botao_voltar">Botão voltar</string>
+    <string name="voltar">Voltar</string>
+    <string name="logo_do_aplicativo">Logo do Aplicativo</string>
+    <string name="sobre_o_aplicativo">Sobre o Aplicativo</string>
+    <string name="todos_juntos_contra_a_dengue">Todos Juntos contra a Dengue</string>
+    <string name="vers_o_1_0_0">Versão x.x.x</string>
+    <string name="desenvolvido_por_marcelo_rodrigues_da_silva">Desenvolvido por: Marcelo Rodrigues da Silva</string>
+    <string name="casa_estrela_software">Casa Estrela Software</string>
+    <string name="_2026_casa_estrela_software_todos_os_direitos_reservados">© 2026 Casa Estrela Software. Todos os direitos reservados.</string>
+    <string name="solicitacao_de_contratacao">Solicitação de Contrato</string>
+    <string name="municipio">Município</string>
+    <string name="estado">Estado</string>
+    <string name="mostrar_imagem">Selecionado irá mostrar a imagem do agente na tela Agentes de vigilância em saúde.</string>
+    <string name="aviso_admin">Lembre o admin de concluir o cadastro na pagina de Login Admin -> Concluir Pré Cadastro. E Login agente -> Concluir pré cadastro para agentes e demais.</string>
+    <string name="responsavel">Responsável</string>
+    <string name="cargo">Cargo</string>
+    <string name="outros">Outros</string>
+    <string name="plano_desejado">Plano Desejado</string>
+    <string name="quantidade">Quantidade</string>
+    <string name="valor_mensal_estimado">Valor Mensal Estimado</string>
+    <string name="observacoes">Observações</string>
+    <string name="enviar_solicitacao">ENVIAR SOLICITAÇÃO</string>
+    <string name="contato">Contato:</string>
+    <string name="e_mail_contato">E_mail contato</string>
+    <string name="buscar_imagem">Buscar imagem</string>
+    <string name="salvar_imagem">Salvar imagem</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="referencia_endereco_reclamacao">Próximo a prefeitura</string>
+    <string name="substituir_sliders">Substituir sliders</string>
+    <string name="reclamacao_recebida">RECLAMAÇÃO RECEBIDA</string>
+    <string name="excluir_pre_cadastro">Excluir Pré Cadastro</string>
+    <string name="alto_falante">Alto falante</string>
+    <string name="title_activity_dengue">Dengue</string>
+    <string name="menu_home">Home</string>
+    <string name="comunicacao">Comunicação</string>
+    <string name="historico">Histórico:</string>
+    <string name="title_activity_telefones_uteis">Telefones Úteis</string>
+    <string name="escorpionismo">Escorpionismo</string>
+    <string name="data_do_pre_cadastro">Data do pre cadastro</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="descricao_escorpiao">Informações sobre escorpiões, prevenção e primeiros socorros.</string>
+    <string name="informacoes_degue"><b>Informações sobre Dengue, Zika e chikungunya</b></string>
+    <string name="descricao_informacoes">Informações sobre Dengue, Zika e chikungunya, contagio e sintomas.</string>
+    <string name="escolher_video">Escolher Vídeo</string>
+    <string name="trabalhos_realizados_pelos_agentes">Trabalhos realizados pelos agentes</string>
+    <string name="imagem_escorpiao">Imagem escorpiao</string>
+    <string name="imagem_pernilongo_branco_e_preto">Imagem pernilongo branco e preto</string>
+    <string name="bem_vindo">BEM VINDO</string>
+    <string name="denuncias"><b>Denúncia/Reclamação</b></string>
+    <string name="descricao_denuncias">Faça ser ouvido, faça aqui a sua reclamação para possiveis locais de criadoros de dengue.</string>
+    <string name="descricao_trabalhos">Veja fotos e videos de alguns trabalhos feitos pelos os agentes de endemias.</string>
+    <string name="trabalhos_agentes"><b>Trabalhos de campo</b></string>
+    <string name="imagem_homem_camisa_verde_escrito_ace">Imagem homem camisa verde escrito ace</string>
+    <string name="descricao_ag">Imagem-desenho agentes de endemias </string>
+    <string name="descricao_agentes">Conheça e avalie os agentes de endemias. caso fique com dúvida em relação ao agente, basta verificar aqui no APP.</string>
+    <string name="agentes"><b>Agentes de Vigilância em Saúde</b></string>
+    <string name="imagem_duas_pessoas_de_colete_verde_amarelo">Imagem duas pessoas de colete verde amarelo</string>
+    <string name="nao_tem_uma_conta_cadastre_se">Não tem uma conta? Cadastre-se</string>
+    <string name="nenhuma_reclamacao_encontrada">Nenhuma reclamação encontrada</string>
+    <string name="erro_ao_carregar_dados">Erro ao carregar dados</string>
+    <string name="endereco_reclamacao">=Endereço reclamacao</string>
+    <string name="reclamacao_atendida_por">Reclamação atendida por:</string>
+    <string name="imagens_da_visita">Imagens da visita</string>
+    <string name="sua_reclamacao_foi_resolvida">Sua reclamacao foi resolvida?</string>
+    <string name="aguarde">Aguarde...</string>
+    <string name="horario_de_funcionamento">Horário de funcionamento</string>
+    <string name="enviando_video">Enviando vídeo...</string>
+    <string name="isso_pode_levar_alguns_segundos">Isso pode levar alguns segundos</string>
+    <string name="enviar_mensagens_a_todos_usuario_app_do_municipio">Enviar mensagens a todos usuario app do municipio</string>
+    <string name="mensagens_aos_usuarios">Mensagens aos usuários</string>
+    <string name="deseja_se_identificar">Deseja se identificar?</string>
+    <string name="acompanhar_as_reclamacoes_feitas_e_verificar_a_solucao">Acompanhar as reclamações feitas e verificar a solução.</string>
+    <string name="podemos_entrar_em_contato_caso_necessite">Podemos entrar em contato caso necessite.</string>
+    <string name="avaliar_as_reclamacoes_feitas_resolvido_nao_resolvido">Avaliar as reclamações feitas (resolvido/Não resolvido)</string>
+    <string name="quero_me_identificar">Quero me identificar</string>
+    <string name="quero_ficar_anonimo">Quero ficar anônimo</string>
+    <string name="download_da_gif_em_https_www_flaticon_com">Download da GIF em https://www.flaticon.com/</string>
+    <string name="category_text">Category Text</string>
+    <string name="captions">Captions</string>
+    <string name="brasao_do_municipio">Brasão do municipio</string>
+    <string name="todos_contra_a_dengue">Todos Contra a Dengue</string>
+    <string name="municipio_estado">Municipio/Estado</string>
+    <string name="nome_agente">Nome agente</string>
+    <string name="data_da_reclamacao">Data da reclamação:</string>
+    <string name="data_reclamacao_dd_mm_aaaa">xx/xx/xxxx</string>
+    <string name="reclamante">Reclamante:</string>
+    <string name="nome_reclamante">Nome reclamante</string>
+    <string name="status_da_reclamacao">Status da reclamação:</string>
+    <string name="aguardando">Aguardando</string>
+    <string name="respondido_por">Respondido por:</string>
+    <string name="local">Local:</string>
+    <string name="nome_do_servidor">Nome do Servidor</string>
+    <string name="excluir">Excluir</string>
+    <string name="horario">Horário</string>
+    <string name="substituir_imagem">Substituir imagem?</string>
+    <string name="textview">TextView</string>
+    <string name="selecione_uma_funcao_abaixo">Selecione uma função abaixo</string>
+    <string name="mostrar_na_tela_agentes_de_vigilancia_em_saude">Mostrar imagem do agente na tela Agentes de Vigilância em Saúde</string>
+    <string name="adicionar">Adicionar</string>
+    <string name="download_dos_icones">Download dos icones em https://icon-icons.com/pt/pacotes-de-icones </string>
+    <string name="informacoes">Informações</string>
+    <string name="minha_conta">Minha conta</string>
+    <string name="minhas_denuncias">Minhas Denúncias</string>
+    <string name="descarte_de_pneus">Descarte de Pneus</string>
+    <string name="descarte_de_eletronicos">Descarte de Eletrônicos</string>
+    <string name="termos_de_uso_e_privacidade">Termos de Uso e Privacidade</string>
+    <string name="acesso_administrativo">Acesso administrativo</string>
+    <string name="login_admin">Login Admin</string>
+    <string name="login_agente">Login Agente</string>
+    <string name="adicionar_sliders">Adicionar sliders</string>
+    <string name="adicionar_telefones">Adicionar telefones</string>
+    <string name="excluir_telefones_uteis">Excluir telefones úteis</string>
+    <string name="adicionar_locais_de_descartes">Adicionar locais de descartes</string>
+    <string name="compartilhar_app">Compartilhar App</string>
+    <string name="compras">Compras</string>
+    <string name="excluir_locais_de_descarte_de_eletronicos">Excluir locais de descarte de eletronicos</string>
+    <string name="excluir_locais_de_descarte_de_pneus">Excluir locais de descarte de pneus</string>
+    <string name="trocar_senha">Trocar Senha</string>
+    <string name="total_de_uploda_de_imagens">Total de uploda de imagens</string>
+    <string name="texto_funcionalidades_usuario"> - Consulte os trabalhos realizados pelos agentes de saúde do município; \n - Consulte quem são os agentes de endemias; \n - Envie reclamações e acompanhe o feedback; \n - Consulte telefones úteis; \n - Encontre locais para descarte de eletrônicos e/ou pneus; \n - Acesse informações sobre dengue e escorpião.</string>
+    <string name="texto_funcionalidades_adm"> - Gerenciamento de fotos; \n - Vídeos informativos de abertura do app; \n - Resposta a reclamações; \n - Cadastro de novos servidores ou agentes.</string>
+    <string name="texto_funcionalidades_agente">- Colaboração na resolução de reclamações; \n - Postagem de trabalhos realizados.</string>
+    <string name="funcionalidades_do_aplicativo">Funcionalidades do Aplicativo:</string>
+    <string name="valor_estimado">Valor estimado</string>
+    <string name="usuario">Usuário</string>
+    <string name="remover_trabalhos_de_campo">Remover trabalhos de campo</string>
+    <string name="adicionar_imagens_da_visita">Adicionar imagens da visita</string>
+    <string name="selecionar_uma_imagem">Selecionar uma imagem</string>
+    <string name="fazer_uma_reclamacao">Fazer uma reclamação</string>
+    <string name="visualizar_resposta">VISUALIZAR RESPOSTA</string>
+    <string name="imagem_do_agente_de_saude">Imagem do agente de saúde</string>
+    <string name="funcao_do_agente_de_saude">Função do agente de saúde</string>
+
+
+    <string name="erro_carregar_estados">Erro ao carregar estados: %1$s</string>
+    <string name="erro_carregar_municipios">Erro ao carregar municípios: %1$s</string>
+    <string name="selecione_estado_municipio">Selecione estado e município.</string>
+    <string name="sem_conexao_internet">Sem conexão com a internet.</string>
+    <string name="validacao_pode_falhar_sem_internet">Sem conexão com a internet. A validação de localização pode falhar.</string>
+    <string name="nao_foi_possivel_obter_localizacao">Não foi possível obter sua localização. Tente novamente.</string>
+    <string name="validando_localizacao">📍 Validando localização…</string>
+    <string name="erro_validar_endereco">Erro ao validar endereço: %1$s</string>
+    <string name="localizacao_detectada">📍 Localização detectada: %1$s, %2$s</string>
+    <string name="desconhecida">Desconhecida</string>
+    <string name="desconhecido">Desconhecido</string>
+    <string name="estado_confirmado">Estado confirmado: %1$s. Não foi possível identificar a cidade exata.</string>
+    <string name="nao_foi_possivel_identificar_localizacao">Não foi possível identificar sua localização. Verifique sua conexão com a internet.</string>
+
+    <string name="titulo_localizacao_diferente">📍 Localização diferente</string>
+    <string name="mensagem_localizacao_diferente">Você está em %1$s, mas selecionou %2$s.\n\nDeseja usar a localização detectada automaticamente?</string>
+    <string name="localidade_desconhecida">localidade desconhecida</string>
+    <string name="titulo_municipio_nao_cadastrado">Município não cadastrado</string>
+    <string name="mensagem_municipio_nao_cadastrado">Seu município não foi cadastrado no aplicativo. Entre em contato com o desenvolvedor para inclusão do seu município.</string>
+    <string name="ok">OK</string>
+
+    <string name="titulo_localizacao_nao_confirmada">📍 Localização não confirmada</string>
+    <string name="mensagem_localizacao_nao_confirmada">Não foi possível confirmar sua localização.\n\nIsso pode ocorrer se:\n• O GPS não estiver preciso\n• Você estiver sem conexão com a internet\n• A localização não corresponde à cidade selecionada\n\nDeseja continuar mesmo assim?</string>
+    <string name="continuar_dialog">Continuar</string>
+
+    <string name="local_salvo">✅ Local salvo: %1$s/%2$s</string>
+
+    <string name="titulo_ativar_gps">Ativar GPS</string>
+    <string name="mensagem_ativar_gps">Para validar sua localização, é necessário ativar o GPS.</string>
+    <string name="configurar">Configurar</string>
+
+    <string name="titulo_permissao_localizacao">Permissão de Localização</string>
+    <string name="mensagem_permissao_localizacao">O app precisa da permissão de localização para validar sua cidade. Você pode conceder a permissão nas configurações do app.</string>
+
+    <string name="validando">VALIDANDO…</string>
+    <string name="agente_de_saude">Agente de Saúde</string>
+    <string name="toque_para_ampliar">Toque para ampliar</string>
+    <string name="aguardando_resposta">Aguardando resposta</string>
+    <string name="resolvidas">Resolvidas</string>
+    <string name="nao_resolvidas">Não Resolvidas</string>
+    <string name="aguardando_avaliacao_do_usuario">Aguardando avaliação do usuário: 0</string>
+    <string name="reclamacoes_respondidas">Reclamações respondidas</string>
+    <string name="total_de_reclamacoes">Total de reclamações</string>
+    <string name="selecionar_item">selecionar_item</string>
+    <string name="voce_esta_offline_exibindo_dados_salvos_localmente">Você está offline. Exibindo dados salvos localmente.</string>
+    <string name="logo_todos_contra_a_dengue">Logo Todos Contra a Dengue</string>
+    <string name="perfil_administrador">Perfil Administrador</string>
+    <string name="perfil_agente">Perfil Agente</string>
 
 </resources>

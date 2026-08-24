@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AddLocalDescartesPneusEletronicos"
+    android:fitsSystemWindows="true">
+
+    <androidx.appcompat.widget.Toolbar
+    android:id="@+id/toolbarDescartesPneusEletronicos"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorPrimary"
+    android:minHeight="?attr/actionBarSize"
+    android:theme="?attr/actionBarTheme"
+    app:title="Cadastro de Locais de Descartes"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/lytDescartesPneusEletronicos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarDescartesPneusEletronicos">
+
+        <EditText
+            android:id="@+id/edtTxtDescartesLocais"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/local"
+            android:padding="16dp"
+            android:background="@drawable/border_rounded_gray"
+            android:layout_marginBottom="16dp"
+            android:textSize="16sp"/>
+
+        <EditText
+            android:id="@+id/edtTxtDescartesEndereco"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/endereco"
+            android:padding="16dp"
+            android:background="@drawable/border_rounded_gray"
+            android:layout_marginBottom="16dp"
+            android:textSize="16sp"/>
+
+        <EditText
+            android:id="@+id/edtTxtDescartesNumero"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/border_rounded_gray"
+            android:hint="@string/numero"
+            android:padding="16dp"
+            android:inputType="number"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/edtTxtDescartesHorarios"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/horario_de_funcionamento"
+            android:padding="16dp"
+            android:background="@drawable/border_rounded_gray"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/edtTxtDescartesTelefone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/telefone"
+            android:padding="16dp"
+            android:background="@drawable/border_rounded_gray"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radioButtonAddLocalPneus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:text="@string/pneus" />
+
+            <RadioButton
+                android:id="@+id/radioButtonAddLocalEletronicos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/eletronicos" />
+        </RadioGroup>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lytBotoesMainAddAgentes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lytDescartesPneusEletronicos">
+
+        <Button
+            android:id="@+id/btnCancelDescartes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:layout_marginEnd="16dp"
+            android:text="@string/cancelar">
+        </Button>
+
+        <Button
+            android:id="@+id/btnOkDescartes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:layout_marginStart="16dp"
+            android:text="@string/continuar">
+        </Button>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

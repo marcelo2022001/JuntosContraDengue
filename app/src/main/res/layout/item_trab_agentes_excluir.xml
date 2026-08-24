@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <FrameLayout
+        android:layout_width="150dp"
+        android:layout_height="150dp">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="20dp">
+
+            <ImageView
+                android:id="@+id/img_trab_agente_excluir"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="@string/trabalhos_realizados_pelos_agentes" />
+
+        </androidx.cardview.widget.CardView>
+
+        <ImageView
+            android:id="@+id/btn_selecionar_trab_agente"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="8dp"
+            android:elevation="12dp"
+            android:src="@drawable/ic_radio_unselected"
+            android:contentDescription="@string/selecionar_item"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/caption_trab_agente_excluir"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/captions"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:textColor="@color/lavender"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>
