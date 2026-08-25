@@ -2,25 +2,42 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- FEATURES DO DISPOSITIVO -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
     <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" /> <!-- MUDADO PARA false -->
+    <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
 
+    <!-- PERMISSÕES PARA ANDROID 13+ (API 33+) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission
         android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
         android:minSdkVersion="34" />
+
+    <!-- PERMISSÃO DA CÂMERA E ÁUDIO -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- PERMISSÕES DE ARMAZENAMENTO - CORRIGIDAS -->
+    <!-- Para Android 12 e inferior (API 32-) -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="29" /> <!-- Permissions for internet -->
+        android:maxSdkVersion="32" />
+
+    <!-- PERMISSÕES DE INTERNET -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Permissions for telephone -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- PERMISSÕES DE TELEFONE E LOCALIZAÇÃO -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -45,8 +62,8 @@
             android:exported="false" />
         <activity
             android:name=".SolicitacaoPlano"
-            android:windowSoftInputMode="stateHidden"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".FullScreenVisualizarMidiaReclamacoes"
             android:configChanges="orientation|screenSize"
@@ -62,8 +79,8 @@
 
         <activity
             android:name=".ActivityAdminPush"
-            android:windowSoftInputMode="stateHidden"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ResponderDenunciaActivity"
             android:exported="false"
@@ -93,13 +110,13 @@
         <activity
             android:name=".ActivityLoginAdmin"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ActivityLoginAgentes"
             android:exported="false"
-            android:windowSoftInputMode="stateHidden"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".CriarCadastroAgente"
             android:exported="false"
@@ -185,7 +202,8 @@
         <activity
             android:name=".ListarReclamacoesAgentes"
             android:exported="false"
-            android:parentActivityName=".AdminActivity" />
+            android:parentActivityName=".AdminActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".AddLocalDescartesPneusEletronicos"
             android:exported="false"
@@ -201,8 +219,8 @@
         <activity
             android:name=".AddAgentes"
             android:exported="false"
-            android:windowSoftInputMode="stateHidden"
-            android:parentActivityName=".AdminActivity" />
+            android:parentActivityName=".AdminActivity"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".AddSlidersMain"
             android:exported="false"
@@ -221,7 +239,8 @@
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".VisualizarResposta"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="stateHidden"/>
         <activity
             android:name=".ExcluirAgentesActivity"
             android:exported="false" />
@@ -230,9 +249,9 @@
             android:exported="false" />
         <activity
             android:name=".ExcluirTelefonesUteisActivity"
-            android:windowSoftInputMode="stateHidden"
             android:exported="false"
-            android:parentActivityName=".AdminActivity" />
+            android:parentActivityName=".AdminActivity"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ExcluirLocaisDescartesEletronicosActivity"
             android:exported="false" />
@@ -254,6 +273,18 @@
             android:label="JUNTOS CONTRA A DENGUE"
             android:parentActivityName=".TrabalhosAgentes"
             android:theme="@style/Theme.JuntosContraDengue.Fullscreen" />
+        <activity
+            android:name=".ActivityVisualizarDenunciasUsuario"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".FullscreenImageActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ActivityVisualizarNotificacao"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -265,14 +296,26 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity
-            android:name=".ActivityVisualizarDenunciasUsuario"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".FullscreenImageActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
     </application>
+    <!-- ADICIONE O QUERIES PARA COMPATIBILIDADE COM ANDROID 11+ -->
+    <queries>
+        <!-- Para câmera -->
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+        <!-- Para gravação de vídeo -->
+        <intent>
+            <action android:name="android.media.action.VIDEO_CAPTURE" />
+        </intent>
+        <!-- Para galeria -->
+        <intent>
+            <action android:name="android.intent.action.PICK" />
+            <data android:mimeType="image/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.PICK" />
+            <data android:mimeType="video/*" />
+        </intent>
+    </queries>
 
 </manifest>

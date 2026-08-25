@@ -2,6 +2,7 @@ package com.example.juntoscontradengue.database.classes_database;
 
 public class ClassReclamacoes {
 
+    private Boolean visivel_agente;
     private String idUsuario;
     private String idReclamacao;
     private Long data_envio;
@@ -48,6 +49,14 @@ public class ClassReclamacoes {
         this.status = status;
         this.total_reclamacoes = total_reclamacoes;
         this.respondida_por = respondida_por;
+    }
+
+    public boolean isVisivelAgente() {
+        return visivel_agente == null || visivel_agente; // default true se não existir no banco
+    }
+
+    public void setVisivelAgente(Boolean visivel_agente) {
+        this.visivel_agente = visivel_agente;
     }
 
     public String getIdUsuario() {

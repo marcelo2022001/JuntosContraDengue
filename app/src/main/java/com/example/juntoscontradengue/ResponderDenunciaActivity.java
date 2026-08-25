@@ -564,7 +564,7 @@ public class ResponderDenunciaActivity extends AppCompatActivity {
             Toast.makeText(this, "Resposta enviada com sucesso!", Toast.LENGTH_SHORT).show();
             enviarPushPorToken(token);
 
-            Intent intent = new Intent(ResponderDenunciaActivity.this, ListarReclamacoesAgentes.class);
+            Intent intent = new Intent(ResponderDenunciaActivity.this, ListarReclamacoesAdmins.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();

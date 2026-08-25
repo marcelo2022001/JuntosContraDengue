@@ -4,19 +4,23 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.juntoscontradengue.database.adapters.AdapterReclamacaoAgentes;
+import com.example.juntoscontradengue.database.adapters.AdapterReclamacaoAdmins;
 import com.example.juntoscontradengue.database.classes_database.ClassReclamacoes;
-import com.example.juntoscontradengue.databinding.ActivityVerificarReclamacoesAgentesBinding;
+import com.example.juntoscontradengue.databinding.ActivityVerificarReclamacoesAdminsBinding;
 import com.example.juntoscontradengue.extras.NetworkUtils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,14 +29,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-public class ListarReclamacoesAgentes extends AppCompatActivity {
+public class ListarReclamacoesAdmins extends AppCompatActivity
+        implements AdapterReclamacaoAdmins.OnSelectionChangedListener {
 
-    private ActivityVerificarReclamacoesAgentesBinding binding;
-    private AdapterReclamacaoAgentes adapter;
-
+    private @NonNull ActivityVerificarReclamacoesAdminsBinding binding;
+    private AdapterReclamacaoAdmins adapter;
+    private Boolean isAdmin = false;
     private final List<ClassReclamacoes> listaCompleta = new ArrayList<>();
 
     // TextView
@@ -41,6 +48,10 @@ public class ListarReclamacoesAgentes extends AppCompatActivity {
     private String estado, municipio;
 
     Boolean isConnected;
+
+    // Menu (ação de ocultar aparece só quando há seleção)
+    private Menu menu;
+    private int selecionadosAtual = 0;
 
     // Contadores
     int total = 0;
@@ -53,14 +64,18 @@ public class ListarReclamacoesAgentes extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityVerificarReclamacoesAgentesBinding.inflate(getLayoutInflater());
+        binding = ActivityVerificarReclamacoesAdminsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", "");
         municipio = prefs.getString("municipio", "");
 
-        isConnected = NetworkUtils.isNetworkAvailable(ListarReclamacoesAgentes.this);
+        SharedPreferences prefUser = getSharedPreferences("UserData", MODE_PRIVATE);
+        String perfil = prefUser.getString("perfil", "");
+        isAdmin = "admins".equalsIgnoreCase(perfil) || "admin".equalsIgnoreCase(perfil);
+
+        isConnected = NetworkUtils.isNetworkAvailable(ListarReclamacoesAdmins.this);
 
         if (!isConnected) {
 
@@ -85,6 +100,111 @@ public class ListarReclamacoesAgentes extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_reclamacoes_agentes, menu);
+        this.menu = menu;
+        atualizarVisibilidadeAcaoOcultar();
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_ocultar_selecionadas) {
+            confirmarOcultarSelecionadas();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void atualizarVisibilidadeAcaoOcultar() {
+        if (menu == null) return;
+        MenuItem acaoOcultar = menu.findItem(R.id.action_ocultar_selecionadas);
+        if (acaoOcultar != null) {
+            boolean podeMostrar = isAdmin && selecionadosAtual > 0;
+            acaoOcultar.setVisible(podeMostrar);
+            acaoOcultar.setTitle(getString(R.string.excluir_selecionadas_com_total, selecionadosAtual));
+        }
+    }
+
+    // ================= SELEÇÃO =================
+
+    @Override
+    public void onSelectionChanged(int selectedCount) {
+        selecionadosAtual = selectedCount;
+        atualizarVisibilidadeAcaoOcultar();
+    }
+
+    private void confirmarOcultarSelecionadas() {
+        if (!isAdmin) {
+            Toast.makeText(this, "Apenas administradores podem excluir reclamações.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        List<ClassReclamacoes> selecionadas = adapter.getSelectedItems();
+        if (selecionadas.isEmpty()) return;
+
+        List<ClassReclamacoes> elegiveis = new ArrayList<>();
+        int ignoradas = 0;
+        for (ClassReclamacoes r : selecionadas) {
+            String status = r.getStatus() == null ? "" : r.getStatus().trim();
+            if (status.equalsIgnoreCase("Resolvido") || status.equalsIgnoreCase("Não Resolvido")) {
+                elegiveis.add(r);
+            } else {
+                ignoradas++;
+            }
+        }
+
+        if (elegiveis.isEmpty()) {
+            Toast.makeText(this, "Só é possível excluir reclamações já resolvidas ou não resolvidas.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        String mensagem = getString(R.string.excluir_reclamacoes_mensagem, elegiveis.size());
+        if (ignoradas > 0) {
+            mensagem += "\n\n" + ignoradas + " reclamação(ões) selecionada(s) ainda aguarda(m) resposta e não será(ão) excluida(s).";
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.excluir_reclamacoes_titulo)
+                .setMessage(mensagem)
+                .setPositiveButton(R.string.excluir, (dialog, which) -> ocultarReclamacoesSelecionadas(elegiveis))
+                .setNegativeButton(R.string.cancelar, null)
+                .show();
+    }
+
+    /**
+     * Não exclui a reclamação do banco: apenas marca visivel_agente = false
+     * em cadastros/{estado}/{municipio}/reclamacoes/{idUsuario}/{idReclamacao}.
+     */
+    private void ocultarReclamacoesSelecionadas(List<ClassReclamacoes> selecionadas) {
+
+        DatabaseReference ref = FirebaseDatabase.getInstance()
+                .getReference("cadastros")
+                .child(estado)
+                .child(municipio)
+                .child("reclamacoes");
+
+        Map<String, Object> updates = new HashMap<>();
+        for (ClassReclamacoes r : selecionadas) {
+            if (r.getIdUsuario() == null || r.getIdReclamacao() == null) continue;
+            updates.put(r.getIdUsuario() + "/" + r.getIdReclamacao() + "/visivel_agente", false);
+        }
+
+        if (updates.isEmpty()) return;
+
+        ref.updateChildren(updates)
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(this, R.string.reclamacoes_excluidas_sucesso, Toast.LENGTH_SHORT).show();
+                    adapter.clearSelection();
+                    // A lista é atualizada automaticamente pelo ValueEventListener em carregarReclamacoes()
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FIREBASE", "Erro ao ocultar reclamações: " + e.getMessage());
+                    Toast.makeText(this, R.string.error_excluir_reclamacoes, Toast.LENGTH_SHORT).show();
+                });
+    }
+
     // =================== TextView ==================
     private void setupTextViews() {
         txtTotal = binding.txtTotal;
@@ -95,17 +215,17 @@ public class ListarReclamacoesAgentes extends AppCompatActivity {
         txtNaoResolvidas = binding.txtNaoResolvidas;
 
         // ✅ Inicializa com valores padrão
-        txtTotal.setText("Total de reclamações: 0");
-        txtRespondidas.setText("Reclamações respondidas: 0");
-        txtAguardandoResposta.setText("Aguardando resposta: 0");
-        txtResolvidas.setText("Resolvidas: 0");
-        txtNaoResolvidas.setText("Não resolvidas: 0");
+        txtTotal.setText("@string/total_de_reclamacoes");
+        txtRespondidas.setText("@string/reclamacoes_respondidas");
+        txtAguardandoResposta.setText("@string/aguardando_resposta");
+        txtResolvidas.setText("@string/resolvidas");
+        txtNaoResolvidas.setText("@string/nao_resolvidas");
     }
 
     // ================= RECYCLER =================
 
     private void setupRecycler() {
-        adapter = new AdapterReclamacaoAgentes(new ArrayList<>());
+        adapter = new AdapterReclamacaoAdmins(new ArrayList<>(), this);
         binding.recyclerViewReclamacoes.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerViewReclamacoes.setAdapter(adapter);
         binding.recyclerViewReclamacoes.addItemDecoration(
@@ -152,6 +272,11 @@ public class ListarReclamacoesAgentes extends AppCompatActivity {
                     for (DataSnapshot reclamacaoSnap : usuarioSnap.getChildren()) {
                         ClassReclamacoes reclamacao =
                                 reclamacaoSnap.getValue(ClassReclamacoes.class);
+
+                        // ❌ Reclamação ocultada pelo agente (visivel_agente: false) não entra na lista
+                        if (reclamacao != null && !reclamacao.isVisivelAgente()) {
+                            continue;
+                        }
 
                         if (reclamacao != null) {
                             reclamacao.setIdUsuario(idUsuario);
@@ -225,7 +350,7 @@ public class ListarReclamacoesAgentes extends AppCompatActivity {
         int total_respondidas = total - aguardando;
 
         // ✅ Atualiza as TextView
-        txtTotal.setText("Total de reclamações: " + total);
+        txtTotal.setText(String.format("Total de reclamações: %d", total));
         txtRespondidas.setText("Reclamações respondidas: " + total_respondidas);
         txtAguardandoUsuarioAvaliar.setText("Respondido/Aguardando usuário avaliar: " + respondidas);
         txtAguardandoResposta.setText("Aguardando resposta: " + aguardando);

@@ -315,4 +315,13 @@
     <string name="perfil_administrador">Perfil Administrador</string>
     <string name="perfil_agente">Perfil Agente</string>
 
+
+    // Novas Ocultar
+    <string name="excluir_selecionadas_com_total">Excluir (%1$d)</string>
+    <string name="excluir_reclamacoes_titulo">Excluir reclamações</string>
+    <string name="excluir_reclamacoes_mensagem">Excluir %1$d reclamação(ões) da sua lista? Elas continuam no sistema, só deixam de aparecer para os agentes.</string>
+    <string name="reclamacoes_excluidas_sucesso">Reclamações Excluir com sucesso</string>
+    <string name="error_excluir_reclamacoes">Erro ao Excluir reclamações</string>
+
+
 </resources>

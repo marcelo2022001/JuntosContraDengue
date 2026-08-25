@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity
             R.drawable.image_2,
             R.drawable.image_3,
             R.drawable.image_4,
-             R.drawable.image_5
+            R.drawable.image_5
     };
 
     Toolbar toolbar;
@@ -216,6 +216,15 @@ public class MainActivity extends AppCompatActivity
         if (auth.getCurrentUser() != null) {
             // Usuário está logado. Ir para a tela principal.
             carregarBrasao();
+
+            // ✅ Redireciona para a tela do perfil (admin/agente) só na CRIAÇÃO
+            // desta Activity — não em onStart(), que também roda quando o
+            // usuário volta pelo botão voltar. Antes isso ficava em onStart()
+            // com uma trava (VEIO_PELO_VOLTAR) que nunca era setada como true
+            // por ninguém, então todo retorno à MainActivity reabria
+            // imediatamente a AgentesMainActivity/AdminActivity — o usuário
+            // nunca conseguia "ficar" logado nesta tela.
+            redirecionarPeloPerfilSeNecessario();
         } else {
             // Usuário não está logado. Ir para a tela de login.
             brasaoMunicipio.setImageResource(R.drawable.ic_launcher);
@@ -223,6 +232,17 @@ public class MainActivity extends AppCompatActivity
         }
 
 
+    }
+
+    private void redirecionarPeloPerfilSeNecessario() {
+        if (perfil == null) return;
+
+        if (perfil.equals("admins")) {
+            startActivity(new Intent(MainActivity.this, AdminActivity.class));
+        } else if (perfil.equals("agentes")) {
+            startActivity(new Intent(MainActivity.this, AgentesMainActivity.class));
+        }
+        // perfil == "usuarios": nada a fazer, a própria MainActivity já é a tela do usuário.
     }
 
     private void carregarBrasao() {
@@ -364,44 +384,44 @@ public class MainActivity extends AppCompatActivity
             editor.apply();
 
         }
-            View tutorial = findViewById(R.id.layoutTutorial);
-            if (tutorial == null) return;
+        View tutorial = findViewById(R.id.layoutTutorial);
+        if (tutorial == null) return;
 
-            tutorial.setVisibility(View.VISIBLE);
-            tutorial.setAlpha(0f);
-            tutorial.setScaleX(0.7f);
-            tutorial.setScaleY(0.7f);
+        tutorial.setVisibility(View.VISIBLE);
+        tutorial.setAlpha(0f);
+        tutorial.setScaleX(0.7f);
+        tutorial.setScaleY(0.7f);
 
-            tutorial.animate()
-                    .alpha(1f)
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .setDuration(500)
-                    .withEndAction(() -> {
+        tutorial.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(500)
+                .withEndAction(() -> {
 
-                        ImageView hand = findViewById(R.id.imgHand);
-                        if (hand == null) return;
+                    ImageView hand = findViewById(R.id.imgHand);
+                    if (hand == null) return;
 
-                        hand.animate()
-                                .translationY(18)
-                                .setDuration(250)
-                                .withEndAction(() ->
-                                        hand.animate()
-                                                .translationY(0)
-                                                .setDuration(250)
-                                                .withEndAction(() ->
+                    hand.animate()
+                            .translationY(18)
+                            .setDuration(250)
+                            .withEndAction(() ->
+                                    hand.animate()
+                                            .translationY(0)
+                                            .setDuration(250)
+                                            .withEndAction(() ->
 
-                                                        tutorial.postDelayed(() ->
-                                                                tutorial.animate()
-                                                                        .alpha(0f)
-                                                                        .setDuration(600)
-                                                                        .withEndAction(() -> tutorial.setVisibility(View.GONE))
-                                                                        .start(), 2000)
+                                                    tutorial.postDelayed(() ->
+                                                            tutorial.animate()
+                                                                    .alpha(0f)
+                                                                    .setDuration(600)
+                                                                    .withEndAction(() -> tutorial.setVisibility(View.GONE))
+                                                                    .start(), 2000)
 
-                                                ).start())
-                                .start();
+                                            ).start())
+                            .start();
 
-                    }).start();
+                }).start();
 
     }
 
@@ -487,7 +507,8 @@ public class MainActivity extends AppCompatActivity
 
     private void goToLogin() {
 
-        Intent intent = new Intent(MainActivity.this, TelaLoguin.class);
+        Intent intent = new Intent(MainActivity.this, EscolherPerfilLogin
+                .class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finishAffinity();
@@ -598,39 +619,11 @@ public class MainActivity extends AppCompatActivity
         String usuario = (nome_usuario == null || nome_usuario.isEmpty()) ? "Usuário" : nome_usuario;
         txtNomeUsuario.setText(usuario);
 
-        // VERIFICAÇÃO DE REDIRECIONAMENTO COM TRAVA DE RETORNO
-        // Verifica se o usuário veio pelo botão voltar da tela de agentes
-        boolean veioPeloBotaoVoltar = getIntent().getBooleanExtra("VEIO_PELO_VOLTAR", false);
-
-        if (!veioPeloBotaoVoltar) {
-
-            // Inicialize o FirebaseAuth
-            FirebaseAuth mAuth = FirebaseAuth.getInstance();
-
-// Verifique o usuário atual
-            FirebaseUser currentUser = mAuth.getCurrentUser();
-            if (currentUser != null) {
-
-                if (perfil.equals("admins")) {
-
-                    startActivity(new Intent(MainActivity.this, AdminActivity.class));
-
-                } else if (perfil.equals("agentes")) {
-
-                    startActivity(new Intent(MainActivity.this, AgentesMainActivity.class));
-
-                }
-            } else if (perfil.equals("usuarios")) {
-
-                startActivity(new Intent(MainActivity.this, MainActivity.class));
-
-            }
-        } else{
-            // Se veio pelo botão voltar, nós "limpamos" a flag para que na próxima vez
-            // que o app abrir ele funcione normalmente do zero
-            getIntent().putExtra("VEIO_PELO_VOLTAR", false);
-        }
-
+        // ✅ O redirecionamento por perfil (admin/agente) agora acontece só em
+        // onCreate() -> configurarToolbarEDrawer() -> redirecionarPeloPerfilSeNecessario().
+        // Aqui em onStart() só atualizamos os textos do cabeçalho do drawer,
+        // que devem ficar sempre em dia mesmo quando a Activity só volta ao
+        // primeiro plano (sem recriar).
     }
 
     @Override

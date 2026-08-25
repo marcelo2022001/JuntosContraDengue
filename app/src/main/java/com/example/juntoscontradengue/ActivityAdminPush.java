@@ -99,8 +99,11 @@ public class ActivityAdminPush extends AppCompatActivity {
 
         HashMap<String, Object> notificacao = new HashMap<>();
 
+        String topico = TopicHelper.getUsuariosTopic(this);
+
         notificacao.put("titulo", titulo);
         notificacao.put("mensagem", mensagem);
+        notificacao.put("topicos", topico);
 
         ArrayList<String> topicos = new ArrayList<>();
         topicos.add(topicoUsuarios);

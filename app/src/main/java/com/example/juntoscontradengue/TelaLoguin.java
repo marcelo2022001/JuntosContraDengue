@@ -256,7 +256,7 @@ public class TelaLoguin extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         salvarDadosLocalmente();
-                        irParaActivityPrincipal(nome);
+
                     } else {
                         // Se falhou o login com o email principal, tenta autenticar usando o novoEmail pendente (se houver)
                         if (emailPendente != null && !emailPendente.isEmpty() && !emailPendente.equals(emailLogin)) {
@@ -315,6 +315,11 @@ public class TelaLoguin extends AppCompatActivity {
 
     private void irParaActivityPrincipal(String nomeOpcional) {
         hideLoading();
+
+        salvarDadosLocalmente();
+
+        Log.e("shared_2", "shared");
+
         mensagem = "Bem vindo, ";
 
         if (nomeOpcional != null && !nomeOpcional.isEmpty()) {
@@ -342,8 +347,12 @@ public class TelaLoguin extends AppCompatActivity {
         editor.putString("telefone", telefone);
         editor.putString("dataCadastro", dataCadastro);
         editor.putString("updateAt", updateAt);
+        // Esta tela é exclusiva de usuários comuns (agentes/admins fazem login em outra tela)
         editor.putString("perfil", "usuarios");
         editor.apply();
+
+        Log.e("Shared_1 UserData", "Dados salvo Localmente");
+
     }
 
     private void buscarEmailPorCpf(String cpf_user, EmailCallback callback) {
@@ -380,6 +389,12 @@ public class TelaLoguin extends AppCompatActivity {
         });
     }
 
+    /**
+     * Esta tela (TelaLoguin) é exclusiva para usuários comuns — agentes e admins
+     * fazem login em outra tela. Por isso a busca fica restrita a
+     * "logins/usuarios/{uid}"; se o CPF pertencer a um agente/admin (ou não
+     * existir), mostramos uma mensagem clara em vez de falhar silenciosamente.
+     */
     private void buscarDadosUsuarioPorUid(String uidEncontrado, EmailCallback callback) {
         DatabaseReference refUsuario = FirebaseDatabase.getInstance()
                 .getReference("cadastros")
@@ -393,25 +408,11 @@ public class TelaLoguin extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot userSnapshot) {
                 if (userSnapshot.exists()) {
-                    cpf = userSnapshot.child("cpf").getValue(String.class);
-                    nome = userSnapshot.child("nome").getValue(String.class);
-                    email = userSnapshot.child("email").getValue(String.class);
-                    endereco = userSnapshot.child("endereco").getValue(String.class);
-                    num_casa = userSnapshot.child("num_casa").getValue(String.class);
-                    conjunto = userSnapshot.child("conjunto").getValue(String.class);
-                    telefone = userSnapshot.child("telefone").getValue(String.class);
-                    emailPendente = userSnapshot.child("novoEmail").getValue(String.class);
-
-                    Long dataCadastroLong = userSnapshot.child("dataCadastro").getValue(Long.class);
-                    dataCadastro = (dataCadastroLong != null) ? String.valueOf(dataCadastroLong) : null;
-
-                    Long updateAtLong = userSnapshot.child("updateAt").getValue(Long.class);
-                    updateAt = (updateAtLong != null) ? String.valueOf(updateAtLong) : null;
-
+                    preencherDadosUsuario(userSnapshot);
                     callback.onEmailEncontrado(email, nome);
                 } else {
                     hideLoading();
-                    callback.onErro("Dados do usuário não encontrados.");
+                    callback.onErro("Usuário não encontrado. Se você é agente ou administrador, use a tela de login de agentes/admins.");
                 }
             }
 
@@ -421,6 +422,25 @@ public class TelaLoguin extends AppCompatActivity {
                 callback.onErro(error.getMessage());
             }
         });
+    }
+
+    private void preencherDadosUsuario(DataSnapshot userSnapshot) {
+        cpf = userSnapshot.child("cpf").getValue(String.class);
+        nome = userSnapshot.child("nome").getValue(String.class);
+        email = userSnapshot.child("email").getValue(String.class);
+        endereco = userSnapshot.child("endereco").getValue(String.class);
+        num_casa = userSnapshot.child("num_casa").getValue(String.class);
+        conjunto = userSnapshot.child("conjunto").getValue(String.class);
+        telefone = userSnapshot.child("telefone").getValue(String.class);
+        emailPendente = userSnapshot.child("novoEmail").getValue(String.class);
+
+        Long dataCadastroLong = userSnapshot.child("dataCadastro").getValue(Long.class);
+        dataCadastro = (dataCadastroLong != null) ? String.valueOf(dataCadastroLong) : null;
+
+        // ⚠️ o campo gravado no banco é "updatedAt" — a versão antiga lia "updateAt"
+        // (sem o "d") e por isso esse valor nunca era encontrado.
+        Long updateAtLong = userSnapshot.child("updatedAt").getValue(Long.class);
+        updateAt = (updateAtLong != null) ? String.valueOf(updateAtLong) : null;
     }
 
     private String removerPontuacaoCPF(String cpfStr) {
