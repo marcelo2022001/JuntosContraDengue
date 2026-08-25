@@ -42,7 +42,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 public class ActivityLoginAdmin extends AppCompatActivity {
     private androidx.appcompat.app.AlertDialog loadingDialog;
     private  FirebaseAuth mAuth;
-    private  DatabaseReference usersRef;
     private final CompositeDisposable disposables = new CompositeDisposable();
     private boolean isPasswordVisible = false;
     private EditText edt_txt_email_admin, edt_txt_senha_admin, edt_txt_pre_cadastro;
@@ -51,7 +50,8 @@ public class ActivityLoginAdmin extends AppCompatActivity {
     private  String nome_cadastrado, cpf_cadastrado, emailShared;
     private String nome, cpf, email, endereco, num_casa, conjunto, telefone, dataCadastro, updateAt;
     boolean isConnected;
-     String MENSAGEM = "Bem vindo, ";
+    String MENSAGEM = "Bem vindo, ";
+    private FirebaseDatabase databaseMunicipio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +61,6 @@ public class ActivityLoginAdmin extends AppCompatActivity {
         setContentView(loguinAdminBinding.getRoot());
 
         mAuth = FirebaseAuth.getInstance();
-        usersRef = com.google.firebase.database.FirebaseDatabase
-                .getInstance()
-                .getReference("cadastros");
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", "");
@@ -72,6 +69,9 @@ public class ActivityLoginAdmin extends AppCompatActivity {
         SharedPreferences prefsUser = getSharedPreferences("UserData", MODE_PRIVATE);
         emailShared = prefsUser.getString("email", null);
         nome_cadastrado = prefsUser.getString("nome", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         setupToolbar();
         initializeViews();
@@ -133,12 +133,12 @@ public class ActivityLoginAdmin extends AppCompatActivity {
         isConnected = NetworkUtils.isNetworkAvailable(ActivityLoginAdmin.this);
         if (!isConnected) {
             Toast.makeText(ActivityLoginAdmin.this, "Sem conexão de internet! Ative o wifi ou dados móveis!", Toast.LENGTH_SHORT).show();
-       return;
+            return;
         }
 
         String stCpfPreCadastro = edt_txt_pre_cadastro.getText().toString().trim();
         // Limpa máscara do CPF
-         cpfLimpo = stCpfPreCadastro.replaceAll("[.\\-]", "");
+        cpfLimpo = stCpfPreCadastro.replaceAll("[.\\-]", "");
 
 
         if (TextUtils.isEmpty(edt_txt_pre_cadastro.getText().toString().trim())) {
@@ -173,8 +173,7 @@ public class ActivityLoginAdmin extends AppCompatActivity {
     private void continuaCadastro(String cpfLimpo) {
         showLoading();
 
-        DatabaseReference preCadastroRef = usersRef.child(Objects.requireNonNull(estado))
-                .child(Objects.requireNonNull(municipio))
+        DatabaseReference preCadastroRef = databaseMunicipio.getReference()
                 .child("config")
                 .child("pre_cadastro_admins");
 
@@ -195,7 +194,7 @@ public class ActivityLoginAdmin extends AppCompatActivity {
                         hideLoading();
 
                         cpf_cadastrado = edt_txt_pre_cadastro.getText().toString().trim();
-                         nome_cadastrado = snapshot.child("nome_pre_cadastro").getValue(String.class);
+                        nome_cadastrado = snapshot.child("nome_pre_cadastro").getValue(String.class);
 
                         Intent intent = new Intent(ActivityLoginAdmin.this, TelaDeCadastro.class);
                         intent.putExtra("tipo_conta", "admin");
@@ -228,7 +227,7 @@ public class ActivityLoginAdmin extends AppCompatActivity {
     }
     private void buscaCadExiste(CadastroCallback callback) {
         showLoading();
-        usersRef.child(Objects.requireNonNull(estado))
+        databaseMunicipio.getReference().child(Objects.requireNonNull(estado))
                 .child(Objects.requireNonNull(municipio))
                 .child("cpf_index")
                 .child(cpfLimpo)
@@ -257,11 +256,11 @@ public class ActivityLoginAdmin extends AppCompatActivity {
                 });
 
     }
-                    private void sair_pre_cadastro() {
+    private void sair_pre_cadastro() {
 
-                        Intent intent = new Intent(ActivityLoginAdmin.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
+        Intent intent = new Intent(ActivityLoginAdmin.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     private void togglePasswordVisibility() {
@@ -305,7 +304,7 @@ public class ActivityLoginAdmin extends AppCompatActivity {
     private void entrar_conta_admin() {
 
         // Chamada ao método da classe NetworkUtils
-         isConnected = NetworkUtils.isNetworkAvailable(ActivityLoginAdmin.this);
+        isConnected = NetworkUtils.isNetworkAvailable(ActivityLoginAdmin.this);
         if (isConnected) {
             // A conexão está disponível, prossiga com o login
 
@@ -320,7 +319,7 @@ public class ActivityLoginAdmin extends AppCompatActivity {
             } else {
                 loginAdmin();
 
-                    }
+            }
         } else {
             // Exiba uma mensagem de erro ou aviso
             Toast.makeText(ActivityLoginAdmin.this, "Sem conexão de internet! Ative o wifi ou dados móveis!", Toast.LENGTH_SHORT).show();
@@ -412,73 +411,70 @@ public class ActivityLoginAdmin extends AppCompatActivity {
 
     private void buscaDadosUsuario(String emailAdmin, EmailCallback emailCallback) {
 
-            usersRef = FirebaseDatabase.getInstance()
-                    .getReference("cadastros")
-                    .child(estado)
-                    .child(municipio)
-                    .child("logins")
-                    .child("admins");
+        DatabaseReference usersRef = databaseMunicipio.getReference()
+                .child("logins")
+                .child("admins");
 
-            // 1ª Tentativa: Busca pelo campo "email" tradicional
-            Query queryEmail = usersRef.orderByChild("email").equalTo(emailAdmin);
+        // 1ª Tentativa: Busca pelo campo "email" tradicional
+        Query queryEmail = usersRef.orderByChild("email").equalTo(emailAdmin);
 
-            queryEmail.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        processarDadosUsuario(snapshot, emailCallback);
-                    } else {
-                        // 2ª Tentativa: Se não achou pelo email, busca pelo "novoEmail"
-                        Query queryNovoEmail = usersRef.orderByChild("novoEmail").equalTo(emailAdmin);
+        queryEmail.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    processarDadosUsuario(snapshot, emailCallback);
+                } else {
+                    // 2ª Tentativa: Se não achou pelo email, busca pelo "novoEmail"
+                    Query queryNovoEmail = usersRef.orderByChild("novoEmail").equalTo(emailAdmin);
 
-                        queryNovoEmail.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshotNovo) {
-                                if (snapshotNovo.exists()) {
-                                    // Se encontrou pelo novo email, atualiza o banco principal para efetivar a troca
-                                    for (DataSnapshot userSnapshot : snapshotNovo.getChildren()) {
-                                        String uidEncontrado = userSnapshot.getKey();
-                                        if (uidEncontrado != null) {
+                    queryNovoEmail.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshotNovo) {
+                            if (snapshotNovo.exists()) {
+                                // Se encontrou pelo novo email, atualiza o banco principal para efetivar a troca
+                                for (DataSnapshot userSnapshot : snapshotNovo.getChildren()) {
+                                    String uidEncontrado = userSnapshot.getKey();
+                                    if (uidEncontrado != null) {
 
-                                            // 1. Efetiva a troca no banco: o email principal vira o emailBuscado e limpa o pendente (novoEmail = null)
-                                            Map<String, Object> atualizacao = new HashMap<>();
-                                            atualizacao.put("email", emailAdmin);
-                                            atualizacao.put("novoEmail", null);
+                                        // 1. Efetiva a troca no banco: o email principal vira o emailBuscado e limpa o pendente (novoEmail = null)
+                                        Map<String, Object> atualizacao = new HashMap<>();
+                                        atualizacao.put("email", emailAdmin);
+                                        atualizacao.put("novoEmail", null);
 
-                                            // Aplica a atualização diretamente no nó do usuário encontrado
-                                            usersRef.child(uidEncontrado).updateChildren(atualizacao);
+                                        // Aplica a atualização diretamente no nó do usuário encontrado
+                                        usersRef.child(uidEncontrado).updateChildren(atualizacao);
 
-                                            // 2. Atualiza localmente no SharedPreferences o novo email
-                                            SharedPreferences pref = getSharedPreferences("UserData", MODE_PRIVATE);
-                                            SharedPreferences.Editor editor = pref.edit();
-                                            editor.putString("email", emailAdmin);
-                                            editor.putString("updateAt", updateAt);
-                                            editor.apply();
-                                        }
+                                        // 2. Atualiza localmente no SharedPreferences o novo email
+                                        SharedPreferences pref = getSharedPreferences("UserData", MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = pref.edit();
+                                        editor.putString("email", emailAdmin);
+                                        editor.putString("updateAt", updateAt);
+                                        editor.apply();
                                     }
-                                    processarDadosUsuario(snapshotNovo, emailCallback);
-                                } else {
-                                    hideLoading();
-                                    emailCallback.onErro("Usuário não encontrado na base de dados.");
                                 }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
+                                processarDadosUsuario(snapshotNovo, emailCallback);
+                            } else {
                                 hideLoading();
-                                emailCallback.onErro(error.getMessage());
+                                emailCallback.onErro("Usuário não encontrado na base de dados.");
                             }
-                        });
-                    }
-                }
+                        }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    hideLoading();
-                    emailCallback.onErro(error.getMessage());
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            hideLoading();
+                            emailCallback.onErro(error.getMessage());
+                        }
+                    });
                 }
-            });
-        }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                hideLoading();
+                emailCallback.onErro(error.getMessage());
+            }
+        });
+    }
 
 
     private void irParaActivityPrincipal(String nomeOpcional) {

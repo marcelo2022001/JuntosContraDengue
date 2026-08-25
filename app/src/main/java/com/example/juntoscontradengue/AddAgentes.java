@@ -47,6 +47,8 @@ public class AddAgentes extends AppCompatActivity {
     Boolean autoriza_uso_imagem, radioButtomsel = false;
     Long totalAdminPodeCadastrar, totalAgentePodeCadastrar;
     private String sFuncao_agente = ""; // agente ou admin
+    private FirebaseDatabase databaseMunicipio;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,10 @@ public class AddAgentes extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
 
         edtCpfAgenteCad = findViewById(R.id.edtCpfCadAgentes);
         edtCpfAgenteCad.addTextChangedListener(MaskEditUtil.mask(MaskEditUtil.FORMAT_CPF));
@@ -170,9 +176,9 @@ public class AddAgentes extends AppCompatActivity {
 
     private void verificarPossibilidadeNovoCadastroAdmin() {
 
-            String pathConfig = "cadastros/" + estado + "/" + municipio + "/config/total_admins";
+            String pathConfig = "/config/total_admins";
 
-            FirebaseDatabase.getInstance().getReference(pathConfig)
+            databaseMunicipio.getReference(pathConfig)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -192,9 +198,9 @@ public class AddAgentes extends AppCompatActivity {
 
     private void verificarPossibilidadeNovoCadastroAgentes() {
 
-            String pathConfig = "cadastros/" + estado + "/" + municipio + "/config/total_agentes";
+            String pathConfig = "/config/total_agentes";
 
-            FirebaseDatabase.getInstance().getReference(pathConfig)
+        databaseMunicipio.getReference(pathConfig)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -332,9 +338,7 @@ public class AddAgentes extends AppCompatActivity {
         }
 
 
-        FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        databaseMunicipio.getReference()
                 .child("config")
                 .child(db_salvar_pre_cadastro)
                 .child(sCpf)
@@ -371,9 +375,7 @@ public class AddAgentes extends AppCompatActivity {
 
     private void verificaOutroPreCadastro(CadastroCallback callback) {
 
-        FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        databaseMunicipio.getReference()
                 .child("config")
                 .child(verifica_outro_pre_cadastro)
                 .child(sCpf)
@@ -467,10 +469,7 @@ public class AddAgentes extends AppCompatActivity {
         DateTimeSaver dateSaver = new DateTimeSaver();
         data_atual = dateSaver.saveCurrentDateTime();
 
-        DatabaseReference userRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference userRef = databaseMunicipio.getReference()
                 .child("config")
                 .child(db_salvar_pre_cadastro)
                 .child(sCpf);
@@ -503,10 +502,10 @@ public class AddAgentes extends AppCompatActivity {
 
     private void decrementarContador() {
 
-        DatabaseReference configRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
+        DatabaseReference configRef = databaseMunicipio.getReference()
                 .child("config")
                 .child(decrementarOnde);
 

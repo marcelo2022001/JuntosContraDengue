@@ -66,6 +66,9 @@ public class ActivityVisualizarDenunciasUsuario extends AppCompatActivity {
         String estado = prefs.getString("estado", null);
         String municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
         Button visualizar_resposta_reclamacao = bindingUsers.btnVisualizarRespostaReclamacao;
 
         if(!(status_reclamacao == null && status_reclamacao.isEmpty())) {
@@ -105,9 +108,7 @@ public class ActivityVisualizarDenunciasUsuario extends AppCompatActivity {
         assert estado != null;
         assert municipio != null;
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        databaseReference = databaseMunicipio.getReference()
                 .child("reclamacoes")
                 .child(uuid)
                 .child(id);

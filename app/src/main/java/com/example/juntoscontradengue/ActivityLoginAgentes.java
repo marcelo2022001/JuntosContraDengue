@@ -44,7 +44,7 @@ public class ActivityLoginAgentes extends AppCompatActivity {
 
     private androidx.appcompat.app.AlertDialog loadingDialog;
     private FirebaseAuth mAuth;
-    private DatabaseReference usersRef;
+    private FirebaseDatabase databaseMunicipio;
     private final CompositeDisposable disposables = new CompositeDisposable();
     private boolean isPasswordVisible = false;
     private EditText edt_txt_email_agente, edt_txt_senha_agente, edt_txt_pre_cadastro;
@@ -64,9 +64,6 @@ public class ActivityLoginAgentes extends AppCompatActivity {
         setContentView(loguinAgentesBinding.getRoot());
 
         mAuth = FirebaseAuth.getInstance();
-        usersRef = com.google.firebase.database.FirebaseDatabase
-                .getInstance()
-                .getReference("cadastros");
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", null);
@@ -74,6 +71,9 @@ public class ActivityLoginAgentes extends AppCompatActivity {
 
         SharedPreferences prefsUser = getSharedPreferences("UserData", MODE_PRIVATE);
         emailSharedPrefers = prefsUser.getString("email", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         setupToolbar();
         initializeViews();
@@ -167,8 +167,7 @@ public class ActivityLoginAgentes extends AppCompatActivity {
 
     private void buscaCadExiste(CadastroCallback callback) {
         showLoading();
-        usersRef.child(Objects.requireNonNull(estado))
-                .child(Objects.requireNonNull(municipio))
+        databaseMunicipio.getReference()
                 .child("cpf_index")
                 .child(cpfLimpo)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -202,8 +201,7 @@ public class ActivityLoginAgentes extends AppCompatActivity {
             showLoading();
 
             // Primeiro, vamos verificar se o nó pre_cadastro_admins existe
-            DatabaseReference preCadastroRef = usersRef.child(Objects.requireNonNull(estado))
-                    .child(Objects.requireNonNull(municipio))
+        DatabaseReference preCadastroRef = databaseMunicipio.getReference()
                     .child("config")
                     .child("pre_cadastro_agentes");
 
@@ -463,10 +461,7 @@ public class ActivityLoginAgentes extends AppCompatActivity {
     }
     private void buscaDadosUsuario(String emailAgente, EmailCallback emailCallback) {
 
-        usersRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference usersRef = databaseMunicipio.getReference()
                 .child("logins")
                 .child("agentes");
 
