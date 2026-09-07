@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.juntoscontradengue.R;
 import com.example.juntoscontradengue.VisualizarDenunciasAgentes;
-import com.example.juntoscontradengue.database.classes_database.ClassReclamacoes;
+import com.example.juntoscontradengue.database.classes_database.ClassReclamacoesAdminsAgentes;
 import com.example.juntoscontradengue.extras.DateUtilsApp;
 import com.google.android.material.card.MaterialCardView;
 
@@ -35,10 +35,10 @@ public class AdapterReclamacaoAdmins
     private final Set<String> selectedIds = new HashSet<>();
     private final OnSelectionChangedListener selectionChangedListener;
 
-    private final List<ClassReclamacoes> listaOriginal = new ArrayList<>();
-    private final List<ClassReclamacoes> listaFiltrada = new ArrayList<>();
+    private final List<ClassReclamacoesAdminsAgentes> listaOriginal = new ArrayList<>();
+    private final List<ClassReclamacoesAdminsAgentes> listaFiltrada = new ArrayList<>();
 
-    public AdapterReclamacaoAdmins(List<ClassReclamacoes> lista,
+    public AdapterReclamacaoAdmins(List<ClassReclamacoesAdminsAgentes> lista,
                                     OnSelectionChangedListener selectionChangedListener) {
         listaOriginal.addAll(lista);
         listaFiltrada.addAll(lista);
@@ -47,7 +47,7 @@ public class AdapterReclamacaoAdmins
 
     // ================= UPDATE =================
 
-    public void updateList(List<ClassReclamacoes> novaLista) {
+    public void updateList(List<ClassReclamacoesAdminsAgentes> novaLista) {
         listaOriginal.clear();
         listaOriginal.addAll(novaLista);
 
@@ -58,13 +58,13 @@ public class AdapterReclamacaoAdmins
 
     public void filtrarPorStatus(String status) {
 
-        List<ClassReclamacoes> novaListaFiltrada = new ArrayList<>();
+        List<ClassReclamacoesAdminsAgentes> novaListaFiltrada = new ArrayList<>();
 
         if (status.equalsIgnoreCase("Todos")) {
             novaListaFiltrada.addAll(listaOriginal);
         } else {
 
-            for (ClassReclamacoes r : listaOriginal) {
+            for (ClassReclamacoesAdminsAgentes r : listaOriginal) {
 
                 if (r.getStatus() != null &&
                         r.getStatus().equalsIgnoreCase(status)) {
@@ -100,7 +100,7 @@ public class AdapterReclamacaoAdmins
         if (selectedIds.isEmpty()) return;
 
         for (int i = 0; i < listaFiltrada.size(); i++) {
-            ClassReclamacoes item = listaFiltrada.get(i);
+            ClassReclamacoesAdminsAgentes item = listaFiltrada.get(i);
             if (item.getIdReclamacao() != null && selectedIds.contains(item.getIdReclamacao())) {
                 notifyItemChanged(i);
             }
@@ -114,9 +114,9 @@ public class AdapterReclamacaoAdmins
     }
 
     /** Retorna os itens selecionados (para depois gravar visivel_agente: false no Firebase). */
-    public List<ClassReclamacoes> getSelectedItems() {
-        List<ClassReclamacoes> selecionados = new ArrayList<>();
-        for (ClassReclamacoes item : listaFiltrada) {
+    public List<ClassReclamacoesAdminsAgentes> getSelectedItems() {
+        List<ClassReclamacoesAdminsAgentes> selecionados = new ArrayList<>();
+        for (ClassReclamacoesAdminsAgentes item : listaFiltrada) {
             if (item.getIdReclamacao() != null && selectedIds.contains(item.getIdReclamacao())) {
                 selecionados.add(item);
             }
@@ -126,7 +126,7 @@ public class AdapterReclamacaoAdmins
 
     // ================= DIFFUTIL =================
 
-    private void atualizarListaFiltrada(List<ClassReclamacoes> novaListaFiltrada) {
+    private void atualizarListaFiltrada(List<ClassReclamacoesAdminsAgentes> novaListaFiltrada) {
 
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
             @Override
@@ -147,8 +147,8 @@ public class AdapterReclamacaoAdmins
 
             @Override
             public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                ClassReclamacoes oldItem = listaFiltrada.get(oldItemPosition);
-                ClassReclamacoes newItem = novaListaFiltrada.get(newItemPosition);
+                ClassReclamacoesAdminsAgentes oldItem = listaFiltrada.get(oldItemPosition);
+                ClassReclamacoesAdminsAgentes newItem = novaListaFiltrada.get(newItemPosition);
 
                 boolean statusIguais = oldItem.getStatus() != null
                         && oldItem.getStatus().equals(newItem.getStatus());
@@ -164,7 +164,7 @@ public class AdapterReclamacaoAdmins
         // Remove da seleção qualquer item que tenha saído da lista filtrada
         // (ex.: já foi ocultado e o snapshot do Firebase atualizou a tela)
         Set<String> idsAtuais = new HashSet<>();
-        for (ClassReclamacoes item : novaListaFiltrada) {
+        for (ClassReclamacoesAdminsAgentes item : novaListaFiltrada) {
             if (item.getIdReclamacao() != null) idsAtuais.add(item.getIdReclamacao());
         }
         boolean selecaoMudou = selectedIds.retainAll(idsAtuais);
@@ -187,14 +187,14 @@ public class AdapterReclamacaoAdmins
             int viewType) {
 
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.recycler_reclamacoes_agentes, parent, false);
+                .inflate(R.layout.recycler_reclamacoes_admin, parent, false);
 
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ClassReclamacoes r = listaFiltrada.get(position);
+        ClassReclamacoesAdminsAgentes r = listaFiltrada.get(position);
 
         holder.data.setText(DateUtilsApp.ConverteDataTimeStampLegivel(r.getData_envio()));
         holder.reclamacao.setText(r.getReclamacao());
@@ -205,9 +205,11 @@ public class AdapterReclamacaoAdmins
         String respondido = r.getRespondida_por();
         if (!TextUtils.isEmpty(respondido)) {
             holder.viewRespondido_por.setVisibility(View.VISIBLE);
+            holder.respondido_por.setVisibility(View.VISIBLE);
             holder.respondido_por.setText(respondido);
         } else {
             holder.viewRespondido_por.setVisibility(View.GONE);
+            holder.respondido_por.setVisibility(View.GONE);
         }
 
         // Cor SEMPRE pelo status — independente de seleção

@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.juntoscontradengue.database.adapters.AdapterReclamacaoUsuarios;
-import com.example.juntoscontradengue.database.classes_database.ClassListarReclamacoes;
+import com.example.juntoscontradengue.database.classes_database.ClassListarReclamacoesUsuarios;
 import com.example.juntoscontradengue.databinding.ActivityReclamacoesUsuariosBinding;
 import com.example.juntoscontradengue.extras.NetworkUtils;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,7 +33,7 @@ import java.util.Objects;
 
 public class ListarReclamacoesUsuarios extends AppCompatActivity {
 
-    ArrayList<ClassListarReclamacoes> listClassReclamacoes;
+    ArrayList<ClassListarReclamacoesUsuarios> listClassReclamacoes;
     AdapterReclamacaoUsuarios adapterReclamacaoUsuarios;
     String uid, estado, municipio;
     DatabaseReference databaseReference;
@@ -49,6 +49,8 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         ActivityReclamacoesUsuariosBinding bindingUsers = ActivityReclamacoesUsuariosBinding.inflate(getLayoutInflater());
          setContentView(bindingUsers.getRoot());
@@ -99,11 +101,7 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
         recyclerViewReclamacoes.setAdapter(adapterReclamacaoUsuarios);
 
         // Initialize database reference
-        databaseReference = FirebaseDatabase
-                .getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        databaseReference = databaseMunicipio.getReference()
                 .child("reclamacoes")
                 .child(uid);
 
@@ -112,7 +110,7 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 try {
-                    ClassListarReclamacoes complaint = snapshot.getValue(ClassListarReclamacoes.class);
+                    ClassListarReclamacoesUsuarios complaint = snapshot.getValue(ClassListarReclamacoesUsuarios.class);
                     if (complaint != null) {
                         imageViewSemReclamacao.setVisibility(View.GONE);
                         btnFazerReclamacao.setVisibility(View.GONE);
@@ -127,7 +125,7 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
 
                     // Handle string values by creating a basic complaint
                     if (snapshot.getValue() instanceof String) {
-                        ClassListarReclamacoes tempComplaint = new ClassListarReclamacoes();
+                        ClassListarReclamacoesUsuarios tempComplaint = new ClassListarReclamacoesUsuarios();
                         tempComplaint.setIdReclamacao(snapshot.getKey());
                         tempComplaint.setReclamacao(snapshot.getValue(String.class));
                         tempComplaint.setStatus("Pending");
@@ -140,7 +138,7 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 try {
-                    ClassListarReclamacoes complaint = snapshot.getValue(ClassListarReclamacoes.class);
+                    ClassListarReclamacoesUsuarios complaint = snapshot.getValue(ClassListarReclamacoesUsuarios.class);
                     if (complaint != null) {
                         imageViewSemReclamacao.setVisibility(View.GONE);
                         btnFazerReclamacao.setVisibility(View.GONE);

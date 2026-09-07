@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.juntoscontradengue.ActivityVisualizarDenunciasUsuario;
 import com.example.juntoscontradengue.R;
-import com.example.juntoscontradengue.database.classes_database.ClassListarReclamacoes;
+import com.example.juntoscontradengue.database.classes_database.ClassListarReclamacoesUsuarios;
 import com.example.juntoscontradengue.extras.DateUtilsApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,9 +33,9 @@ import java.util.ArrayList;
 public class AdapterReclamacaoUsuarios extends RecyclerView.Adapter<AdapterReclamacaoUsuarios.MyViewHolder> {
 
     // CORREÇÃO: Use uma lista simples de objetos, não ArrayList<ArrayList<...>>
-    private final ArrayList<ClassListarReclamacoes> listaReclamacoes;
+    private final ArrayList<ClassListarReclamacoesUsuarios> listaReclamacoes;
 
-    public AdapterReclamacaoUsuarios(ArrayList<ClassListarReclamacoes> listaReclamacoes) {
+    public AdapterReclamacaoUsuarios(ArrayList<ClassListarReclamacoesUsuarios> listaReclamacoes) {
         this.listaReclamacoes = listaReclamacoes;
     }
 
@@ -48,7 +48,7 @@ public class AdapterReclamacaoUsuarios extends RecyclerView.Adapter<AdapterRecla
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        ClassListarReclamacoes objetoReclamacao = listaReclamacoes.get(position);
+        ClassListarReclamacoesUsuarios objetoReclamacao = listaReclamacoes.get(position);
 String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData_envio());
 
         holder.data_reclamacao.setText(DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData_envio()));
@@ -77,21 +77,8 @@ String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData
 
         holder.abrir_reclamacao.setOnClickListener(v -> {
 
-            if (opcaoStatus.equals("Aguardando Resposta")){
-                Toast.makeText(v.getContext(), "Aguarde a avaliação. Obrigado!", Toast.LENGTH_LONG).show();
-            return;
-            }
-
             Context context = v.getContext();
-            Intent intent = new Intent(context, ActivityVisualizarDenunciasUsuario.class);
-
-            // Adicione esta flag se o context não for uma Activity (comum em Adapters)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            intent.putExtra("ID", objetoReclamacao.getIdReclamacao());
-            intent.putExtra("UUID", objetoReclamacao.getUid());
-            intent.putExtra("STATUS_RECLAMACAO", objetoReclamacao.getStatus());
-            intent.putExtra("RESPONDIDO_POR", objetoReclamacao.getRespondida_por());
+            Intent intent = getIntent(context, objetoReclamacao);
 
 
             // 4. Iniciar a activity
@@ -133,12 +120,25 @@ String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData
         });
     }
 
+    private static Intent getIntent(Context context, ClassListarReclamacoesUsuarios objetoReclamacao) {
+        Intent intent = new Intent(context, ActivityVisualizarDenunciasUsuario.class);
+
+        // Adicione esta flag se o context não for uma Activity (comum em Adapters)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        intent.putExtra("ID", objetoReclamacao.getIdReclamacao());
+        intent.putExtra("UUID", objetoReclamacao.getUid());
+        intent.putExtra("STATUS_RECLAMACAO", objetoReclamacao.getStatus());
+        intent.putExtra("RESPONDIDO_POR", objetoReclamacao.getRespondida_por());
+        return intent;
+    }
+
     @Override
     public int getItemCount() {
         return listaReclamacoes.size();
     }
 
-    private void excluirReclamacao(View view, ClassListarReclamacoes reclamacao,  MyViewHolder holder) {
+    private void excluirReclamacao(View view, ClassListarReclamacoesUsuarios reclamacao, MyViewHolder holder) {
         Context context = view.getContext();
         new AlertDialog.Builder(context)
                 .setTitle("Excluir Reclamação")

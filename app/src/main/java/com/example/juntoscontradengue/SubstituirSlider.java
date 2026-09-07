@@ -48,7 +48,7 @@ public class SubstituirSlider extends AppCompatActivity {
     String photoUrl, id_slider, estado, municipio;
     private Uri imageUri;
     final private StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-
+    private FirebaseDatabase databaseMunicipio;
     ActivitySubstituirSliderBinding activitySubstituirSliderBinding;
 
     @Override
@@ -85,6 +85,9 @@ public class SubstituirSlider extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         Log.d("SUBSTITUIR_SLIDER", "Estado: " + estado + ", Município: " + municipio);
 
@@ -245,13 +248,8 @@ public class SubstituirSlider extends AppCompatActivity {
                         String downloadUrl = downloadUri.toString();
                         Log.d("SUBSTITUIR_SLIDER", "Nova URL: " + downloadUrl);
 
-                        DatabaseReference ref = FirebaseDatabase.getInstance()
-                                .getReference("cadastros")
-                                .child(estado)
-                                .child(municipio)
-                                .child("config")
-                                .child("sliders_main")
-                                .child(id_slider);
+                        DatabaseReference ref = databaseMunicipio
+                                .getReference("config/sliders_main/" + id_slider);
 
                                     // Atualiza também o campo url_imagem
                                     ref.child(fieldName).setValue(downloadUrl)

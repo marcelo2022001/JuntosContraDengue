@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.juntoscontradengue.database.adapters.AdapterReclamacaoAdmins;
-import com.example.juntoscontradengue.database.classes_database.ClassReclamacoes;
+import com.example.juntoscontradengue.database.classes_database.ClassReclamacoesAdminsAgentes;
 import com.example.juntoscontradengue.databinding.ActivityVerificarReclamacoesAdminsBinding;
 import com.example.juntoscontradengue.extras.NetworkUtils;
 import com.google.firebase.database.DataSnapshot;
@@ -40,12 +40,10 @@ public class ListarReclamacoesAdmins extends AppCompatActivity
     private @NonNull ActivityVerificarReclamacoesAdminsBinding binding;
     private AdapterReclamacaoAdmins adapter;
     private Boolean isAdmin = false;
-    private final List<ClassReclamacoes> listaCompleta = new ArrayList<>();
-
+    private final List<ClassReclamacoesAdminsAgentes> listaCompleta = new ArrayList<>();
+    private FirebaseDatabase databaseMunicipio;
     // TextView
     TextView txtTotal, txtRespondidas, txtAguardandoUsuarioAvaliar, txtAguardandoResposta, txtResolvidas, txtNaoResolvidas;
-
-    private String estado, municipio;
 
     Boolean isConnected;
 
@@ -60,6 +58,10 @@ public class ListarReclamacoesAdmins extends AppCompatActivity
     int naoResolvidas = 0;
     int aguardando = 0;
 
+    public ListarReclamacoesAdmins() {
+        binding = null;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,8 +70,12 @@ public class ListarReclamacoesAdmins extends AppCompatActivity
         setContentView(binding.getRoot());
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
-        estado = prefs.getString("estado", "");
-        municipio = prefs.getString("municipio", "");
+        String estado = prefs.getString("estado", "");
+        String municipio = prefs.getString("municipio", "");
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
 
         SharedPreferences prefUser = getSharedPreferences("UserData", MODE_PRIVATE);
         String perfil = prefUser.getString("perfil", "");
@@ -141,12 +147,12 @@ public class ListarReclamacoesAdmins extends AppCompatActivity
             return;
         }
 
-        List<ClassReclamacoes> selecionadas = adapter.getSelectedItems();
+        List<ClassReclamacoesAdminsAgentes> selecionadas = adapter.getSelectedItems();
         if (selecionadas.isEmpty()) return;
 
-        List<ClassReclamacoes> elegiveis = new ArrayList<>();
+        List<ClassReclamacoesAdminsAgentes> elegiveis = new ArrayList<>();
         int ignoradas = 0;
-        for (ClassReclamacoes r : selecionadas) {
+        for (ClassReclamacoesAdminsAgentes r : selecionadas) {
             String status = r.getStatus() == null ? "" : r.getStatus().trim();
             if (status.equalsIgnoreCase("Resolvido") || status.equalsIgnoreCase("Não Resolvido")) {
                 elegiveis.add(r);
@@ -177,16 +183,13 @@ public class ListarReclamacoesAdmins extends AppCompatActivity
      * Não exclui a reclamação do banco: apenas marca visivel_agente = false
      * em cadastros/{estado}/{municipio}/reclamacoes/{idUsuario}/{idReclamacao}.
      */
-    private void ocultarReclamacoesSelecionadas(List<ClassReclamacoes> selecionadas) {
+    private void ocultarReclamacoesSelecionadas(List<ClassReclamacoesAdminsAgentes> selecionadas) {
 
-        DatabaseReference ref = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference ref = databaseMunicipio.getReference()
                 .child("reclamacoes");
 
         Map<String, Object> updates = new HashMap<>();
-        for (ClassReclamacoes r : selecionadas) {
+        for (ClassReclamacoesAdminsAgentes r : selecionadas) {
             if (r.getIdUsuario() == null || r.getIdReclamacao() == null) continue;
             updates.put(r.getIdUsuario() + "/" + r.getIdReclamacao() + "/visivel_agente", false);
         }
@@ -215,11 +218,11 @@ public class ListarReclamacoesAdmins extends AppCompatActivity
         txtNaoResolvidas = binding.txtNaoResolvidas;
 
         // ✅ Inicializa com valores padrão
-        txtTotal.setText("@string/total_de_reclamacoes");
-        txtRespondidas.setText("@string/reclamacoes_respondidas");
-        txtAguardandoResposta.setText("@string/aguardando_resposta");
-        txtResolvidas.setText("@string/resolvidas");
-        txtNaoResolvidas.setText("@string/nao_resolvidas");
+        txtTotal.setText(R.string.total_de_reclamacoes);
+        txtRespondidas.setText(R.string.reclamacoes_respondidas);
+        txtAguardandoResposta.setText(R.string.aguardando_resposta);
+        txtResolvidas.setText(R.string.resolvidas);
+        txtNaoResolvidas.setText(R.string.nao_resolvidas);
     }
 
     // ================= RECYCLER =================
@@ -255,13 +258,10 @@ public class ListarReclamacoesAdmins extends AppCompatActivity
     // ================= FIREBASE =================
 
     private void carregarReclamacoes() {
-        DatabaseReference ref = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference dbRef = databaseMunicipio.getReference()
                 .child("reclamacoes");
 
-        ref.addValueEventListener(new ValueEventListener() {
+        dbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 listaCompleta.clear();
@@ -270,10 +270,11 @@ public class ListarReclamacoesAdmins extends AppCompatActivity
                     String idUsuario = usuarioSnap.getKey();
 
                     for (DataSnapshot reclamacaoSnap : usuarioSnap.getChildren()) {
-                        ClassReclamacoes reclamacao =
-                                reclamacaoSnap.getValue(ClassReclamacoes.class);
+                        ClassReclamacoesAdminsAgentes reclamacao =
+                                reclamacaoSnap.getValue(ClassReclamacoesAdminsAgentes.class);
 
-                        // ❌ Reclamação ocultada pelo agente (visivel_agente: false) não entra na lista
+                        // ❌ Reclamação ocultada
+                        // (visivel_agente: false) não entra na lista
                         if (reclamacao != null && !reclamacao.isVisivelAgente()) {
                             continue;
                         }
@@ -319,7 +320,7 @@ public class ListarReclamacoesAdmins extends AppCompatActivity
         naoResolvidas = 0;
         aguardando = 0;
 
-        for (ClassReclamacoes r : listaCompleta) {
+        for (ClassReclamacoesAdminsAgentes r : listaCompleta) {
             String status = r.getStatus();
 
             if (status == null || status.isEmpty()) {
@@ -350,12 +351,13 @@ public class ListarReclamacoesAdmins extends AppCompatActivity
         int total_respondidas = total - aguardando;
 
         // ✅ Atualiza as TextView
-        txtTotal.setText(String.format("Total de reclamações: %d", total));
-        txtRespondidas.setText("Reclamações respondidas: " + total_respondidas);
-        txtAguardandoUsuarioAvaliar.setText("Respondido/Aguardando usuário avaliar: " + respondidas);
-        txtAguardandoResposta.setText("Aguardando resposta: " + aguardando);
-        txtResolvidas.setText("Resolvidas: " + resolvidas);
-        txtNaoResolvidas.setText("Não resolvidas: " + naoResolvidas);
+
+        txtTotal.setText(getString(R.string.total_de_reclamacoes_contagem, total));
+        txtRespondidas.setText(getString(R.string.reclamacoes_respondidas_contagem, total_respondidas));
+        txtAguardandoUsuarioAvaliar.setText(getString(R.string.aguardando_avaliacao_usuario_contagem, respondidas));
+        txtAguardandoResposta.setText(getString(R.string.aguardando_resposta_contagem, aguardando));
+        txtResolvidas.setText(getString(R.string.resolvidas_contagem, resolvidas));
+        txtNaoResolvidas.setText(getString(R.string.nao_resolvidas_contagem, naoResolvidas));
 
     }
 }

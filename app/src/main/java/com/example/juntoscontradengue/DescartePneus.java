@@ -54,18 +54,12 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
     private TextView textView;
     private WebView webView;
     private RecyclerView recyclerView;
-    private FirebaseDatabase database;
     private AdapterResiduosPneus adapterResiduosPneus;
-
-    private final List<ClassDescarteConsciente> descarteConcienteList = new ArrayList<>();
+    private final List<ClassDescarteConsciente> descarteConscienteList = new ArrayList<>();
     private final Map<String, Integer> itemPositionMap = new HashMap<>();
-
     private ChildEventListener childEventListener;
-    private DatabaseReference databaseReference;
-
     private ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
-
     private boolean redirecionadoSemInternet = false;
     private String estado, municipio;
 
@@ -90,8 +84,6 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
         webView = binding.wvDescartePneus;
         recyclerView = binding.rvDescartePneus;
 
-        database = FirebaseDatabase.getInstance();
-
         setupWebView();
         atualizarBannerOffline();
         loadContent();
@@ -110,14 +102,29 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
         getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
     }
 
+    // ============= MÉTODO AUXILIAR PARA URL =============
+    private String getDatabaseUrl() {
+        if (estado == null || estado.isEmpty() || estado.equals("default")) {
+            return "https://juntos-contra-dengue-default-rtdb.firebaseio.com/";
+        } else {
+            return "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        }
+    }
+
+    private DatabaseReference getDatabaseReference() {
+        String urlBanco = getDatabaseUrl();
+        Log.d(TAG, "Usando banco: " + urlBanco);
+        return FirebaseDatabase.getInstance(urlBanco).getReference();
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         registrarNetworkCallback();
 
-        int previousSize = descarteConcienteList.size();
+        int previousSize = descarteConscienteList.size();
         if (previousSize > 0) {
-            descarteConcienteList.clear();
+            descarteConscienteList.clear();
             itemPositionMap.clear();
             if (adapterResiduosPneus != null) {
                 adapterResiduosPneus.notifyItemRangeRemoved(0, previousSize);
@@ -131,8 +138,9 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
     protected void onStop() {
         super.onStop();
         removerNetworkCallback();
-        if (childEventListener != null && databaseReference != null) {
-            databaseReference.removeEventListener(childEventListener);
+        if (childEventListener != null) {
+            DatabaseReference dbRef = getDatabaseReference().child("descarte_Pneus");
+            dbRef.removeEventListener(childEventListener);
         }
     }
 
@@ -179,7 +187,7 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
 
     private void inciarRecyclerViewDescarteConsciente() {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapterResiduosPneus = new AdapterResiduosPneus(this, descarteConcienteList, this);
+        adapterResiduosPneus = new AdapterResiduosPneus(this, descarteConscienteList, this);
         recyclerView.setAdapter(adapterResiduosPneus);
     }
 
@@ -221,8 +229,10 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
     }
 
     private void loadContent() {
-        DatabaseReference htmlReference = database.getReference("config_app_material_educativo")
-                .child("pneus") // ou "pneus", conforme a tela
+        // USA O BANCO PADRÃO PARA CONFIGURAÇÕES
+        DatabaseReference htmlReference = FirebaseDatabase.getInstance()
+                .getReference("config_app_material_educativo")
+                .child("pneus")
                 .child("html_content");
 
         htmlReference.keepSynced(true);
@@ -237,8 +247,6 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
             }
         };
 
-        // Só ativa o timeout se já sabemos que está offline.
-        // Se tiver internet, o Firebase deve responder (dado ou erro) rapidamente.
         if (!NetworkUtils.isNetworkAvailable(this)) {
             handler.postDelayed(timeoutRunnable, TIMEOUT_SEM_CACHE_MS);
         }
@@ -246,13 +254,13 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
         htmlReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (respondido[0]) return; // timeout já disparou, ignora resposta tardia
+                if (respondido[0]) return;
                 respondido[0] = true;
                 handler.removeCallbacks(timeoutRunnable);
 
                 String html = snapshot.getValue(String.class);
                 if (html != null && !html.isEmpty()) {
-                    atualizarBannerOffline(); // garante que o banner reflita o estado real da rede no momento da exibição
+                    atualizarBannerOffline();
                     webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
                 } else {
                     mostrarAvisoSemConteudo();
@@ -273,15 +281,15 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
     private void mostrarAvisoSemConteudo() {
         webView.setVisibility(View.GONE);
         Intent intent = new Intent(DescartePneus.this, SemInternetActivity.class);
-        intent.putExtra("id_activity", "descarte_pneus_eletronicos");
+        intent.putExtra("id_activity", "descarte_pneus_Pneus");
         startActivity(intent);
         finish();
     }
 
-
     private void recarregarOuvinte() {
-        if (databaseReference != null && childEventListener != null) {
-            databaseReference.removeEventListener(childEventListener);
+        if (childEventListener != null) {
+            DatabaseReference dbRef = getDatabaseReference().child("descarte_Pneus");
+            dbRef.removeEventListener(childEventListener);
         }
         redirecionadoSemInternet = false;
         ouvinte();
@@ -293,13 +301,9 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
             return;
         }
 
-        databaseReference = database.getReference()
-                .child("cadastros")
-                .child(estado.toLowerCase())
-                .child(municipio.toLowerCase())
-                .child("descarte_pneus");
-
-        databaseReference.keepSynced(true);
+        // USA O MÉTODO getDatabaseReference() QUE CONSTRÓI A URL CORRETA
+        DatabaseReference dbRef = getDatabaseReference().child("descarte_Pneus");
+        dbRef.keepSynced(true);
 
         childEventListener = new ChildEventListener() {
             @Override
@@ -318,18 +322,18 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
                         }
                     }
 
-                    if (position > descarteConcienteList.size()) {
-                        position = descarteConcienteList.size();
+                    if (position > descarteConscienteList.size()) {
+                        position = descarteConscienteList.size();
                     }
 
-                    descarteConcienteList.add(position, descarteConsciente);
+                    descarteConscienteList.add(position, descarteConsciente);
                     updatePositionMapFrom(position);
 
                     if (adapterResiduosPneus != null) {
                         adapterResiduosPneus.notifyItemInserted(position);
                     }
 
-                    if (!descarteConcienteList.isEmpty()) {
+                    if (!descarteConscienteList.isEmpty()) {
                         textView.setVisibility(View.VISIBLE);
                     }
                 }
@@ -344,7 +348,7 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
                     Integer position = itemPositionMap.get(key);
                     if (position != null) {
                         updatedClass.setId(key);
-                        descarteConcienteList.set(position, updatedClass);
+                        descarteConscienteList.set(position, updatedClass);
 
                         if (adapterResiduosPneus != null) {
                             adapterResiduosPneus.notifyItemChanged(position);
@@ -360,7 +364,7 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
                 if (key != null) {
                     Integer position = itemPositionMap.get(key);
                     if (position != null) {
-                        descarteConcienteList.remove(position.intValue());
+                        descarteConscienteList.remove(position.intValue());
                         itemPositionMap.remove(key);
                         updatePositionMapFrom(position);
 
@@ -368,7 +372,7 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
                             adapterResiduosPneus.notifyItemRemoved(position);
                         }
 
-                        if (descarteConcienteList.isEmpty()) {
+                        if (descarteConscienteList.isEmpty()) {
                             textView.setVisibility(View.GONE);
                         }
                     }
@@ -384,7 +388,7 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
                     Integer oldPosition = itemPositionMap.get(key);
 
                     if (oldPosition != null) {
-                        descarteConcienteList.remove(oldPosition.intValue());
+                        descarteConscienteList.remove(oldPosition.intValue());
 
                         if (adapterResiduosPneus != null) {
                             adapterResiduosPneus.notifyItemRemoved(oldPosition);
@@ -398,12 +402,12 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
                             }
                         }
 
-                        if (newPosition > descarteConcienteList.size()) {
-                            newPosition = descarteConcienteList.size();
+                        if (newPosition > descarteConscienteList.size()) {
+                            newPosition = descarteConscienteList.size();
                         }
 
                         movedClass.setId(key);
-                        descarteConcienteList.add(newPosition, movedClass);
+                        descarteConscienteList.add(newPosition, movedClass);
                         updatePositionMapFrom(Math.min(oldPosition, newPosition));
 
                         if (adapterResiduosPneus != null) {
@@ -424,12 +428,12 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
             }
         };
 
-        databaseReference.addChildEventListener(childEventListener);
+        dbRef.addChildEventListener(childEventListener);
     }
 
     private void updatePositionMapFrom(int startPosition) {
-        for (int i = startPosition; i < descarteConcienteList.size(); i++) {
-            ClassDescarteConsciente item = descarteConcienteList.get(i);
+        for (int i = startPosition; i < descarteConscienteList.size(); i++) {
+            ClassDescarteConsciente item = descarteConscienteList.get(i);
             if (item.getId() != null) {
                 itemPositionMap.put(item.getId(), i);
             }
@@ -441,15 +445,15 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
         redirecionadoSemInternet = true;
 
         Intent intent = new Intent(DescartePneus.this, SemInternetActivity.class);
-        intent.putExtra("id_activity", "descarte_pneus");
+        intent.putExtra("id_activity", "descarte_Pneus");
         startActivity(intent);
         finish();
     }
 
     @Override
-    public void click_DescartePneus(ClassDescarteConsciente residuoPneu) {
-        if (residuoPneu != null && residuoPneu.getFone() != null) {
-            ligar(residuoPneu.getFone());
+    public void click_DescartePneus(ClassDescarteConsciente descartePneusClass) {
+        if (descartePneusClass != null && descartePneusClass.getFone() != null) {
+            ligar(descartePneusClass.getFone());
         }
     }
 
@@ -483,8 +487,9 @@ public class DescartePneus extends AppCompatActivity implements AdapterResiduosP
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (childEventListener != null && databaseReference != null) {
-            databaseReference.removeEventListener(childEventListener);
+        if (childEventListener != null) {
+            DatabaseReference dbRef = getDatabaseReference().child("descarte_Pneus");
+            dbRef.removeEventListener(childEventListener);
         }
         if (webView != null) {
             webView.destroy();

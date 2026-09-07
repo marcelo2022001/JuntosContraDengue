@@ -504,8 +504,8 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
         SharedPreferences.Editor editor =
                 getSharedPreferences("configApp", MODE_PRIVATE).edit();
 
-        editor.putString("estado", estadoSelecionado.toLowerCase().trim());
-        editor.putString("municipio", municipioSelecionado.toLowerCase().trim());
+        editor.putString("estado", paraChaveFirebase(estadoSelecionado));
+        editor.putString("municipio",paraChaveFirebase(municipioSelecionado));
         editor.apply();
 
         Toast.makeText(this,
@@ -515,6 +515,13 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
         setLoading(false);
         startActivity(new Intent(this, VideoIniciarAppActivity.class));
         finish();
+    }
+
+    private String paraChaveFirebase(String input) {
+        String normalizado = normalizeString(input);
+        return normalizado
+                .replaceAll("\\s+", "_")        // espaços -> "_"
+                .replaceAll("[^a-z0-9_]", "");  // remove qualquer sobra (hífen, apóstrofo, etc.)
     }
 
     private boolean isGPSEnabled() {

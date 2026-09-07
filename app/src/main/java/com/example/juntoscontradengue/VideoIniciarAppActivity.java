@@ -26,14 +26,11 @@ import com.google.firebase.database.ValueEventListener;
 public class VideoIniciarAppActivity extends AppCompatActivity {
     private static final String TAG = "VideoIniciarApp";
     private androidx.appcompat.app.AlertDialog loadingDialog;
-
     private static final int FALLBACK_TIME_OUT = 180000; // 3 minutos
     private static final int TEMPO_ATIVAR_BOTAO = 10000; // 10 segundos
 
     private FloatingActionButton btnFecharVideo;
     private VideoView videoIn;
-
-    private final FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference refVideo;
 
     // HANDLERS CONTROLADOS
@@ -63,14 +60,15 @@ public class VideoIniciarAppActivity extends AppCompatActivity {
             String estado = AppConfig.getEstado(this).toLowerCase();
             String municipio = AppConfig.getMunicipio(this).toLowerCase();
 
+            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+            FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
             if (!isConnected) {
                 // Sem internet, vai direto para MainActivity
                 iniciarMainActivity();
             } else {
                 // Com internet, busca o vídeo do Firebase
-                refVideo = database.getReference(
-                        "cadastros/" + estado + "/" + municipio + "/config/video_inicia_app"
-                );
+                refVideo = databaseMunicipio.getReference("/config/video_inicia_app");
                 carregarVideoDoFirebase();
                 agendarFallback();
 

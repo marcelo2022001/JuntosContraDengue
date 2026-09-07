@@ -63,7 +63,8 @@ public class ProfileActivity extends AppCompatActivity {
     private boolean isRedirecting = false;
     Boolean isConnected;
     private FirebaseAuth mAuth;
-    private DatabaseReference usersRef;
+    private DatabaseReference loginsRef;
+    private FirebaseDatabase databaseMunicipio;
     private FirebaseAuth.AuthStateListener authListener;
     private String estado, municipio;
     private String nomeSalvoSharedOuFirebase, cpfSalvoSharedOuFirebase, enderecoSalvoSharedOuFirebase;
@@ -108,13 +109,17 @@ public class ProfileActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mAuth = FirebaseAuth.getInstance();
-        usersRef = FirebaseDatabase.getInstance().getReference("cadastros");
 
         initViews(profileBinding);
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
+         loginsRef = databaseMunicipio.getReference().child("logins");
 
         SharedPreferences prefsUser = getSharedPreferences("UserData", MODE_PRIVATE);
         perfil = prefsUser.getString("perfil", null);
@@ -183,15 +188,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void busca_imagem_agente() {
-        DatabaseReference buscar_img_agente = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child("agentes")
-                .child(uid)
-                .child("urlImagem");
-        buscar_img_agente.addListenerForSingleValueEvent(new ValueEventListener() {
+        getCurrentUserRef().child("urlImagem")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -370,18 +368,19 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
+    private DatabaseReference getCurrentUserRef() {
+        if (loginsRef == null || perfil == null || uid == null) {
+            return databaseMunicipio.getReference().child("logins").child(perfil != null ? perfil : "").child(uid != null ? uid : "");
+        }
+        return loginsRef.child(perfil).child(uid);
+    }
+
     private void buscarDadosUsuarioNoFirebase() {
         if (TextUtils.isEmpty(estado) || TextUtils.isEmpty(municipio) || TextUtils.isEmpty(perfil) || TextUtils.isEmpty(uid)) {
             redirecionarLogin();
         }
 
-        usersRef
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child(perfil)
-                .child(uid)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        getCurrentUserRef().addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.exists()) {
@@ -495,14 +494,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void conferirAlteracoesNoRealtimeAntesDeSalvar(String end, String num, String conj, String fone, String mail) {
 
-        DatabaseReference ref = usersRef
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child(perfil)
-                .child(uid);
-
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+        getCurrentUserRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -548,12 +540,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void updateUserData(String end, String num, String conj, String fone, String mail) {
 
-        DatabaseReference ref = usersRef
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child(perfil)
-                .child(uid);
+        DatabaseReference ref = getCurrentUserRef();
 
         Map<String, Object> updates = new HashMap<>();
 
@@ -699,11 +686,9 @@ public class ProfileActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
 
                         // 1. Salvamos no banco ANTES de deslogar e usando o UID correto
-                        DatabaseReference mDatabase = FirebaseDatabase.getInstance().
-                                getReference("cadastros");
+                        DatabaseReference mDatabase = databaseMunicipio.getReference();
 
-                        mDatabase.child(estado)
-                                .child(municipio)
+                        mDatabase
                                 .child("logins")
                                 .child(perfil)
                                 .child(uid) // O UID do usuário faltava aqui
@@ -889,10 +874,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void conta_admin_cadastro() {
 
-        DatabaseReference adminsRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference adminsRef = databaseMunicipio.getReference()
                 .child("logins")
                 .child("admins");
 
@@ -1001,12 +983,12 @@ public class ProfileActivity extends AppCompatActivity {
             progressDialog.setMessage("Excluindo dados do banco...");
         }
 
-        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference rootRef = databaseMunicipio.getReference();
         Map<String, Object> updates = new HashMap<>();
-        updates.put("cadastros/" + estado + "/" + municipio + "/logins/usuarios/" + userId, null);
-        updates.put("cadastros/" + estado + "/" + municipio + "/logins/admins/" + userId, null);
-        updates.put("cadastros/" + estado + "/" + municipio + "/logins/agentes/" + userId, null);
-        updates.put("cadastros/" + estado + "/" + municipio + "/reclamacoes/" + userId, null);
+        updates.put( "/logins/usuarios/" + userId, null);
+        updates.put( "/logins/admins/" + userId, null);
+        updates.put( "/logins/agentes/" + userId, null);
+        updates.put("/reclamacoes/" + userId, null);
 
         rootRef.updateChildren(updates)
                 .addOnSuccessListener(aVoid -> excluirStorageUsuario(userId, progressDialog))

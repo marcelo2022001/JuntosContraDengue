@@ -31,6 +31,7 @@ public class AddLocalDescartesPneusEletronicos extends AppCompatActivity {
     Button btnCancelDescartes;
     ActivityAddLocaisDescartesPneusEletronicosBinding bindingDescartes;
     String estado, municipio;
+    private FirebaseDatabase databaseMunicipio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,9 @@ public class AddLocalDescartesPneusEletronicos extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
          estado = prefs.getString("estado", null);
          municipio = prefs.getString("municipio", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
          edtTxtDescartesLocais = bindingDescartes.edtTxtDescartesLocais;
          edtTxtDescartesEndereco = bindingDescartes.edtTxtDescartesEndereco;
@@ -83,10 +87,7 @@ public class AddLocalDescartesPneusEletronicos extends AppCompatActivity {
 
         FirebaseDatabase mdatabaseDescartes = FirebaseDatabase.getInstance();
 
-        DatabaseReference ref_descartes = mdatabaseDescartes
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference ref_descartes = databaseMunicipio.getReference()
                 .child("descarte_pneus");
 
         String local = edtTxtDescartesLocais.getText().toString();
@@ -128,10 +129,7 @@ public class AddLocalDescartesPneusEletronicos extends AppCompatActivity {
 
         FirebaseDatabase mdatabaseDescartes = FirebaseDatabase.getInstance();
 
-        DatabaseReference ref_descartes = mdatabaseDescartes
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference ref_descartes = databaseMunicipio.getReference()
                 .child("descarte_eletronicos");
 
         String local = edtTxtDescartesLocais.getText().toString();

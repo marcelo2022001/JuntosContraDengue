@@ -49,20 +49,15 @@ import java.util.Objects;
 public class DescarteEletronicos extends AppCompatActivity implements AdapterResiduosEletronicos.ClickResiduosEletronicos {
 
     private static final String TAG = "DescarteEletronicos";
-    private static final long TIMEOUT_SEM_CACHE_MS = 3000; // 3s
+    private static final long TIMEOUT_SEM_CACHE_MS = 3000;
     private ActivityDescarteEletronicosBinding binding;
     private TextView textView;
     private WebView webView;
     private RecyclerView recyclerView;
-    private FirebaseDatabase database;
     private AdapterResiduosEletronicos adapterResiduosEletronicos;
-
     private final List<ClassDescarteConsciente> descarteConscienteList = new ArrayList<>();
     private final Map<String, Integer> itemPositionMap = new HashMap<>();
-
     private ChildEventListener childEventListener;
-    private DatabaseReference databaseReference;
-
     private String estado, municipio;
     private ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
@@ -89,8 +84,6 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
         webView = binding.wvDescarteEletronicos;
         recyclerView = binding.rvDescarteEletronicos;
 
-        database = FirebaseDatabase.getInstance();
-
         setupWebView();
         atualizarBannerOffline();
         loadContent();
@@ -107,6 +100,21 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
             }
         };
         getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
+    }
+
+    // ============= MÉTODO AUXILIAR PARA URL =============
+    private String getDatabaseUrl() {
+        if (estado == null || estado.isEmpty() || estado.equals("default")) {
+            return "https://juntos-contra-dengue-default-rtdb.firebaseio.com/";
+        } else {
+            return "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        }
+    }
+
+    private DatabaseReference getDatabaseReference() {
+        String urlBanco = getDatabaseUrl();
+        Log.d(TAG, "Usando banco: " + urlBanco);
+        return FirebaseDatabase.getInstance(urlBanco).getReference();
     }
 
     @Override
@@ -130,8 +138,9 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
     protected void onStop() {
         super.onStop();
         removerNetworkCallback();
-        if (childEventListener != null && databaseReference != null) {
-            databaseReference.removeEventListener(childEventListener);
+        if (childEventListener != null) {
+            DatabaseReference dbRef = getDatabaseReference().child("descarte_eletronicos");
+            dbRef.removeEventListener(childEventListener);
         }
     }
 
@@ -220,8 +229,10 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
     }
 
     private void loadContent() {
-        DatabaseReference htmlReference = database.getReference("config_app_material_educativo")
-                .child("e_lixo") // ou "pneus", conforme a tela
+        // USA O BANCO PADRÃO PARA CONFIGURAÇÕES
+        DatabaseReference htmlReference = FirebaseDatabase.getInstance()
+                .getReference("config_app_material_educativo")
+                .child("e_lixo")
                 .child("html_content");
 
         htmlReference.keepSynced(true);
@@ -236,8 +247,6 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
             }
         };
 
-        // Só ativa o timeout se já sabemos que está offline.
-        // Se tiver internet, o Firebase deve responder (dado ou erro) rapidamente.
         if (!NetworkUtils.isNetworkAvailable(this)) {
             handler.postDelayed(timeoutRunnable, TIMEOUT_SEM_CACHE_MS);
         }
@@ -245,13 +254,13 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
         htmlReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (respondido[0]) return; // timeout já disparou, ignora resposta tardia
+                if (respondido[0]) return;
                 respondido[0] = true;
                 handler.removeCallbacks(timeoutRunnable);
 
                 String html = snapshot.getValue(String.class);
                 if (html != null && !html.isEmpty()) {
-                    atualizarBannerOffline(); // garante que o banner reflita o estado real da rede no momento da exibição
+                    atualizarBannerOffline();
                     webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
                 } else {
                     mostrarAvisoSemConteudo();
@@ -278,8 +287,9 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
     }
 
     private void recarregarOuvinte() {
-        if (databaseReference != null && childEventListener != null) {
-            databaseReference.removeEventListener(childEventListener);
+        if (childEventListener != null) {
+            DatabaseReference dbRef = getDatabaseReference().child("descarte_eletronicos");
+            dbRef.removeEventListener(childEventListener);
         }
         redirecionadoSemInternet = false;
         ouvinte();
@@ -291,13 +301,9 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
             return;
         }
 
-        databaseReference = database.getReference()
-                .child("cadastros")
-                .child(estado.toLowerCase())
-                .child(municipio.toLowerCase())
-                .child("descarte_eletronicos");
-
-        databaseReference.keepSynced(true);
+        // USA O MÉTODO getDatabaseReference() QUE CONSTRÓI A URL CORRETA
+        DatabaseReference dbRef = getDatabaseReference().child("descarte_eletronicos");
+        dbRef.keepSynced(true);
 
         childEventListener = new ChildEventListener() {
             @Override
@@ -422,7 +428,7 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
             }
         };
 
-        databaseReference.addChildEventListener(childEventListener);
+        dbRef.addChildEventListener(childEventListener);
     }
 
     private void updatePositionMapFrom(int startPosition) {
@@ -481,8 +487,9 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (childEventListener != null && databaseReference != null) {
-            databaseReference.removeEventListener(childEventListener);
+        if (childEventListener != null) {
+            DatabaseReference dbRef = getDatabaseReference().child("descarte_eletronicos");
+            dbRef.removeEventListener(childEventListener);
         }
         if (webView != null) {
             webView.destroy();

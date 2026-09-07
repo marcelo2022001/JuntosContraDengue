@@ -39,22 +39,14 @@ import java.util.Objects;
 
 public class UploadTrabAgentes extends AppCompatActivity {
 
-    private final DatabaseReference dbContador = FirebaseDatabase.getInstance().getReference("cadastros");
-
-    private androidx.appcompat.app.AlertDialog loadingDialog;
-
-    String estado, municipio;
-
-    private ImageView uploadImage;
-
-    EditText uploadCaption;
-
-    private Uri imageUri;
-
-    private DatabaseReference totalRefImagens;
-
+    private FirebaseDatabase databaseMunicipio;
     private DatabaseReference databaseReference;
-
+    private DatabaseReference totalRefImagens;
+    private androidx.appcompat.app.AlertDialog loadingDialog;
+    String estado, municipio;
+    private ImageView uploadImage;
+    EditText uploadCaption;
+    private Uri imageUri;
     final private StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
     String id_activity;
@@ -99,11 +91,10 @@ public class UploadTrabAgentes extends AppCompatActivity {
 
         municipio = prefs.getString("municipio", null);
 
-        databaseReference = FirebaseDatabase
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
-                .getInstance()
-
-                .getReference("cadastros/" + estado + "/" + municipio + "/trabalhos_agentes");
+         databaseReference = databaseMunicipio.getReference("trabalhos_agentes");
 
 
         verificaPossibilidadeUploadImagens();
@@ -189,9 +180,9 @@ public class UploadTrabAgentes extends AppCompatActivity {
 
     private void verificaPossibilidadeUploadImagens() {
 
-        String pathConfig = "cadastros/" + estado + "/" + municipio + "/config/total_upload_imagens";
+        String pathConfig = "/config/total_upload_imagens";
 
-        FirebaseDatabase.getInstance().getReference(pathConfig)
+        databaseMunicipio.getReference(pathConfig)
 
                 .addListenerForSingleValueEvent(new ValueEventListener() {
 
@@ -218,7 +209,7 @@ public class UploadTrabAgentes extends AppCompatActivity {
                                     (dialog, which) -> dialog.dismiss());
                             alertDialog.show();
                         } else {
-                            totalUploadDeImagens.setText(String.format("Pode enviar um total de: %d de 50 imagens possíveis.", total));
+                            totalUploadDeImagens.setText(String.format("Pode enviar um total de: %d de 30 imagens possíveis.", total));
                         }
                     }
 
@@ -306,15 +297,7 @@ public class UploadTrabAgentes extends AppCompatActivity {
 
 // Referência para o contador do usuário
 
-        totalRefImagens = dbContador
-
-                .child(estado)
-
-                .child(municipio)
-
-                .child("config")
-
-                .child("total_upload_imagens");
+        totalRefImagens = databaseMunicipio.getReference("config/total_upload_imagens");
 
     }
 

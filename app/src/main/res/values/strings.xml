@@ -303,12 +303,7 @@
     <string name="validando">VALIDANDO…</string>
     <string name="agente_de_saude">Agente de Saúde</string>
     <string name="toque_para_ampliar">Toque para ampliar</string>
-    <string name="aguardando_resposta">Aguardando resposta</string>
-    <string name="resolvidas">Resolvidas</string>
-    <string name="nao_resolvidas">Não Resolvidas</string>
     <string name="aguardando_avaliacao_do_usuario">Aguardando avaliação do usuário: 0</string>
-    <string name="reclamacoes_respondidas">Reclamações respondidas</string>
-    <string name="total_de_reclamacoes">Total de reclamações</string>
     <string name="selecionar_item">selecionar_item</string>
     <string name="voce_esta_offline_exibindo_dados_salvos_localmente">Você está offline. Exibindo dados salvos localmente.</string>
     <string name="logo_todos_contra_a_dengue">Logo Todos Contra a Dengue</string>
@@ -322,6 +317,20 @@
     <string name="excluir_reclamacoes_mensagem">Excluir %1$d reclamação(ões) da sua lista? Elas continuam no sistema, só deixam de aparecer para os agentes.</string>
     <string name="reclamacoes_excluidas_sucesso">Reclamações Excluir com sucesso</string>
     <string name="error_excluir_reclamacoes">Erro ao Excluir reclamações</string>
+    <string name="ocultar">Ocultar</string>
+
+    <string name="total_de_reclamacoes_contagem">Total de reclamações: %1$d</string>
+    <string name="reclamacoes_respondidas_contagem">Reclamações respondidas: %1$d</string>
+    <string name="aguardando_avaliacao_usuario_contagem">Respondido/Aguardando usuário avaliar: %1$d</string>
+    <string name="aguardando_resposta_contagem">Aguardando resposta: %1$d</string>
+    <string name="resolvidas_contagem">Resolvidas: %1$d</string>
+    <string name="nao_resolvidas_contagem">Não resolvidas: %1$d</string>
+
+    <string name="total_de_reclamacoes">Total de reclamações: 0</string>
+    <string name="reclamacoes_respondidas">Reclamações respondidas: 0</string>
+    <string name="aguardando_resposta">Aguardando resposta: 0</string>
+    <string name="resolvidas">Resolvidas: 0</string>
+    <string name="nao_resolvidas">Não resolvidas: 0</string>
 
 
 </resources>

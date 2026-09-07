@@ -84,6 +84,7 @@
         <activity
             android:name=".ResponderDenunciaActivity"
             android:exported="false"
+            android:windowSoftInputMode="stateHidden"
             android:parentActivityName=".AdminActivity" />
         <activity
             android:name=".ExcluirPreCadastro"
@@ -156,6 +157,7 @@
             android:name=".TelefonesUteis"
             android:exported="false"
             android:label="@string/title_activity_telefones_uteis"
+            android:windowSoftInputMode="stateHidden"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".Escorpionismo"
@@ -202,6 +204,11 @@
         <activity
             android:name=".ListarReclamacoesAgentes"
             android:exported="false"
+            android:parentActivityName=".AgentesMainActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ListarReclamacoesAdmins"
+            android:exported="false"
             android:parentActivityName=".AdminActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
@@ -240,7 +247,7 @@
         <activity
             android:name=".VisualizarResposta"
             android:exported="false"
-            android:windowSoftInputMode="stateHidden"/>
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".ExcluirAgentesActivity"
             android:exported="false" />

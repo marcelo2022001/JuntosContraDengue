@@ -39,8 +39,12 @@ public class VisualizarResposta extends AppCompatActivity {
     private TextInputEditText inputEditText;
     private CardView cardViewImagensResposta;
     private List<ImageView> imageViews;
-
-    private String UUID, ID, estado, municipio, STATUS_RECLAMACAO, RESPONDIDO_POR;
+    private FirebaseDatabase databaseMunicipio;
+    private String UUID;
+    private String ID;
+    private String municipio;
+    private String STATUS_RECLAMACAO;
+    private String RESPONDIDO_POR;
     private String respPor, dataResposta, respostaTxt;
     private String tokenDestinatario; // token FCM de quem fez a reclamação
 
@@ -71,8 +75,12 @@ public class VisualizarResposta extends AppCompatActivity {
         }
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
-        estado = prefs.getString("estado", null);
+        String estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
 
         inputLayout = bindingUser.txtInputLayoutVisualizarRespostaReclamacao;
         inputLayout.setEnabled(false);
@@ -154,11 +162,7 @@ public class VisualizarResposta extends AppCompatActivity {
             return;
         }
 
-        DatabaseReference refStatus = FirebaseDatabase.getInstance().getReference()
-                .child("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("reclamacoes")
+        DatabaseReference refStatus = databaseMunicipio.getReference("reclamacoes")
                 .child(UUID)
                 .child(ID);
 
@@ -214,11 +218,7 @@ public class VisualizarResposta extends AppCompatActivity {
     }
 
     private void buscarDadosFirebase() {
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference()
-                .child("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("reclamacoes")
+        DatabaseReference reference = databaseMunicipio.getReference("reclamacoes")
                 .child(UUID)
                 .child(ID);
 

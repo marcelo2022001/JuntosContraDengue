@@ -58,6 +58,7 @@ public class CriarCadastroAgente extends AppCompatActivity {
         private FirebaseAuth mAuth;
         String cpf, nome, funcao, cpfLimpo, telLimpo;
         final private StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+        private FirebaseDatabase databaseMunicipio;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +111,10 @@ public class CriarCadastroAgente extends AppCompatActivity {
 
             estado = AppConfig.getEstado(this);
             municipio = AppConfig.getMunicipio(this);
+
+
+            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+            databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
             img_agente = cadastro_binding.imgCriarCadAgenteAdmin;
 
@@ -267,10 +272,7 @@ public class CriarCadastroAgente extends AppCompatActivity {
             cpfLimpo = cpf_agente.replaceAll("[^0-9]", "");
             telLimpo = telefone_agente.replaceAll("[^0-9]", "");
 
-            DatabaseReference baseRef = FirebaseDatabase.getInstance()
-                    .getReference("cadastros")
-                    .child(estado)
-                    .child(municipio);
+            DatabaseReference baseRef = databaseMunicipio.getReference();
 
             // Verifica CPF
             baseRef.child("cpf_index").child(cpfLimpo)
@@ -335,10 +337,7 @@ public class CriarCadastroAgente extends AppCompatActivity {
                 long dataCadastro = c.getTimeInMillis();
 
                 // 2. Salvar Dados no Realtime Database
-                DatabaseReference userRef = FirebaseDatabase.getInstance()
-                        .getReference("cadastros")
-                        .child(estado)
-                        .child(municipio)
+                DatabaseReference userRef = databaseMunicipio.getReference()
                         .child("logins")
                         .child("agentes")
                         .child(uuid);
@@ -365,10 +364,7 @@ public class CriarCadastroAgente extends AppCompatActivity {
                     editor.apply();
 
                     // CORREÇÃO AQUI: Usar cpfLimpo em vez de cpf (que é a variável da intent)
-                    DatabaseReference baseRef = FirebaseDatabase.getInstance()
-                            .getReference("cadastros")
-                            .child(estado)
-                            .child(municipio);
+                    DatabaseReference baseRef = databaseMunicipio.getReference();
 
                     // Criar índices
                     Map<String, Object> indices = new HashMap<>();
@@ -425,10 +421,7 @@ public class CriarCadastroAgente extends AppCompatActivity {
 
     private void deletar_pre_cadastro_agente() {
             cpf = cpf.replaceAll("[^0-9]", "");
-            DatabaseReference usersRef = FirebaseDatabase.getInstance()
-                    .getReference( "cadastros")
-                    .child(estado)
-                    .child(municipio)
+            DatabaseReference usersRef = databaseMunicipio.getReference()
                     .child("config")
                     .child("pre_cadastro_agentes")
                     .child(cpf);

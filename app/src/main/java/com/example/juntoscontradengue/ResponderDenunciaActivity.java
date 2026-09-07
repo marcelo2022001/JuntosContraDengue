@@ -61,6 +61,7 @@ public class ResponderDenunciaActivity extends AppCompatActivity {
     private Button btnEnviarRespostaReclamacao;
     String estado, municipio, status_reclamacao, reclamacao, uuid, id, nome, token, dataFormatada;
     Long dataReclamacao;
+    private FirebaseDatabase databaseMunicipio;
 
     // PERMISSÃO
     private final ActivityResultLauncher<String> cameraPermissionLauncher =
@@ -136,6 +137,9 @@ public class ResponderDenunciaActivity extends AppCompatActivity {
         municipio = prefs.getString("municipio", null);
         nome = prefs.getString("nome", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             status_reclamacao = extras.getString("status_reclamacao");
@@ -146,9 +150,7 @@ public class ResponderDenunciaActivity extends AppCompatActivity {
 
     private void buscaToken() {
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference databaseReference = databaseMunicipio.getReference()
                 .child("reclamacoes")
                 .child(uuid)
                 .child(id);
@@ -424,7 +426,7 @@ public class ResponderDenunciaActivity extends AppCompatActivity {
 
             Toast.makeText(
                     this,
-                    "Aguarde carregar os dados do usuário.",
+                    "Aguarde, enviando resposta.",
                     Toast.LENGTH_SHORT
             ).show();
 
@@ -491,8 +493,7 @@ public class ResponderDenunciaActivity extends AppCompatActivity {
             return;
         }
 
-        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado).child(municipio).child("logins");
+        DatabaseReference rootRef = databaseMunicipio.getReference().child("logins");
 
         // Tenta buscar em ADMINS. Busca nome e a função agente/admin
         rootRef.child("admins").child(meuUid).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -544,8 +545,7 @@ public class ResponderDenunciaActivity extends AppCompatActivity {
     }
 
     private void gravarNoBancoFinal(String resposta, String nome, String funcao, Map<String, Object> urlsMap) {
-        DatabaseReference reclamacaoRef = FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado).child(municipio).child("reclamacoes").child(uuid).child(id);
+        DatabaseReference reclamacaoRef = databaseMunicipio.getReference("reclamacoes").child(uuid).child(id);
 
         Map<String, Object> dadosAtualizacao = new HashMap<>();
         dadosAtualizacao.put("resposta_reclamacao", resposta);

@@ -51,7 +51,7 @@ public class ActivityLoginAgentes extends AppCompatActivity {
     private ActivityLoginAgentesBinding loguinAgentesBinding;
     private String  emailAgente, senhaAgente,  estado, municipio;
     private String cpf, cpfLimpo, mensagem;
-    private String nome_usuario, emailSharedPrefers, endereco, num_casa, conjunto, telefone, dataCadastro, updateAt;
+    private String nome_usuario, emailSharedPrefers, funcao, dataCadastro, updateAt;
     boolean isConnected;
 
     @Override
@@ -380,14 +380,15 @@ public class ActivityLoginAgentes extends AppCompatActivity {
 
                         } else {
                             Bundle extras = getIntent().getExtras();
+                            mensagem += "Bem vindo ";
                             if (extras != null && extras.getString("nome") != null) {
                                 mensagem += extras.getString("nome");
                             } else {
-                                mensagem += "Agente de Endemias";
+                                mensagem += "Bem vindo";
                             }
                             salvarDadosLocalmente();
                             Toast.makeText(this, mensagem, Toast.LENGTH_LONG).show();
-                            startActivity(new Intent(this, ActivityLoginAgentes.class));
+                            startActivity(new Intent(this, AgentesMainActivity.class));
                         }
                     } else {
 
@@ -445,15 +446,13 @@ public class ActivityLoginAgentes extends AppCompatActivity {
     }
 
     private void salvarDadosLocalmente() {
+
         SharedPreferences pref = getSharedPreferences("UserData", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putString("nome", nome_usuario);
         editor.putString("cpf", cpf);
         editor.putString("email", emailSharedPrefers);
-        editor.putString("endereco", endereco);
-        editor.putString("num_casa", num_casa);
-        editor.putString("conjunto", conjunto);
-        editor.putString("telefone", telefone);
+        editor.putString("funcao", funcao);
         editor.putString("dataCadastro", dataCadastro);
         editor.putString("updateAt", updateAt);
         editor.putString("perfil", "agentes");
@@ -531,10 +530,8 @@ public class ActivityLoginAgentes extends AppCompatActivity {
             nome_usuario = userSnapshot.child("nome").getValue(String.class);
             cpf = userSnapshot.child("cpf").getValue(String.class);
             emailSharedPrefers = userSnapshot.child("email").getValue(String.class);
-            endereco = userSnapshot.child("endereco").getValue(String.class);
-            num_casa = userSnapshot.child("num_casa").getValue(String.class);
-            conjunto = userSnapshot.child("conjunto").getValue(String.class);
-            telefone = userSnapshot.child("telefone").getValue(String.class);
+            funcao = userSnapshot.child("funcao").getValue(String.class);
+
 
             // Busca como Long (o tipo real no banco)
             Long dataLong = userSnapshot.child("dataCadastro").getValue(Long.class);

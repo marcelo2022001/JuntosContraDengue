@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.juntoscontradengue.database.adapters.AdapterVisualizarDenunciasAgentes;
-import com.example.juntoscontradengue.database.classes_database.ClassReclamacoes;
+import com.example.juntoscontradengue.database.classes_database.ClassReclamacoesAdminsAgentes;
 import com.example.juntoscontradengue.databinding.ActivityVisualizarDenunciasUsuarioBinding;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -71,23 +71,26 @@ public class ActivityVisualizarDenunciasUsuario extends AppCompatActivity {
 
         Button visualizar_resposta_reclamacao = bindingUsers.btnVisualizarRespostaReclamacao;
 
-        if(!(status_reclamacao == null && status_reclamacao.isEmpty())) {
-
-            if (!status_reclamacao.equals("Aguardando Resposta")) {
-
-                visualizar_resposta_reclamacao.setVisibility(View.VISIBLE);
                 visualizar_resposta_reclamacao.setOnClickListener(v -> {
 
-                    Intent visualizar_resposta = new Intent(ActivityVisualizarDenunciasUsuario.this, VisualizarResposta.class);
-                    visualizar_resposta.putExtra("STATUS_RECLAMACAO", status_reclamacao);
-                    visualizar_resposta.putExtra("ID", id);
-                    visualizar_resposta.putExtra("UUID", uuid);
-                    visualizar_resposta.putExtra("RESPONDIDO_POR", RESPONDIDO_POR);
-                    startActivity(visualizar_resposta);
-                });
+                            if (!(status_reclamacao == null && status_reclamacao.isEmpty())) {
 
-            }
-        }
+                                if (status_reclamacao.equals("Aguardando resposta")) {
+                                    Toast.makeText(v.getContext(), "Aguarde a avaliação. Obrigado!", Toast.LENGTH_LONG).show();
+
+                                } else {
+
+                                    Intent visualizar_resposta = new Intent(ActivityVisualizarDenunciasUsuario.this, VisualizarResposta.class);
+                                    visualizar_resposta.putExtra("STATUS_RECLAMACAO", status_reclamacao);
+                                    visualizar_resposta.putExtra("ID", id);
+                                    visualizar_resposta.putExtra("UUID", uuid);
+                                    visualizar_resposta.putExtra("RESPONDIDO_POR", RESPONDIDO_POR);
+                                    startActivity(visualizar_resposta);
+                                }
+                            } else {
+                                Toast.makeText(this, "Status nulo ou vazio", Toast.LENGTH_SHORT).show();
+                            }
+                        });
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -165,7 +168,7 @@ public class ActivityVisualizarDenunciasUsuario extends AppCompatActivity {
                     return;
                 }
 
-                ClassReclamacoes r = snapshot.getValue(ClassReclamacoes.class);
+                ClassReclamacoesAdminsAgentes r = snapshot.getValue(ClassReclamacoesAdminsAgentes.class);
                 if (r != null) {
                     bindingUsers.txtVisualizarReclamacaoUsuario.setText(r.getReclamacao());
                     bindingUsers.txtEndReclamacaoUsuario.setText(

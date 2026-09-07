@@ -1,6 +1,8 @@
 package com.example.juntoscontradengue.database.classes_database;
 
-public class ClassReclamacoes {
+import com.google.firebase.database.PropertyName;
+
+public class ClassReclamacoesAdminsAgentes {
 
     private Boolean visivel_agente;
     private String idUsuario;
@@ -25,10 +27,10 @@ public class ClassReclamacoes {
     private int total_reclamacoes;
     private String respondida_por;
 
-    public ClassReclamacoes() {
+    public ClassReclamacoesAdminsAgentes() {
     }
 
-    public ClassReclamacoes(String idUsuario, String idReclamacao, Long data_envio, String reclamante, String telefone, String endereco_reclamante, String numero_casa_reclamante, String conjunto_residencia_reclamante, String endereco_reclamacao, String num_casa_reclamacao, String conjunto_reclamacao, String referencia, String reclamacao, String imagem1, String imagem2, String imagem3, String video, String status, int total_reclamacoes, String respondida_por) {
+    public ClassReclamacoesAdminsAgentes(String idUsuario, String idReclamacao, Long data_envio, String reclamante, String telefone, String endereco_reclamante, String numero_casa_reclamante, String conjunto_residencia_reclamante, String endereco_reclamacao, String num_casa_reclamacao, String conjunto_reclamacao, String referencia, String reclamacao, String imagem1, String imagem2, String imagem3, String video, String status, int total_reclamacoes, String respondida_por) {
         this.idUsuario = idUsuario;
         this.idReclamacao = idReclamacao;
         this.data_envio = data_envio;
@@ -50,11 +52,12 @@ public class ClassReclamacoes {
         this.total_reclamacoes = total_reclamacoes;
         this.respondida_por = respondida_por;
     }
-
+   @PropertyName("visivel_agente")
     public boolean isVisivelAgente() {
         return visivel_agente == null || visivel_agente; // default true se não existir no banco
     }
 
+    @PropertyName("visivel_agente")
     public void setVisivelAgente(Boolean visivel_agente) {
         this.visivel_agente = visivel_agente;
     }
@@ -91,10 +94,12 @@ public class ClassReclamacoes {
         this.reclamante = reclamante;
     }
 
+    @PropertyName("telefone_reclamante")
     public String getTelefone() {
         return telefone;
     }
 
+    @PropertyName("telefone_reclamante")
     public void setTelefone(String telefone) {
         this.telefone = telefone;
     }

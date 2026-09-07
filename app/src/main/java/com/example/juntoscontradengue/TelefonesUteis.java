@@ -40,14 +40,15 @@ public class TelefonesUteis extends AppCompatActivity implements AdapterTelefone
 
     private static final int CALL_PHONE_REQUEST_CODE = 1;
     private ActivityTelefonesUteisBinding binding;
-    private DatabaseReference databaseReference;
+    private FirebaseDatabase databaseMunicipio;
     private ValueEventListener telefonesListener;
     private ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
     private AdapterTelefone adapterTelefone;
     private final List<ClassTelefonesUteis> telefoneList = new ArrayList<>();
     private final List<ClassTelefonesUteis> filteredList = new ArrayList<>();
-    private String lastQuery = "", estado, municipio, lastPhoneNumber;
+    private String lastQuery = "";
+    private String lastPhoneNumber;
     private boolean redirecionadoSemInternet = false;
 
     @Override
@@ -57,8 +58,11 @@ public class TelefonesUteis extends AppCompatActivity implements AdapterTelefone
         setContentView(binding.getRoot());
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
-        estado = Objects.requireNonNull(prefs.getString("estado", null)).toLowerCase();
-        municipio = Objects.requireNonNull(prefs.getString("municipio", null)).toLowerCase();
+        String estado = Objects.requireNonNull(prefs.getString("estado", null)).toLowerCase();
+        String municipio = Objects.requireNonNull(prefs.getString("municipio", null)).toLowerCase();
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         atualizarBannerOffline();
         setupToolbar();
@@ -129,9 +133,7 @@ public class TelefonesUteis extends AppCompatActivity implements AdapterTelefone
     }
 
     private void initializeFirebase() {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        databaseReference = database.getReference("cadastros/" + estado + "/" + municipio + "/telefones_uteis");
-
+        DatabaseReference databaseReference = databaseMunicipio.getReference("telefones_uteis");
         // Mantém este nó sincronizado ativamente enquanto há internet.
         // A persistência em disco em si já é garantida globalmente pelo
         // setPersistenceEnabled(true) na JuntosContraDengueApp.
@@ -226,10 +228,11 @@ public class TelefonesUteis extends AppCompatActivity implements AdapterTelefone
     }
 
     private void recarregarTelefones() {
-        if (databaseReference == null) return;
+        if (databaseMunicipio == null) return;
 
         if (telefonesListener != null) {
-            databaseReference.removeEventListener(telefonesListener);
+            databaseMunicipio.getReference("telefones_uteis")
+                    .removeEventListener(telefonesListener);
         }
         redirecionadoSemInternet = false;
         carregarTelefones();
@@ -274,7 +277,7 @@ public class TelefonesUteis extends AppCompatActivity implements AdapterTelefone
             }
         };
 
-        databaseReference.addValueEventListener(telefonesListener);
+        databaseMunicipio.getReference("telefones_uteis").addValueEventListener(telefonesListener);
     }
 
     private void irParaSemInternet() {
@@ -290,8 +293,8 @@ public class TelefonesUteis extends AppCompatActivity implements AdapterTelefone
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (databaseReference != null && telefonesListener != null) {
-            databaseReference.removeEventListener(telefonesListener);
+        if (databaseMunicipio != null && telefonesListener != null) {
+            databaseMunicipio.getReference("telefones_uteis").removeEventListener(telefonesListener);
         }
         binding = null;
     }

@@ -52,7 +52,7 @@ public class TelaLoguin extends AppCompatActivity {
     ProgressBar progressBar;
     private ActivityTelaLoguinBinding loguinBinding;
     String estado, municipio, nomeShared, mensagem, emailPendente;
-
+    private FirebaseDatabase databaseMunicipio;
     //shared prefers dados usuario estiver null
     String nome, email,endereco, cpf, cpf_prefes, num_casa, conjunto, dataCadastro, telefone, updateAt;
 
@@ -113,6 +113,9 @@ public class TelaLoguin extends AppCompatActivity {
     private void initializeViews() {
         estado = AppConfig.getEstado(this);
         municipio = AppConfig.getMunicipio(this);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         SharedPreferences prefsUser = getSharedPreferences("UserData", MODE_PRIVATE);
         cpf_prefes = prefsUser.getString("cpf", null);
@@ -279,11 +282,8 @@ public class TelaLoguin extends AppCompatActivity {
     }
 
     private void atualizarEmailNoBancoEEfetivar(String novoEmailEfetivado) {
-        DatabaseReference refCpfIndex = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("cpf_index");
+        DatabaseReference refCpfIndex = databaseMunicipio
+                .getReference("cpf_index");
 
         Query query = refCpfIndex.orderByChild("cpf").equalTo(cpf);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -356,12 +356,8 @@ public class TelaLoguin extends AppCompatActivity {
     }
 
     private void buscarEmailPorCpf(String cpf_user, EmailCallback callback) {
-        DatabaseReference refCpfIndex = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("cpf_index")
-                .child(cpf_user); // Acessa diretamente a chave do CPF
+        DatabaseReference refCpfIndex = databaseMunicipio
+                .getReference("cpf_index/" + cpf_user); // Acessa diretamente a chave do CPF
 
         refCpfIndex.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -396,13 +392,8 @@ public class TelaLoguin extends AppCompatActivity {
      * existir), mostramos uma mensagem clara em vez de falhar silenciosamente.
      */
     private void buscarDadosUsuarioPorUid(String uidEncontrado, EmailCallback callback) {
-        DatabaseReference refUsuario = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child("usuarios")
-                .child(uidEncontrado);
+        DatabaseReference refUsuario = databaseMunicipio
+                .getReference("logins/usuarios/" + uidEncontrado);
 
         refUsuario.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

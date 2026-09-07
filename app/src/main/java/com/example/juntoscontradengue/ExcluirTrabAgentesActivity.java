@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ExcluirTrabAgentesActivity extends AppCompatActivity {
-    private final DatabaseReference dbContador = FirebaseDatabase.getInstance().getReference("cadastros");
+    private FirebaseDatabase databaseMunicipio;
     private final List<ClassTrabAgentes> classTrabAgentesExcluir = new ArrayList<>();
     private AdapterExcluirTrabAgentes adapterTrabAgentesExcluir; // Make adapter a field to access it throughout the class
     private DatabaseReference databaseReferenceExcluirTrabAgentes;
@@ -77,6 +77,10 @@ public class ExcluirTrabAgentesActivity extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+         databaseReferenceExcluirTrabAgentes = databaseMunicipio.getReference().child("trabalhos_agentes");
+
         // Setup RecyclerView
         RecyclerView rcExcluirTrabAgentes = bindingExcluirTrabAgentes.recyclerViewExcluirTrabAgentes;
         // Configuração do RecyclerView
@@ -91,10 +95,7 @@ public class ExcluirTrabAgentesActivity extends AppCompatActivity {
 
 
         // Reference to database
-        databaseReferenceExcluirTrabAgentes = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference databaseReferenceExcluirTrabAgentes = databaseMunicipio.getReference()
                 .child("trabalhos_agentes");
 
         databaseReferenceExcluirTrabAgentes.addChildEventListener(new ChildEventListener() {
@@ -246,9 +247,7 @@ public class ExcluirTrabAgentesActivity extends AppCompatActivity {
     }
 
     private void incrementaContadorImagem() {
-        DatabaseReference totalRefImagens = dbContador
-                .child(estado)
-                .child(municipio)
+        DatabaseReference totalRefImagens = databaseMunicipio.getReference()
                 .child("config")
                 .child("total_upload_imagens");
 

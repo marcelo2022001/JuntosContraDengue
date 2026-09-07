@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity
     Toolbar toolbar;
     DrawerLayout drawerLayout;
     ImageButton btn_agentes, btn_trab_agentes, btn_denuncias, btn_dengue, btn_escorpiao;
-
+    private FirebaseDatabase databaseMunicipio;
     // =====================================================
     // onCreate
     // =====================================================
@@ -84,6 +84,10 @@ public class MainActivity extends AppCompatActivity
         estado = Objects.requireNonNull(prefs.getString("estado", "")).toLowerCase();
         municipio = Objects.requireNonNull(prefs.getString("municipio", "")).toLowerCase();
         tutorial = prefs.getInt("tutorial", 1);
+
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         if (!prefs.getBoolean("tutorialFull", false)) {
 
@@ -246,10 +250,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void carregarBrasao() {
-        DatabaseReference db = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference db = databaseMunicipio.getReference()
                 .child("config")
                 .child("imagem_brasao_municipio");
 
@@ -280,8 +281,7 @@ public class MainActivity extends AppCompatActivity
     // FLIPPER
     // =====================================================
     private void carregarImagensFirebase() {
-        DatabaseReference ref = FirebaseDatabase.getInstance()
-                .getReference("cadastros/" + estado + "/" + municipio + "/config/sliders_main");
+        DatabaseReference ref = databaseMunicipio.getReference("/config/sliders_main");
 
         ref.get().addOnSuccessListener(snapshot -> {
             List<String> urls = new ArrayList<>();
