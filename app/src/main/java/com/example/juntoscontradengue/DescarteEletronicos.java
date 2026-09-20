@@ -1,10 +1,7 @@
 package com.example.juntoscontradengue;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -15,125 +12,308 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.juntoscontradengue.database.adapters.AdapterResiduosEletronicos;
-import com.example.juntoscontradengue.database.classes_database.ClassDescarteConsciente;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.juntoscontradengue.databinding.ActivityDescarteEletronicosBinding;
 import com.example.juntoscontradengue.extras.NetworkUtils;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class DescarteEletronicos extends AppCompatActivity implements AdapterResiduosEletronicos.ClickResiduosEletronicos {
 
-    private static final String TAG = "DescarteEletronicos";
-    private static final long TIMEOUT_SEM_CACHE_MS = 3000; // 3s
-    private ActivityDescarteEletronicosBinding binding;
-    private TextView textView;
-    private WebView webView;
-    private RecyclerView recyclerView;
-    private FirebaseDatabase database;
-    private AdapterResiduosEletronicos adapterResiduosEletronicos;
+public class DescarteEletronicos extends AppCompatActivity {
 
-    private final List<ClassDescarteConsciente> descarteConscienteList = new ArrayList<>();
-    private final Map<String, Integer> itemPositionMap = new HashMap<>();
+    private static final String TAG = "Descarte_Eletronicos";
+    private static final long TIMEOUT_CARREGAMENTO_MS = 5000;
+    private static final String ARQUIVO_CACHE_HTML = "DescarteEletronicos_html_cache.html";
+    private static final Pattern PADRAO_IMG =
+            Pattern.compile("<img[^>]+src\\s*=\\s*[\"'](https?://[^\"']+)[\"']", Pattern.CASE_INSENSITIVE);
 
-    private ChildEventListener childEventListener;
-    private DatabaseReference databaseReference;
-
-    private String estado, municipio;
+    private WebView webVDescarteEletronicos;
+    private  ActivityDescarteEletronicosBinding bindingDescarteEletronicos;
+    private DatabaseReference htmlRef;
+    private ValueEventListener htmlListener;
     private ConnectivityManager connectivityManager;
     private ConnectivityManager.NetworkCallback networkCallback;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable timeoutCarregamento;
+    private final ExecutorService io = Executors.newSingleThreadExecutor();
+    private String htmlAtual = null;
+    private boolean conteudoExibido = false;
     private boolean redirecionadoSemInternet = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityDescarteEletronicosBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        bindingDescarteEletronicos = ActivityDescarteEletronicosBinding.inflate(getLayoutInflater());
+        setContentView(bindingDescarteEletronicos.getRoot());
 
-        Toolbar toolbar = binding.toolbarDescarteEletronicos;
+         webVDescarteEletronicos = bindingDescarteEletronicos.wvDescarteEletronicos;
+
+        Toolbar toolbar = bindingDescarteEletronicos.toolbarDescarteEletronicos;
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        toolbar.setNavigationOnClickListener(v -> navigateBackToMainActivity());
-
-        SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
-        estado = prefs.getString("estado", null);
-        municipio = prefs.getString("municipio", null);
-
-        textView = binding.txtlocalEntregaEletronicos;
-        webView = binding.wvDescarteEletronicos;
-        recyclerView = binding.rvDescarteEletronicos;
-
-        database = FirebaseDatabase.getInstance();
-
         setupWebView();
         atualizarBannerOffline();
-        loadContent();
-        inciarRecyclerViewDescarteConsciente();
 
-        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (webView.canGoBack()) {
-                    webView.goBack();
-                } else {
-                    navigateBackToMainActivity();
-                }
-            }
-        };
-        getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
+        htmlRef = FirebaseDatabase.getInstance()
+                .getReference("config_app_material_educativo")
+                .child("e_lixo")
+                .child("html_content");
+        htmlRef.keepSynced(true);
+
+        // 1) cópia salva no aparelho (aparece na hora, inclusive reabrindo o app offline)
+        mostrarCopiaLocalSeExistir();
+        // 2) Firebase (fonte da verdade): atualiza sozinho quando o admin mudar ou a internet voltar
+        carregarDoFirebase();
+        iniciarTimeout();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         registrarNetworkCallback();
-
-        int previousSize = descarteConscienteList.size();
-        if (previousSize > 0) {
-            descarteConscienteList.clear();
-            itemPositionMap.clear();
-            if (adapterResiduosEletronicos != null) {
-                adapterResiduosEletronicos.notifyItemRangeRemoved(0, previousSize);
-            }
-        }
-
-        ouvinte();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         removerNetworkCallback();
-        if (childEventListener != null && databaseReference != null) {
-            databaseReference.removeEventListener(childEventListener);
+    }
+
+    // ---------------------------------------------------------------- WebView
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private void setupWebView() {
+        WebSettings settings = webVDescarteEletronicos.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setLoadsImagesAutomatically(true);
+        settings.setAllowFileAccess(false); // não usa mais assets
+        atualizarModoCacheWebView();
+
+        webVDescarteEletronicos.setWebViewClient(new WebViewClient() {
+
+            // Imagens do HTML: serve do cache do Glide (o mesmo que o preload aquece),
+            // então aparecem mesmo sem internet
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                Uri uri = request.getUrl();
+                if ("GET".equalsIgnoreCase(request.getMethod()) && ehImagem(uri)) {
+                    try {
+                        File arquivo = Glide.with(getApplicationContext())
+                                .downloadOnly()
+                                .load(uri.toString())
+                                .submit()
+                                .get();
+                        return new WebResourceResponse(mimeDaImagem(uri), null, new FileInputStream(arquivo));
+                    } catch (Exception e) {
+                        // sem cache e sem rede: deixa o WebView tentar normalmente
+                    }
+                }
+                return super.shouldInterceptRequest(view, request);
+            }
+        });
+    }
+
+    private void atualizarModoCacheWebView() {
+        boolean online = NetworkUtils.isNetworkAvailable(this);
+        webVDescarteEletronicos.getSettings().setCacheMode(
+                online ? WebSettings.LOAD_DEFAULT : WebSettings.LOAD_CACHE_ELSE_NETWORK);
+    }
+
+    private boolean ehImagem(Uri uri) {
+        String path = uri.getPath();
+        if (path == null) return false;
+        String p = path.toLowerCase(Locale.ROOT);
+        return p.endsWith(".png") || p.endsWith(".jpg") || p.endsWith(".jpeg")
+                || p.endsWith(".webp") || p.endsWith(".gif");
+    }
+
+    private String mimeDaImagem(Uri uri) {
+        String p = Objects.requireNonNull(uri.getPath()).toLowerCase(Locale.ROOT);
+        if (p.endsWith(".png")) return "image/png";
+        if (p.endsWith(".webp")) return "image/webp";
+        if (p.endsWith(".gif")) return "image/gif";
+        return "image/jpeg";
+    }
+
+    // ---------------------------------------------------------------- Conteúdo
+
+    private void carregarDoFirebase() {
+        htmlListener = new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                cancelarTimeout();
+                atualizarBannerOffline();
+
+                String html = snapshot.getValue(String.class);
+                boolean temHtml = html != null && !html.trim().isEmpty();
+                boolean online = NetworkUtils.isNetworkAvailable(DescarteEletronicos.this);
+
+                if (temHtml) {
+                    preCarregarImagens(html);
+                    salvarCopiaLocal(html);
+                    mostrarHtml(html);
+                } else if (online) {
+                    // conectado e o nó realmente não tem conteúdo: força o aviso
+                    conteudoExibido = false;
+                    apagarCopiaLocal();
+                    mostrarAviso();
+                } else if (!conteudoExibido) {
+                    // offline, sem cache do Firebase e sem cópia local
+                    irParaSemInternet();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Erro ao buscar HTML: " + error.getMessage());
+                cancelarTimeout();
+                htmlListener = null; // permite tentar de novo quando a internet voltar
+
+                if (conteudoExibido) return;
+
+                if (NetworkUtils.isNetworkAvailable(DescarteEletronicos.this)) {
+                    mostrarAviso();
+                } else {
+                    irParaSemInternet();
+                }
+            }
+        };
+
+        htmlRef.addValueEventListener(htmlListener);
+    }
+
+    private void mostrarHtml(String html) {
+        if (html.equals(htmlAtual)) return; // não recarrega a página (nem perde a rolagem) à toa
+        htmlAtual = html;
+        conteudoExibido = true;
+        webVDescarteEletronicos.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
+    }
+
+    private void mostrarAviso() {
+        htmlAtual = null;
+        String aviso = "<html><head><meta name='viewport' content='width=device-width, initial-scale=1'></head>"
+                + "<body style='font-family:sans-serif;text-align:center;padding:32px;color:#555'>"
+                + "<h3>" + getString(R.string.conteudo_indisponivel_titulo) + "</h3>"
+                + "<p>" + getString(R.string.conteudo_indisponivel_msg) + "</p>"
+                + "</body></html>";
+        webVDescarteEletronicos.loadDataWithBaseURL(null, aviso, "text/html", "UTF-8", null);
+    }
+
+    // Esquenta o cache do Glide para as imagens do HTML enquanto há internet
+    private void preCarregarImagens(String html) {
+        if (!NetworkUtils.isNetworkAvailable(this)) return;
+
+        Matcher m = PADRAO_IMG.matcher(html);
+        while (m.find()) {
+            Glide.with(getApplicationContext())
+                    .load(m.group(1))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .preload();
         }
     }
+
+    // ---------------------------------------------------------------- Cópia local do HTML
+
+    private void mostrarCopiaLocalSeExistir() {
+        io.execute(() -> {
+            String html = lerCopiaLocal();
+            if (html == null) return;
+            runOnUiThread(() -> {
+                // só usa a cópia se o Firebase ainda não respondeu (evita sobrescrever dado mais novo)
+                if (!isFinishing() && !isDestroyed() && !conteudoExibido) {
+                    mostrarHtml(html);
+                }
+            });
+        });
+    }
+
+    private void salvarCopiaLocal(String html) {
+        io.execute(() -> {
+            try (FileOutputStream fos = openFileOutput(ARQUIVO_CACHE_HTML, MODE_PRIVATE)) {
+                fos.write(html.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                Log.e(TAG, "Erro ao salvar cópia local", e);
+            }
+        });
+    }
+
+    private void apagarCopiaLocal() {
+        io.execute(() -> deleteFile(ARQUIVO_CACHE_HTML));
+    }
+
+    private String lerCopiaLocal() {
+        File arquivo = new File(getFilesDir(), ARQUIVO_CACHE_HTML);
+        if (!arquivo.exists()) return null;
+
+        try (FileInputStream fis = new FileInputStream(arquivo);
+             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int lidos;
+            while ((lidos = fis.read(buffer)) != -1) {
+                bos.write(buffer, 0, lidos);
+            }
+            String html = bos.toString("UTF-8");
+            return html.trim().isEmpty() ? null : html;
+        } catch (IOException e) {
+            Log.e(TAG, "Erro ao ler cópia local", e);
+            return null;
+        }
+    }
+
+    // ---------------------------------------------------------------- Timeout
+
+    private void iniciarTimeout() {
+        cancelarTimeout();
+        timeoutCarregamento = () -> {
+            if (conteudoExibido) return;
+
+            if (NetworkUtils.isNetworkAvailable(DescarteEletronicos.this)) {
+                mostrarAviso(); // se o dado chegar depois, o listener substitui o aviso
+            } else {
+                irParaSemInternet();
+            }
+        };
+        handler.postDelayed(timeoutCarregamento, TIMEOUT_CARREGAMENTO_MS);
+    }
+
+    private void cancelarTimeout() {
+        if (timeoutCarregamento != null) {
+            handler.removeCallbacks(timeoutCarregamento);
+        }
+    }
+
+    // ---------------------------------------------------------------- Rede
 
     private void registrarNetworkCallback() {
         connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
@@ -148,13 +328,19 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
             public void onAvailable(@NonNull Network network) {
                 runOnUiThread(() -> {
                     atualizarBannerOffline();
-                    recarregarOuvinte();
+                    atualizarModoCacheWebView();
+                    if (htmlListener == null) { // listener caiu por erro: tenta de novo
+                        carregarDoFirebase();
+                    }
                 });
             }
 
             @Override
             public void onLost(@NonNull Network network) {
-                runOnUiThread(DescarteEletronicos.this::atualizarBannerOffline);
+                runOnUiThread(() -> {
+                    atualizarBannerOffline();
+                    atualizarModoCacheWebView();
+                });
             }
         };
 
@@ -166,272 +352,14 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
             try {
                 connectivityManager.unregisterNetworkCallback(networkCallback);
             } catch (IllegalArgumentException e) {
-                // Callback unregistration safety
+                // já não estava registrado; ignora
             }
         }
     }
 
     private void atualizarBannerOffline() {
-        boolean isConnected = NetworkUtils.isNetworkAvailable(this);
-        binding.txtAvisoOfflineEletronicos.setVisibility(isConnected ? View.GONE : View.VISIBLE);
-    }
-
-    private void inciarRecyclerViewDescarteConsciente() {
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapterResiduosEletronicos = new AdapterResiduosEletronicos(this, descarteConscienteList, this);
-        recyclerView.setAdapter(adapterResiduosEletronicos);
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private void setupWebView() {
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
-        settings.setLoadsImagesAutomatically(true);
-        settings.setAllowFileAccess(true);
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                ajustarAlturaWebView(view);
-            }
-        });
-    }
-
-    private void ajustarAlturaWebView(WebView view) {
-        view.evaluateJavascript(
-                "(function() { return document.body ? document.body.scrollHeight : 0; })();",
-                value -> {
-                    try {
-                        int alturaDp = Integer.parseInt(value);
-                        float density = getResources().getDisplayMetrics().density;
-                        int alturaPx = Math.round(alturaDp * density);
-
-                        android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
-                        params.height = alturaPx;
-                        view.setLayoutParams(params);
-                    } catch (NumberFormatException e) {
-                        Log.e(TAG, "Erro ao ajustar altura do WebView: " + value, e);
-                    }
-                }
-        );
-    }
-
-    private void loadContent() {
-        DatabaseReference htmlReference = database.getReference("config_app_material_educativo")
-                .child("e_lixo") // ou "pneus", conforme a tela
-                .child("html_content");
-
-        htmlReference.keepSynced(true);
-
-        final boolean[] respondido = {false};
-        final Handler handler = new Handler(Looper.getMainLooper());
-
-        Runnable timeoutRunnable = () -> {
-            if (!respondido[0]) {
-                respondido[0] = true;
-                mostrarAvisoSemConteudo();
-            }
-        };
-
-        // Só ativa o timeout se já sabemos que está offline.
-        // Se tiver internet, o Firebase deve responder (dado ou erro) rapidamente.
-        if (!NetworkUtils.isNetworkAvailable(this)) {
-            handler.postDelayed(timeoutRunnable, TIMEOUT_SEM_CACHE_MS);
-        }
-
-        htmlReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (respondido[0]) return; // timeout já disparou, ignora resposta tardia
-                respondido[0] = true;
-                handler.removeCallbacks(timeoutRunnable);
-
-                String html = snapshot.getValue(String.class);
-                if (html != null && !html.isEmpty()) {
-                    atualizarBannerOffline(); // garante que o banner reflita o estado real da rede no momento da exibição
-                    webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
-                } else {
-                    mostrarAvisoSemConteudo();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                if (respondido[0]) return;
-                respondido[0] = true;
-                handler.removeCallbacks(timeoutRunnable);
-                mostrarAvisoSemConteudo();
-                Log.e(TAG, "Erro ao carregar conteúdo do Firebase: " + error.getMessage());
-            }
-        });
-    }
-
-    private void mostrarAvisoSemConteudo() {
-        webView.setVisibility(View.GONE);
-        Intent intent = new Intent(DescarteEletronicos.this, SemInternetActivity.class);
-        intent.putExtra("id_activity", "descarte_pneus_eletronicos");
-        startActivity(intent);
-        finish();
-    }
-
-    private void recarregarOuvinte() {
-        if (databaseReference != null && childEventListener != null) {
-            databaseReference.removeEventListener(childEventListener);
-        }
-        redirecionadoSemInternet = false;
-        ouvinte();
-    }
-
-    private void ouvinte() {
-        if (estado == null || municipio == null) {
-            Log.e(TAG, "Estado ou município não configurados");
-            return;
-        }
-
-        databaseReference = database.getReference()
-                .child("cadastros")
-                .child(estado.toLowerCase())
-                .child(municipio.toLowerCase())
-                .child("descarte_eletronicos");
-
-        databaseReference.keepSynced(true);
-
-        childEventListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                String key = snapshot.getKey();
-                ClassDescarteConsciente descarteConsciente = snapshot.getValue(ClassDescarteConsciente.class);
-
-                if (descarteConsciente != null && key != null) {
-                    descarteConsciente.setId(key);
-
-                    int position = 0;
-                    if (previousChildName != null) {
-                        Integer prevPosition = itemPositionMap.get(previousChildName);
-                        if (prevPosition != null) {
-                            position = prevPosition + 1;
-                        }
-                    }
-
-                    if (position > descarteConscienteList.size()) {
-                        position = descarteConscienteList.size();
-                    }
-
-                    descarteConscienteList.add(position, descarteConsciente);
-                    updatePositionMapFrom(position);
-
-                    if (adapterResiduosEletronicos != null) {
-                        adapterResiduosEletronicos.notifyItemInserted(position);
-                    }
-
-                    if (!descarteConscienteList.isEmpty()) {
-                        textView.setVisibility(View.VISIBLE);
-                    }
-                }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                String key = snapshot.getKey();
-                ClassDescarteConsciente updatedClass = snapshot.getValue(ClassDescarteConsciente.class);
-
-                if (key != null && updatedClass != null) {
-                    Integer position = itemPositionMap.get(key);
-                    if (position != null) {
-                        updatedClass.setId(key);
-                        descarteConscienteList.set(position, updatedClass);
-
-                        if (adapterResiduosEletronicos != null) {
-                            adapterResiduosEletronicos.notifyItemChanged(position);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                String key = snapshot.getKey();
-
-                if (key != null) {
-                    Integer position = itemPositionMap.get(key);
-                    if (position != null) {
-                        descarteConscienteList.remove(position.intValue());
-                        itemPositionMap.remove(key);
-                        updatePositionMapFrom(position);
-
-                        if (adapterResiduosEletronicos != null) {
-                            adapterResiduosEletronicos.notifyItemRemoved(position);
-                        }
-
-                        if (descarteConscienteList.isEmpty()) {
-                            textView.setVisibility(View.GONE);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                String key = snapshot.getKey();
-                ClassDescarteConsciente movedClass = snapshot.getValue(ClassDescarteConsciente.class);
-
-                if (key != null && movedClass != null) {
-                    Integer oldPosition = itemPositionMap.get(key);
-
-                    if (oldPosition != null) {
-                        descarteConscienteList.remove(oldPosition.intValue());
-
-                        if (adapterResiduosEletronicos != null) {
-                            adapterResiduosEletronicos.notifyItemRemoved(oldPosition);
-                        }
-
-                        int newPosition = 0;
-                        if (previousChildName != null) {
-                            Integer prevPosition = itemPositionMap.get(previousChildName);
-                            if (prevPosition != null) {
-                                newPosition = prevPosition + 1;
-                            }
-                        }
-
-                        if (newPosition > descarteConscienteList.size()) {
-                            newPosition = descarteConscienteList.size();
-                        }
-
-                        movedClass.setId(key);
-                        descarteConscienteList.add(newPosition, movedClass);
-                        updatePositionMapFrom(Math.min(oldPosition, newPosition));
-
-                        if (adapterResiduosEletronicos != null) {
-                            adapterResiduosEletronicos.notifyItemMoved(oldPosition, newPosition);
-                            adapterResiduosEletronicos.notifyItemChanged(newPosition);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Erro no Firebase: " + error.getMessage());
-
-                if (!NetworkUtils.isNetworkAvailable(DescarteEletronicos.this)) {
-                    irParaSemInternet();
-                }
-            }
-        };
-
-        databaseReference.addChildEventListener(childEventListener);
-    }
-
-    private void updatePositionMapFrom(int startPosition) {
-        for (int i = startPosition; i < descarteConscienteList.size(); i++) {
-            ClassDescarteConsciente item = descarteConscienteList.get(i);
-            if (item.getId() != null) {
-                itemPositionMap.put(item.getId(), i);
-            }
-        }
+        boolean conectado = NetworkUtils.isNetworkAvailable(this);
+        bindingDescarteEletronicos.txtAvisoOfflineEletronicos.setVisibility(conectado ? View.GONE : View.VISIBLE);
     }
 
     private void irParaSemInternet() {
@@ -439,54 +367,18 @@ public class DescarteEletronicos extends AppCompatActivity implements AdapterRes
         redirecionadoSemInternet = true;
 
         Intent intent = new Intent(DescarteEletronicos.this, SemInternetActivity.class);
-        intent.putExtra("id_activity", "descarte_eletronicos");
+        intent.putExtra("id_activity", "material_educativo");
         startActivity(intent);
         finish();
-    }
-
-    @Override
-    public void click_DescarteEletronicos(ClassDescarteConsciente descarteEletronicosClass) {
-        if (descarteEletronicosClass != null && descarteEletronicosClass.getFone() != null) {
-            ligar(descarteEletronicosClass.getFone());
-        }
-    }
-
-    private void ligar(String num) {
-        if (ActivityCompat.checkSelfPermission(DescarteEletronicos.this, Manifest.permission.CALL_PHONE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(DescarteEletronicos.this,
-                    new String[]{Manifest.permission.CALL_PHONE}, 1);
-
-        } else {
-            Intent intentLigar = new Intent(Intent.ACTION_CALL);
-            intentLigar.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intentLigar.setData(Uri.parse("tel:" + num));
-            startActivity(intentLigar);
-        }
-    }
-
-    private void navigateBackToMainActivity() {
-        Intent intent = new Intent(DescarteEletronicos.this, MainActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        navigateBackToMainActivity();
-        return true;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (childEventListener != null && databaseReference != null) {
-            databaseReference.removeEventListener(childEventListener);
+        cancelarTimeout();
+        if (htmlRef != null && htmlListener != null) {
+            htmlRef.removeEventListener(htmlListener);
         }
-        if (webView != null) {
-            webView.destroy();
-        }
-        binding = null;
+        io.shutdown();
     }
 }

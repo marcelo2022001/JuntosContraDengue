@@ -111,7 +111,7 @@
     <string name="sugestao">Sugestão</string>
     <string name="titulo_da_imagem">Titulo da imagem</string>
     <string name="botao_enviar_imagem">botao enviar imagem</string>
-    <string name="nada_para_ver">Nada para ver.\n Tente:\n 1- Ativar a internet. \n 2- Espere adicionar conteúdo.</string>
+    <string name="nada_para_ver">Nenhum trabalho adicionado.\n Tente:\n 1- Ativar a internet. \n 2- Aguarde adicionar conteúdo.</string>
     <string name="sugestao_email">Você quis dizer: exemplo@gmail.com?</string>
     <string name="corrigir">Corrigir</string>
     <string name="contamos_com_voce">Contamos com Você!</string>
@@ -135,7 +135,7 @@
     <string name="voltar">Voltar</string>
     <string name="logo_do_aplicativo">Logo do Aplicativo</string>
     <string name="sobre_o_aplicativo">Sobre o Aplicativo</string>
-    <string name="todos_juntos_contra_a_dengue">Todos Juntos contra a Dengue</string>
+    <string name="todos_juntos_contra_a_dengue">Juntos contra a Dengue</string>
     <string name="vers_o_1_0_0">Versão x.x.x</string>
     <string name="desenvolvido_por_marcelo_rodrigues_da_silva">Desenvolvido por: Marcelo Rodrigues da Silva</string>
     <string name="casa_estrela_software">Casa Estrela Software</string>
@@ -144,7 +144,7 @@
     <string name="municipio">Município</string>
     <string name="estado">Estado</string>
     <string name="mostrar_imagem">Selecionado irá mostrar a imagem do agente na tela Agentes de vigilância em saúde.</string>
-    <string name="aviso_admin">Lembre o admin de concluir o cadastro na pagina de Login Admin -> Concluir Pré Cadastro. E Login agente -> Concluir pré cadastro para agentes e demais.</string>
+    <string name="aviso_admin">Lembre o admin de concluir o cadastro na página de Login Admin -> Concluir Pré-Cadastro. E Login Agentes -> Concluir Pré-Cadastro para agentes e outros.</string>
     <string name="responsavel">Responsável</string>
     <string name="cargo">Cargo</string>
     <string name="outros">Outros</string>
@@ -231,7 +231,6 @@
     <string name="selecione_uma_funcao_abaixo">Selecione uma função abaixo</string>
     <string name="mostrar_na_tela_agentes_de_vigilancia_em_saude">Mostrar imagem do agente na tela Agentes de Vigilância em Saúde</string>
     <string name="adicionar">Adicionar</string>
-    <string name="download_dos_icones">Download dos icones em https://icon-icons.com/pt/pacotes-de-icones </string>
     <string name="informacoes">Informações</string>
     <string name="minha_conta">Minha conta</string>
     <string name="minhas_denuncias">Minhas Denúncias</string>
@@ -303,16 +302,52 @@
     <string name="validando">VALIDANDO…</string>
     <string name="agente_de_saude">Agente de Saúde</string>
     <string name="toque_para_ampliar">Toque para ampliar</string>
-    <string name="aguardando_resposta">Aguardando resposta</string>
-    <string name="resolvidas">Resolvidas</string>
-    <string name="nao_resolvidas">Não Resolvidas</string>
     <string name="aguardando_avaliacao_do_usuario">Aguardando avaliação do usuário: 0</string>
-    <string name="reclamacoes_respondidas">Reclamações respondidas</string>
-    <string name="total_de_reclamacoes">Total de reclamações</string>
     <string name="selecionar_item">selecionar_item</string>
     <string name="voce_esta_offline_exibindo_dados_salvos_localmente">Você está offline. Exibindo dados salvos localmente.</string>
+    <string name="conteudo_indisponivel_titulo">Conteúdo indisponível</string>
+    <string name="conteudo_indisponivel_msg">Não foi possível carregar o material educativo agora. Tente novamente mais tarde.</string>
     <string name="logo_todos_contra_a_dengue">Logo Todos Contra a Dengue</string>
     <string name="perfil_administrador">Perfil Administrador</string>
     <string name="perfil_agente">Perfil Agente</string>
+
+
+    // Novas Ocultar
+    <string name="excluir_selecionadas_com_total">Excluir (%1$d)</string>
+    <string name="excluir_reclamacoes_titulo">Excluir reclamações</string>
+    <string name="excluir_reclamacoes_mensagem">Excluir %1$d reclamação(ões) da sua lista? Elas continuam no sistema, só deixam de aparecer para os agentes.</string>
+    <string name="reclamacoes_excluidas_sucesso">Reclamações Excluir com sucesso</string>
+    <string name="error_excluir_reclamacoes">Erro ao Excluir reclamações</string>
+    <string name="ocultar">Ocultar</string>
+
+    <string name="total_de_reclamacoes_contagem">Total de reclamações: %1$d</string>
+    <string name="reclamacoes_respondidas_contagem">Reclamações respondidas: %1$d</string>
+    <string name="aguardando_avaliacao_usuario_contagem">Respondido/Aguardando usuário avaliar: %1$d</string>
+    <string name="aguardando_resposta_contagem">Aguardando resposta: %1$d</string>
+    <string name="resolvidas_contagem">Resolvidas: %1$d</string>
+    <string name="nao_resolvidas_contagem">Não resolvidas: %1$d</string>
+
+    <string name="total_de_reclamacoes">Total de reclamações: 0</string>
+    <string name="reclamacoes_respondidas">Reclamações respondidas: 0</string>
+    <string name="aguardando_resposta">Aguardando resposta: 0</string>
+    <string name="resolvidas">Resolvidas: 0</string>
+    <string name="nao_resolvidas">Não resolvidas: 0</string>
+    <string name="creditos_e_atribuicoes">Créditos e Atribuições</string>
+    <string name="usuarios">Usuários:</string>
+
+    <string name="creditos">
+Flaticon\n
+Ícones utilizados no aplicativo conforme as respectivas condições de licença e atribuição. Recursos utilizados sob licença gratuita com atribuição obrigatória.\n\n
+Imagem de escorpião (Tela Principal):\nhttps://www.flaticon.com/br/icone-gratis/escorpiao_2188058\n\n
+Identificação (Tela Denúncia/Reclamação):\nRosto scan ícones animados criados por Magnific - Flaticon\nhttps://www.flaticon.com/br/icones-animados-gratis/rosto-scan. \n\n
+ Pixabay \n
+   Imagem pneus (Tela info. sobre descarte de pneus): https://pixabay.com/pt/photos/pneus-velhos-pneu-de-carro-3414608/
+</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="recuperar_email">Recuperar email</string>
+    <string name="recuperar_e_mail">Recuperar E-mail</string>
+    <string name="digite_seu_cpf_apenas_numeros">Digite seu CPF (apenas números)</string>
+    <string name="buscar_email">Buscar Email</string>
 
 </resources>

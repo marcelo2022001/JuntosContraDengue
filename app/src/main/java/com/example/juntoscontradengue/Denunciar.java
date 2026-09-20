@@ -2,8 +2,8 @@ package com.example.juntoscontradengue;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -12,6 +12,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuItem;
@@ -27,8 +28,10 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.example.juntoscontradengue.databinding.ActivityDenunciarBinding;
+import com.example.juntoscontradengue.extras.Alertas;
 import com.example.juntoscontradengue.extras.NetworkUtils;
 import com.example.juntoscontradengue.extras.TopicHelper;
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,6 +45,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,8 +56,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Denunciar extends AppCompatActivity {
-    private ActivityResultLauncher<String> cameraPermissionLauncher;
-    private ActivityResultLauncher<String> storagePermissionLauncher;
+    private ActivityResultLauncher<String[]> permissionsLauncher;
     private ActivityDenunciarBinding binding;
     private AlertDialog loadingDialog;
     private String estado;
@@ -61,6 +64,7 @@ public class Denunciar extends AppCompatActivity {
     private String uid;
     private String tokenFCM;
     private boolean usuarioQuerSeIdentificar = false;
+    private boolean isCapturingVideo = false;
     boolean isConnected;
     String nome, telefone;
     private Uri imgUri1, imgUri2, imgUri3, videoUri, imgUriTemp;
@@ -69,8 +73,8 @@ public class Denunciar extends AppCompatActivity {
     private ActivityResultLauncher<Intent> galleryLauncher;
     private ActivityResultLauncher<Intent> cameraLauncher;
     private ActivityResultLauncher<Intent> videoLauncher;
-    private final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     private final StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+    private FirebaseDatabase databaseMunicipio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +82,8 @@ public class Denunciar extends AppCompatActivity {
 
         isConnected = NetworkUtils.isNetworkAvailable(Denunciar.this);
 
-
+        verificarPermissoesIniciais();
+        
         binding = ActivityDenunciarBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -97,6 +102,18 @@ public class Denunciar extends AppCompatActivity {
         configurarBackPressed();
         configPerfil();
     }
+
+    private void verificarPermissoesIniciais() {
+        boolean temCamera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED;
+        Log.d("Denunciar", "Permissão da câmera ao iniciar: " + temCamera);
+
+        if (!temCamera) {
+            // Solicita permissão antecipadamente
+            verificarPermissoesEAbrirCamera(false);
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -106,26 +123,53 @@ public class Denunciar extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void verificarPermissoesEAbrirCamera() {
-        boolean temCamera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_GRANTED;
+    private void verificarPermissoesEAbrirCamera(boolean isForVideo) {
+        this.isCapturingVideo = isForVideo;
 
-        // WRITE_EXTERNAL_STORAGE só é necessária até a API 28 (Android 9)
-        boolean precisaStorage = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P;
-        boolean temStorage = !precisaStorage || ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        List<String> missingPermissions = new ArrayList<>();
 
-        if (!temCamera) {
-            cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
-            return;
+        // PERMISSÃO DA CÂMERA
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            missingPermissions.add(Manifest.permission.CAMERA);
         }
 
-        if (!temStorage) {
-            storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            return;
+        // PERMISSÃO DE ÁUDIO PARA VÍDEO
+        if (isForVideo && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            missingPermissions.add(Manifest.permission.RECORD_AUDIO);
         }
 
-        abrirCamera();
+        // PERMISSÕES DE ARMAZENAMENTO POR VERSÃO
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+            // Para Android 13+, usa READ_MEDIA_IMAGES e READ_MEDIA_VIDEO
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+                missingPermissions.add(Manifest.permission.READ_MEDIA_IMAGES);
+            }
+            if (isForVideo && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO)
+                    != PackageManager.PERMISSION_GRANTED) {
+                missingPermissions.add(Manifest.permission.READ_MEDIA_VIDEO);
+            }
+        } else { // Android 12 ou inferior
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                missingPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+            }
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) { // Android 9 ou inferior
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    missingPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                }
+            }
+        }
+
+        if (missingPermissions.isEmpty()) {
+            if (isForVideo) abrirGravadorVideo();
+            else abrirCamera();
+        } else {
+            permissionsLauncher.launch(missingPermissions.toArray(new String[0]));
+        }
     }
 
     private void inicializarDados() {
@@ -137,6 +181,13 @@ public class Denunciar extends AppCompatActivity {
         SharedPreferences prefsData = getSharedPreferences("UserData", MODE_PRIVATE);
         nome = Objects.requireNonNull(prefsData.getString("nome", ""));
         telefone = Objects.requireNonNull(prefsData.getString("telefone", ""));
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
+        Log.d("FIREBASE_DB", "Estado: " + estado);
+        Log.d("FIREBASE_DB", "Município: " + municipio);
+        Log.d("FIREBASE_DB", "URL banco: " + urlBanco);
 
         if (!isConnected){
             Intent itente = new Intent(this, SemInternetActivity.class);
@@ -195,11 +246,24 @@ public class Denunciar extends AppCompatActivity {
         });
 
         // Câmera de Fotos
-        cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), r -> {
-            if (r.getResultCode() == Activity.RESULT_OK) {
-                atribuirUri(imgUriTemp);
-            }
-        });
+        cameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        // A foto foi salva em imgUriTemp
+                        atribuirUri(imgUriTemp);
+                    } else {
+                        // Limpa o arquivo temporário se cancelou
+                        if (imgUriTemp != null) {
+                            try {
+                                getContentResolver().delete(imgUriTemp, null, null);
+                            } catch (Exception e) {
+                                Log.e("Denunciar", "Erro ao deletar arquivo temporário", e);
+                            }
+                        }
+                    }
+                }
+        );
 
         // Seleção/Gravação de Vídeo — registrado sempre, sem checagem de versão
         videoLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), r -> {
@@ -214,26 +278,38 @@ public class Denunciar extends AppCompatActivity {
             }
         });
 
-        // Permissão para câmera
-        cameraPermissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestPermission(),
-                isGranted -> {
-                    if (isGranted) {
-                        abrirCamera();
-                    } else {
-                        Toast.makeText(this, "Permissão da câmera negada.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        // Permissões múltiplas
+        permissionsLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestMultiplePermissions(),
+                result -> {
+                    Log.d("Denunciar", "Resultado das permissões: " + result);
 
-        storagePermissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestPermission(),
-                isGranted -> {
-                    if (isGranted) {
-                        abrirCamera();
+                    boolean allGranted = true;
+                    for (Map.Entry<String, Boolean> entry : result.entrySet()) {
+                        Log.d("Denunciar", "Permissão " + entry.getKey() + ": " + entry.getValue());
+                        if (!entry.getValue()) {
+                            allGranted = false;
+                        }
+                    }
+
+                    if (allGranted) {
+                        Log.d("Denunciar", "Todas as permissões concedidas");
+                        if (isCapturingVideo) abrirGravadorVideo();
+                        else abrirCamera();
                     } else {
-                        Toast.makeText(this,
-                                "Permissão de armazenamento negada. Não é possível salvar a foto.",
-                                Toast.LENGTH_SHORT).show();
+                        Log.e("Denunciar", "Algumas permissões foram negadas");
+                        // MOSTRA UM DIÁLOGO EXPLICATIVO
+                        new AlertDialog.Builder(this)
+                                .setTitle("Permissões necessárias")
+                                .setMessage("Para usar a câmera, você precisa conceder as permissões solicitadas. " +
+                                        "Vá em Configurações > Apps > Juntos Contra Dengue > Permissões e ative manualmente.")
+                                .setPositiveButton("Configurações", (d, w) -> {
+                                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    intent.setData(Uri.parse("package:" + getPackageName()));
+                                    startActivity(intent);
+                                })
+                                .setNegativeButton("Cancelar", null)
+                                .show();
                     }
                 });
     }
@@ -297,7 +373,7 @@ public class Denunciar extends AppCompatActivity {
         String[] options = {"Tirar Foto", "Escolher da Galeria"};
         new AlertDialog.Builder(this).setTitle("Adicionar Imagem").setItems(options, (dialog, which) -> {
             if (which == 0) {
-                verificarPermissoesEAbrirCamera();
+                verificarPermissoesEAbrirCamera(false);
             } else {
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
@@ -307,38 +383,93 @@ public class Denunciar extends AppCompatActivity {
     }
 
     private void abrirCamera() {
+        Log.d("Denunciar", "Tentando abrir a câmera...");
 
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "Foto Dengue");
-
-        imgUriTemp = getContentResolver().insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                values);
-
-        if (imgUriTemp == null) {
-            Toast.makeText(this,
-                    "Não foi possível abrir a câmera.",
-                    Toast.LENGTH_SHORT).show();
+        // VERIFICA SE O DISPOSITIVO TEM CÂMERA
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+            Toast.makeText(this, "Seu dispositivo não possui câmera", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        // CRIA O ARQUIVO TEMPORÁRIO
+        File photoFile;
+        try {
+            String timeStamp = String.valueOf(System.currentTimeMillis());
+            String imageFileName = "JPEG_" + timeStamp + "_";
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+            if (storageDir != null && !storageDir.exists()) {
+                boolean dirCreated = storageDir.mkdirs();
+                if (!dirCreated) {
+                    Log.e("Denunciar", "Não foi possível criar o diretório: " + storageDir.getAbsolutePath());
+                    Toast.makeText(this, "Erro ao criar diretório para fotos", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+
+            // File.createTempFile NUNCA retorna null - sempre lança IOException em caso de erro
+            photoFile = File.createTempFile(
+                    imageFileName,  /* prefix */
+                    ".jpg",         /* suffix */
+                    storageDir      /* directory */
+            );
+
+            Log.d("Denunciar", "Arquivo criado: " + photoFile.getAbsolutePath());
+
+        } catch (IOException ex) {
+            Log.e("Denunciar", "Erro ao criar arquivo: " + ex.getMessage());
+            Toast.makeText(this, "Erro ao criar arquivo para foto", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // USA FILE PROVIDER PARA OBTER A URI
+        imgUriTemp = FileProvider.getUriForFile(this,
+                getApplicationContext().getPackageName() + ".fileprovider",
+                photoFile);
+
+        Log.d("Denunciar", "URI da foto: " + imgUriTemp.toString());
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imgUriTemp);
 
-        cameraLauncher.launch(intent);
+        // CONCEDE PERMISSÃO TEMPORÁRIA
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+        // VERIFICA SE HÁ APP DE CÂMERA
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            cameraLauncher.launch(intent);
+        } else {
+            Toast.makeText(this, "Nenhum aplicativo de câmera encontrado", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showVideoPickerOptions() {
         String[] options = {"Gravar Vídeo", "Escolher da Galeria"};
         new AlertDialog.Builder(this).setTitle("Adicionar Vídeo").setItems(options, (d, w) -> {
             if (w == 0) {
-                videoLauncher.launch(new Intent(MediaStore.ACTION_VIDEO_CAPTURE));
+                verificarPermissoesEAbrirCamera(true);
             } else {
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*");
                 videoLauncher.launch(intent);
             }
         }).show();
+    }
+
+    private void abrirGravadorVideo() {
+        Log.d("Denunciar", "Tentando abrir gravador de vídeo...");
+
+        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+
+        // LIMITA O TAMANHO DO VÍDEO (OPCIONAL)
+        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 60); // 60 segundos
+        intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1); // Qualidade alta
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            videoLauncher.launch(intent);
+        } else {
+            Toast.makeText(this, "Nenhum aplicativo de vídeo encontrado", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void alertaOpcoesImagem(Uri uri, int index) {
@@ -481,9 +612,16 @@ public class Denunciar extends AppCompatActivity {
     }
 
     private void salvarNoRealtime(String id, Map<String, Object> urls, String end, String num, String ref, String desc) {
-        DatabaseReference dbRef = databaseReference.child("cadastros")
-                .child(estado)
-                .child(municipio)
+
+        if (estado == null || estado.isEmpty() || estado.equals("default")) {
+        Toast.makeText(this, "Não foi possível salvar sua reclamação", Toast.LENGTH_SHORT).show();
+        return;
+        } else {
+            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+            Log.d("FIREBASE_DB", "URL para verificar reclamações: " + urlBanco);
+        }
+
+        DatabaseReference dbRef = databaseMunicipio.getReference()
                 .child("reclamacoes")
                 .child(uid)
                 .child(id);
@@ -496,6 +634,7 @@ public class Denunciar extends AppCompatActivity {
         data.put("num_casa_reclamacao", num);
         data.put("referencia", ref);
         data.put("reclamacao", desc);
+        data.put("visivel_agente", true);
         data.put("status", "Aguardando resposta");
         data.put("midia_reclamacoes", urls);
         data.put("tokenFCM", tokenFCM);
@@ -521,7 +660,7 @@ public class Denunciar extends AppCompatActivity {
 
             HashMap<String, Object> notificacao = new HashMap<>();
             notificacao.put("titulo", "Nova Reclamação");
-            notificacao.put("mensagem", "Uma nova reclamação foi registrada em " + municipio);
+            notificacao.put("mensagem",  desc);
             notificacao.put("topicos", topicos);
 
             FirebaseDatabase.getInstance()
@@ -561,12 +700,13 @@ public class Denunciar extends AppCompatActivity {
             return;
         }
 
-        databaseReference.child("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("reclamacoes")
-                .child(uid)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance(urlBanco)
+                .getReference()
+                .child("reclamacoesUsuarios")
+                .child(uid);
+
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
 
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -575,9 +715,28 @@ public class Denunciar extends AppCompatActivity {
 
                         if (total >= 3) {
                             hideLoading();
-                            Toast.makeText(Denunciar.this,
-                                    "Você já possui o limite máximo de 3 denúncias. Exclua 1 ou mais denúncias para continuar.",
-                                    Toast.LENGTH_LONG).show();
+
+                            Alertas.showSuccessDialog(
+                                    Denunciar.this,
+                                    "Limite de denúncias",
+                                    "Você já possui o limite máximo de 3 denúncias.\n\n" +
+                                            "Exclua 1 ou mais denúncias para continuar.",
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                            Intent intent = new Intent(Denunciar.this, MainActivity.class);
+
+                                            // Evita voltar para a tela Denunciar ao pressionar Voltar
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                                    Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    }
+                            );
+
                             return;
                         }
 
@@ -628,6 +787,12 @@ public class Denunciar extends AppCompatActivity {
 
         // Guardamos também se o utilizador já escolheu identificar-se
         outState.putBoolean("usuarioQuerSeIdentificar", usuarioQuerSeIdentificar);
+
+        // SALVA A URI TEMPORÁRIA DA CÂMERA
+        if (imgUriTemp != null) {
+            outState.putString("imgUriTemp", imgUriTemp.toString());
+        }
+
     }
 
     @Override
@@ -695,5 +860,16 @@ public class Denunciar extends AppCompatActivity {
             throw new RuntimeException(e);
         }
     }
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Limpa arquivos temporários
+        if (imgUriTemp != null) {
+            try {
+                getContentResolver().delete(imgUriTemp, null, null);
+            } catch (Exception e) {
+                Log.e("Denunciar", "Erro ao limpar arquivo temporário", e);
+            }
+        }
+    }
 }

@@ -32,6 +32,7 @@ public class ExcluirLocaisDescartesPneus extends AppCompatActivity {
 
     private ActivityExcluirLocaisDescartesPneusBinding bindingDescartesPneus;
     private DatabaseReference databaseDescartesPneus;
+    private FirebaseDatabase databaseMunicipio;
     private ChildEventListener childEventListenerDescartesPneus;
     private AdapterExcluirLocaisDescartesPneus adapterDescartesPneus;
     RecyclerView recyclerViewDescartesPneus;
@@ -58,6 +59,11 @@ public class ExcluirLocaisDescartesPneus extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+        // INICIALIZA A REFERÊNCIA DO BANCO
+        databaseDescartesPneus = databaseMunicipio.getReference().child("descarte_eletronicos");
+
         setupToolbarDescartesPneus();
         initializeFirebaseDescartesPneus();
         setupRecyclerViewDescartesPneus();
@@ -72,11 +78,7 @@ public class ExcluirLocaisDescartesPneus extends AppCompatActivity {
     }
 
     private void initializeFirebaseDescartesPneus() {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        databaseDescartesPneus = database.getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("descarte_pneus");
+        databaseMunicipio.getReference().child("descarte_pneus");
     }
 
     private void setupRecyclerViewDescartesPneus() {

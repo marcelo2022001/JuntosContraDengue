@@ -61,6 +61,9 @@ public class ExcluirTelefonesUteisActivity extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+        databaseReferenceExcluirFone = databaseMunicipio.getReference();
 
         setupToolbar();
         initializeFirebase();
@@ -76,11 +79,8 @@ public class ExcluirTelefonesUteisActivity extends AppCompatActivity {
     }
 
     private void initializeFirebase() {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        databaseReferenceExcluirFone = database
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+
+       databaseReferenceExcluirFone
                 .child("telefones_uteis");
     }
 

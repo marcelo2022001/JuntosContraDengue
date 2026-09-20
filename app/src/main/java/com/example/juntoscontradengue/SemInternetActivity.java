@@ -40,7 +40,7 @@ public class SemInternetActivity extends AppCompatActivity {
             case "denunciar":
             case "profile":
             case "reclamacoes_usuarios":
-            case "descarte_pneus_eletronicos":
+            case "material_educativo":
             case "termos":
                 Intent intent = new Intent(SemInternetActivity.this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

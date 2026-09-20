@@ -24,6 +24,7 @@ import com.example.juntoscontradengue.extras.AppConfig;
 import com.example.juntoscontradengue.extras.EmailValidator;
 import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TopicHelper;
 import com.example.juntoscontradengue.extras.ValidaCpf;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -57,9 +58,9 @@ public class TelaDeCadastro extends AppCompatActivity {
     private String email;
     private String telLimpo;
     private String senha;
-    private String estado, municipio;
     private String uuid, tipoConta;
     Long dataCadastro;
+    private FirebaseDatabase databaseMunicipio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +72,12 @@ public class TelaDeCadastro extends AppCompatActivity {
         // Inicialize o FirebaseAuth aqui
         auth = FirebaseAuth.getInstance();
 
-        estado = AppConfig.getEstado(this);
-        municipio = AppConfig.getMunicipio(this);
+        String estado = AppConfig.getEstado(this);
+        String municipio = AppConfig.getMunicipio(this);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -154,7 +159,13 @@ public class TelaDeCadastro extends AppCompatActivity {
         }
 
 
-        checkBoxCad.setOnCheckedChangeListener((buttonView, isChecked) -> verificarCampo());
+        checkBoxCad.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked){
+                verificarCampo();
+            } else{
+                btnCad.setEnabled(false);
+            }
+        });
 
         termos.setOnClickListener(v -> startActivity(new Intent(TelaDeCadastro.this, TermosDeUsoActivity.class)));
 
@@ -299,13 +310,9 @@ public class TelaDeCadastro extends AppCompatActivity {
     }
 
     private void verificarTelefoneAntesCadastro(CadastroCallback cadastroCallback) {
-        DatabaseReference baseRefFone = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio);
+        DatabaseReference baseRefFone = databaseMunicipio.getReference("telefone_index");
 
-        // Verifica telefone
-        baseRefFone.child("telefone_index").child(telLimpo)
+        baseRefFone.child(telLimpo)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snap) {
@@ -329,12 +336,9 @@ public class TelaDeCadastro extends AppCompatActivity {
 
     private void verificarCpfAntesCadastro(CadastroCallback callback) {
 
-        DatabaseReference baseRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio);
+        DatabaseReference baseRef = databaseMunicipio.getReference("cpf_index");
 
-        baseRef.child("cpf_index").child(cpfLimpo)
+        baseRef.child(cpfLimpo)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -408,11 +412,7 @@ public class TelaDeCadastro extends AppCompatActivity {
         dataCadastro = c.getTimeInMillis();
 
 
-        DatabaseReference userRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("logins")
+        DatabaseReference userRef =  databaseMunicipio.getReference("logins")
                 .child(tipoConta)
                 .child(uuid); // Já referencia o nó
 
@@ -426,18 +426,26 @@ public class TelaDeCadastro extends AppCompatActivity {
         dados.put("email", email);
         dados.put("dataCadastro", dataCadastro);
         dados.put("uuid", uuid);
-        dados.put("updatedAt", "");
+        dados.put("updatedAt", 0);
+
+        if(tipoConta.equals("admins")){
+
+            dados.put("index_email_admin/" + cpfLimpo + "/email", email);
+
+        }
 
         userRef.setValue(dados)
                 .addOnSuccessListener(aVoid -> {
 
-                    DatabaseReference baseRef = FirebaseDatabase.getInstance()
-                            .getReference("cadastros")
-                            .child(estado)
-                            .child(municipio);
+// 1. Crie um mapa com os caminhos relativos à raiz do banco
+                    Map<String, Object> atualizacoes = new HashMap<>();
+                    atualizacoes.put("cpf_index/" + cpfLimpo, uuid);
+                    atualizacoes.put("telefone_index/" + telLimpo, uuid);
 
-                    baseRef.child("cpf_index").child(cpfLimpo).setValue(uuid);
-                    baseRef.child("telefone_index").child(telLimpo).setValue(uuid);
+// 2. Grava os dois índices em uma única operação atômica
+                    databaseMunicipio.getReference().updateChildren(atualizacoes);
+
+                    TopicHelper.inscreverNoTopicoDoPerfil(this, tipoConta);
 
                     if (tipoConta.equals("admins")) {
                         deletar_pre_cadastro();
@@ -464,6 +472,7 @@ public class TelaDeCadastro extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     Log.e("Firebase", "Erro ao salvar", e);
+                    checkBoxCad.setChecked(false);
                     finish();
                 });
     }
@@ -485,13 +494,7 @@ public class TelaDeCadastro extends AppCompatActivity {
     }
 
     private void deletar_pre_cadastro() {
-        DatabaseReference usersRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("config")
-                .child("pre_cadastro_admins")
-                .child(cpfLimpo);
+        DatabaseReference usersRef =  databaseMunicipio.getReference("config/pre_cadastro_admins/" + cpfLimpo);
 
         usersRef.removeValue();
     }

@@ -38,6 +38,8 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
     private final List<ClassAgentes> classAgentesExcluir = new ArrayList<>();
     private AdapterExcluirAgentes adapterAgentesExcluir;
     private DatabaseReference databaseReferenceExcluirAgentes;
+    private FirebaseDatabase databaseMunicipio;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,9 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
         // Configuração do RecyclerView e do Listener de Clique do Adapter
         RecyclerView recyclerView = bindingExcluirAgentes.rvAgentesExcluir;
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -76,8 +81,7 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
         });
 
         // Referência do Realtime Database
-        databaseReferenceExcluirAgentes = FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado).child(municipio).child(local_database);
+        databaseReferenceExcluirAgentes = databaseMunicipio.getReference().child(local_database);
 
         ouvirEventosBanco();
     }
@@ -129,10 +133,7 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
                         db_total_cadastro = "total_agentes";
                     }
 
-                    DatabaseReference preCadastroSoma = FirebaseDatabase.getInstance()
-                            .getReference("cadastros")
-                            .child(estado)
-                            .child(municipio)
+                    DatabaseReference preCadastroSoma = databaseMunicipio.getReference()
                             .child(local_database)
                             .child(db_total_cadastro);
 

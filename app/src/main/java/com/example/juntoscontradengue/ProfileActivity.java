@@ -63,7 +63,8 @@ public class ProfileActivity extends AppCompatActivity {
     private boolean isRedirecting = false;
     Boolean isConnected;
     private FirebaseAuth mAuth;
-    private DatabaseReference usersRef;
+    private DatabaseReference loginsRef;
+    private FirebaseDatabase databaseMunicipio;
     private FirebaseAuth.AuthStateListener authListener;
     private String estado, municipio;
     private String nomeSalvoSharedOuFirebase, cpfSalvoSharedOuFirebase, enderecoSalvoSharedOuFirebase;
@@ -81,6 +82,7 @@ public class ProfileActivity extends AppCompatActivity {
    private ImageView img_profile;
     private LinearLayout suggestionLayout;
     private String suggestedEmail = null;
+    private String urlImagemAgenteAtual;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +110,6 @@ public class ProfileActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mAuth = FirebaseAuth.getInstance();
-        usersRef = FirebaseDatabase.getInstance().getReference("cadastros");
 
         initViews(profileBinding);
 
@@ -116,13 +117,18 @@ public class ProfileActivity extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
+         loginsRef = databaseMunicipio.getReference().child("logins");
+
         SharedPreferences prefsUser = getSharedPreferences("UserData", MODE_PRIVATE);
         perfil = prefsUser.getString("perfil", null);
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
         Log.d("PROFILE", "user = " + currentUser);
 
-        if (currentUser == null) {
+        if (currentUser == null || perfil == null){
             Log.e("AUTH", "Usuário não autenticado no onCreate");
             redirecionarLogin();
             return;
@@ -183,22 +189,15 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void busca_imagem_agente() {
-        DatabaseReference buscar_img_agente = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child("agentes")
-                .child(uid)
-                .child("urlImagem");
-        buscar_img_agente.addListenerForSingleValueEvent(new ValueEventListener() {
+        getCurrentUserRef().child("urlImagem")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     // Obter a contagem de filhos
                     String urlImg = dataSnapshot.getValue(String.class);
                     if (urlImg != null && !urlImg.isEmpty()) {
-
+                        urlImagemAgenteAtual = urlImg;
                         Glide.with(ProfileActivity.this)
                                 .load(urlImg)
                                 .circleCrop()
@@ -334,6 +333,8 @@ public class ProfileActivity extends AppCompatActivity {
                                 .addOnCompleteListener(passwordTask -> {
                                     if (passwordTask.isSuccessful()) {
                                         Alertas.showAlertDialog(this, "Sucesso", "Sua senha foi alterada com sucesso!");
+                                       startActivity(new Intent(this, EscolherPerfilLogin.class));
+                                        FirebaseAuth.getInstance().signOut();
                                     } else {
                                         showToastSafe("Erro ao atualizar senha: " + Objects.requireNonNull(passwordTask.getException()).getMessage());
                                     }
@@ -370,18 +371,19 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
+    private DatabaseReference getCurrentUserRef() {
+        if (loginsRef == null || perfil == null || uid == null) {
+            return databaseMunicipio.getReference().child("logins").child(perfil != null ? perfil : "").child(uid != null ? uid : "");
+        }
+        return loginsRef.child(perfil).child(uid);
+    }
+
     private void buscarDadosUsuarioNoFirebase() {
         if (TextUtils.isEmpty(estado) || TextUtils.isEmpty(municipio) || TextUtils.isEmpty(perfil) || TextUtils.isEmpty(uid)) {
             redirecionarLogin();
         }
 
-        usersRef
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child(perfil)
-                .child(uid)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        getCurrentUserRef().addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.exists()) {
@@ -495,14 +497,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void conferirAlteracoesNoRealtimeAntesDeSalvar(String end, String num, String conj, String fone, String mail) {
 
-        DatabaseReference ref = usersRef
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child(perfil)
-                .child(uid);
-
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+        getCurrentUserRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -548,12 +543,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void updateUserData(String end, String num, String conj, String fone, String mail) {
 
-        DatabaseReference ref = usersRef
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child(perfil)
-                .child(uid);
+        DatabaseReference ref = getCurrentUserRef();
 
         Map<String, Object> updates = new HashMap<>();
 
@@ -568,7 +558,6 @@ public class ProfileActivity extends AppCompatActivity {
                 updates.put("novoEmail", mail);
             }
 
-            updates.put("updatedAt", ServerValue.TIMESTAMP);
 
         } else if ("admins".equals(perfil) || "agentes".equals(perfil)) {
 
@@ -576,7 +565,7 @@ public class ProfileActivity extends AppCompatActivity {
             boolean imagemMudou = "agentes".equals(perfil) && img_trocada;
 
             if (!emailMudou && !imagemMudou) {
-                // Segurança extra: não deveria chegar aqui, pois já é checado antes de chamar
+                // Segurança extra: não deveria chegar aqui, pois já é verificado antes de chamar
                 Alertas.showAlertDialog(this, "Aviso", "Nenhuma alteração detectada.");
                 return;
             }
@@ -626,7 +615,6 @@ public class ProfileActivity extends AppCompatActivity {
                                          String end, String num, String conj, String fone, String mail) {
 
         ref.updateChildren(updates).addOnSuccessListener(aVoid -> {
-            Toast.makeText(ProfileActivity.this, "Dados atualizados com sucesso!", Toast.LENGTH_SHORT).show();
 
             SharedPreferences pref = getSharedPreferences("UserData", MODE_PRIVATE);
             SharedPreferences.Editor editor = pref.edit();
@@ -699,15 +687,13 @@ public class ProfileActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
 
                         // 1. Salvamos no banco ANTES de deslogar e usando o UID correto
-                        DatabaseReference mDatabase = FirebaseDatabase.getInstance().
-                                getReference("cadastros");
+                        DatabaseReference mDatabase = databaseMunicipio.getReference();
 
-                        mDatabase.child(estado)
-                                .child(municipio)
+                        mDatabase
                                 .child("logins")
                                 .child(perfil)
                                 .child(uid) // O UID do usuário faltava aqui
-                                .child("novoEmailCadastrado")
+                                .child("novoEmail")
                                 .setValue(email) // Usando a variável passada por parâmetro com segurança
                                 .addOnSuccessListener(aVoid -> {
                                     Log.d("Firebase", "E-mail salvo com sucesso!");
@@ -870,10 +856,6 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void excluir_conta() {
 
-        if("admins".equals(perfil)) {
-            conta_admin_cadastro();
-        }
-
         Alertas.showConfirmDialog(
                 ProfileActivity.this,
                 "Excluir Conta",
@@ -889,42 +871,43 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void conta_admin_cadastro() {
 
-        DatabaseReference adminsRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child("admins");
+        if("admins".equals(perfil)) {
 
-        adminsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            DatabaseReference adminsRef = databaseMunicipio.getReference()
+                    .child("logins")
+                    .child("admins");
 
-                int totalAdmins = (int) snapshot.getChildrenCount();
+            adminsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                Log.d("TOTAL_ADMINS", "Quantidade: " + totalAdmins);
+                    int totalAdmins = (int) snapshot.getChildrenCount();
 
-                if (totalAdmins == 1) {
+                    Log.d("TOTAL_ADMINS", "Quantidade: " + totalAdmins);
 
-                    Alertas.showAlertDialog(
-                            ProfileActivity.this,
-                            "Aviso",
-                            "Não é possível excluir sua conta, pois você é o único administrador.\n\nCaso ainda deseje excluir a conta, entre em contato com o desenvolvedor."
-                    );
+                    if (totalAdmins == 1) {
 
-                } else {
+                        Alertas.showAlertDialog(
+                                ProfileActivity.this,
+                                "Aviso",
+                                "Não é possível excluir sua conta, pois você é o único administrador.\n\nCaso ainda deseje excluir a conta, entre em contato com o desenvolvedor."
+                        );
 
-                    excluir_conta();
+                    } else {
 
+                        excluir_conta();
+
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("FIREBASE", error.getMessage());
-            }
-        });
-
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e("FIREBASE", error.getMessage());
+                }
+            });
+        } else {
+            excluir_conta();
+        }
     }
 
     private void pedirSenhaParaExclusao() {
@@ -994,6 +977,7 @@ public class ProfileActivity extends AppCompatActivity {
                     }
                 });
     }
+
     private void excluirDadosUsuario(String userId, androidx.appcompat.app.AlertDialog progressDialog) {
         if (isFinishing() || isDestroyed()) return;
 
@@ -1001,12 +985,55 @@ public class ProfileActivity extends AppCompatActivity {
             progressDialog.setMessage("Excluindo dados do banco...");
         }
 
-        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+        Log.d("EXCLUSAO_DEBUG", "cpf=[" + cpfSalvoSharedOuFirebase + "] telefone=[" + telefoneSalvoSharedOuFirebase + "] perfil=" + perfil);
+
+        DatabaseReference rootRef = databaseMunicipio.getReference();
         Map<String, Object> updates = new HashMap<>();
-        updates.put("cadastros/" + estado + "/" + municipio + "/logins/usuarios/" + userId, null);
-        updates.put("cadastros/" + estado + "/" + municipio + "/logins/admins/" + userId, null);
-        updates.put("cadastros/" + estado + "/" + municipio + "/logins/agentes/" + userId, null);
-        updates.put("cadastros/" + estado + "/" + municipio + "/reclamacoes/" + userId, null);
+        updates.put("/logins/usuarios/" + userId, null);
+        updates.put("/logins/admins/" + userId, null);
+        updates.put("/logins/agentes/" + userId, null);
+        updates.put("/reclamacoes/" + userId, null);
+
+        if (!TextUtils.isEmpty(cpfSalvoSharedOuFirebase)) {
+            String cpfKey = sanitizarParaPath(cpfSalvoSharedOuFirebase);
+            updates.put("/cpf_index/" + cpfKey, null);
+
+            // Remove o e-mail (e novo_email) do índice de e-mail do perfil
+            if ("admins".equals(perfil)) {
+                updates.put("/index_email_admin/" + cpfKey, null);
+            } else if ("agentes".equals(perfil)) {
+                updates.put("/index_email_agentes/" + cpfKey, null);
+            }
+
+            Log.d("EXCLUSAO_DEBUG_2", "cpf= " + cpfKey);
+        }
+
+
+        if (!TextUtils.isEmpty(telefoneSalvoSharedOuFirebase)) {
+            String foneKey = sanitizarParaPath(telefoneSalvoSharedOuFirebase);
+            updates.put("/telefone_index/" + foneKey, null);
+            Log.d("EXCLUSAO_DEBUG_fone", "telefone= " + foneKey);
+        }
+
+        String campoContador = "agentes".equals(perfil) ? "total_agentes"
+                : "admins".equals(perfil) ? "total_admins"
+                  : null;
+
+        if (campoContador != null) {
+            rootRef.child("config").child(campoContador)
+                    .runTransaction(new com.google.firebase.database.Transaction.Handler() {
+                        @NonNull
+                        @Override
+                        public com.google.firebase.database.Transaction.Result doTransaction(@NonNull com.google.firebase.database.MutableData currentData) {
+                            Integer total = currentData.getValue(Integer.class);
+                            currentData.setValue((total == null ? 0 : total) + 1);
+                            return com.google.firebase.database.Transaction.success(currentData);
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {}
+                    });
+        }
 
         rootRef.updateChildren(updates)
                 .addOnSuccessListener(aVoid -> excluirStorageUsuario(userId, progressDialog))
@@ -1017,6 +1044,11 @@ public class ProfileActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    private String sanitizarParaPath(String valor) {
+        return valor.replaceAll("\\D", ""); // mantém só dígitos
+    }
+
     private void excluirStorageUsuario(String userId, androidx.appcompat.app.AlertDialog progressDialog) {
         if (isFinishing() || isDestroyed()) return;
 
@@ -1024,11 +1056,38 @@ public class ProfileActivity extends AppCompatActivity {
             progressDialog.setMessage("Excluindo fotos...");
         }
 
+        if (perfil.equals("admins")) {
+            excluirAutenticacaoUsuario(progressDialog);
+            return;
+        }
+
+        if (perfil.equals("agentes")) {
+            excluirImagemAgente(progressDialog);
+            return;
+        }
+
+        String storagePath = estado + "/" + municipio + "/reclamacoesUsuario/" + userId;
+        excluirPastaDeStorage(storagePath, progressDialog);
+    }
+
+    private void excluirImagemAgente(androidx.appcompat.app.AlertDialog progressDialog) {
+        if (TextUtils.isEmpty(urlImagemAgenteAtual)) {
+            excluirAutenticacaoUsuario(progressDialog);
+            return;
+        }
+
         try {
-            com.google.firebase.storage.FirebaseStorage storage = com.google.firebase.storage.FirebaseStorage.getInstance();
-            StorageReference storageRef = storage.getReference();
-            String storagePath = estado + "/" + municipio + "/reclamacoesUsuario/" + userId;
-            StorageReference userStorageRef = storageRef.child(storagePath);
+            StorageReference imgRef = FirebaseStorage.getInstance().getReferenceFromUrl(urlImagemAgenteAtual);
+            imgRef.delete().addOnCompleteListener(task -> excluirAutenticacaoUsuario(progressDialog));
+        } catch (Exception e) {
+            excluirAutenticacaoUsuario(progressDialog);
+        }
+    }
+
+    private void excluirPastaDeStorage(String path, androidx.appcompat.app.AlertDialog progressDialog) {
+        try {
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+            StorageReference userStorageRef = storageRef.child(path);
 
             userStorageRef.listAll()
                     .addOnSuccessListener(listResult -> {
@@ -1040,19 +1099,12 @@ public class ProfileActivity extends AppCompatActivity {
 
                         final int[] contador = {0};
                         for (StorageReference item : items) {
-                            item.delete()
-                                    .addOnSuccessListener(aVoid -> {
-                                        contador[0]++;
-                                        if (contador[0] == items.size()) {
-                                            excluirAutenticacaoUsuario(progressDialog);
-                                        }
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        contador[0]++;
-                                        if (contador[0] == items.size()) {
-                                            excluirAutenticacaoUsuario(progressDialog);
-                                        }
-                                    });
+                            item.delete().addOnCompleteListener(t -> {
+                                contador[0]++;
+                                if (contador[0] == items.size()) {
+                                    excluirAutenticacaoUsuario(progressDialog);
+                                }
+                            });
                         }
                     })
                     .addOnFailureListener(e -> excluirAutenticacaoUsuario(progressDialog));

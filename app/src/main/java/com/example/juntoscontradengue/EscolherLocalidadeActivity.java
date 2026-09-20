@@ -96,6 +96,8 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
         binding = ActivityEscolherLocalidadeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        tratarNotificacaoRecebida(getIntent());
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         executorService = Executors.newSingleThreadExecutor();
 
@@ -107,6 +109,27 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
         setupSpinners();
         setupListeners();
         carregarEstados();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        tratarNotificacaoRecebida(intent);
+    }
+    private void tratarNotificacaoRecebida(Intent intent) {
+        if (intent == null) return;
+        String titulo = intent.getStringExtra("titulo");
+        String mensagem = intent.getStringExtra("mensagem");
+        if (titulo != null || mensagem != null) {
+            Intent it = new Intent(this, ActivityVisualizarNotificacao.class);
+            it.putExtra(ActivityVisualizarNotificacao.EXTRA_TITULO, titulo);
+            it.putExtra(ActivityVisualizarNotificacao.EXTRA_MENSAGEM, mensagem);
+            startActivity(it);
+            intent.removeExtra("titulo");
+            intent.removeExtra("mensagem");
+
+        }
     }
 
     // agora retorna boolean: true = já redirecionou
@@ -481,8 +504,8 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
         SharedPreferences.Editor editor =
                 getSharedPreferences("configApp", MODE_PRIVATE).edit();
 
-        editor.putString("estado", estadoSelecionado.toLowerCase().trim());
-        editor.putString("municipio", municipioSelecionado.toLowerCase().trim());
+        editor.putString("estado", paraChaveFirebase(estadoSelecionado));
+        editor.putString("municipio",paraChaveFirebase(municipioSelecionado));
         editor.apply();
 
         Toast.makeText(this,
@@ -492,6 +515,13 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
         setLoading(false);
         startActivity(new Intent(this, VideoIniciarAppActivity.class));
         finish();
+    }
+
+    private String paraChaveFirebase(String input) {
+        String normalizado = normalizeString(input);
+        return normalizado
+                .replaceAll("\\s+", "_")        // espaços -> "_"
+                .replaceAll("[^a-z0-9_]", "");  // remove qualquer sobra (hífen, apóstrofo, etc.)
     }
 
     private boolean isGPSEnabled() {

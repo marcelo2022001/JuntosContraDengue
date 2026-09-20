@@ -29,6 +29,7 @@ public class ExcluirPreCadastro extends AppCompatActivity {
         private AdapterExcluirPreCadastros adapter;
         String estado, municipio, localDB;
         private DatabaseReference reference;
+        private FirebaseDatabase databaseMunicipio;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +53,9 @@ public class ExcluirPreCadastro extends AppCompatActivity {
              estado = prefs.getString("estado", null);
              municipio = prefs.getString("municipio", null);
 
+            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+            databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
             adapter = new AdapterExcluirPreCadastros(lista);
 
             binding.rvExcluirPreCadastro.setLayoutManager(new LinearLayoutManager(this));
@@ -59,10 +63,7 @@ public class ExcluirPreCadastro extends AppCompatActivity {
 
             assert estado != null;
             assert municipio != null;
-            reference = FirebaseDatabase.getInstance()
-                    .getReference("cadastros")
-                    .child(estado)
-                    .child(municipio)
+            reference = databaseMunicipio.getReference()
                     .child("config")
                     .child(local_database);
 
@@ -149,10 +150,7 @@ public class ExcluirPreCadastro extends AppCompatActivity {
                             .addOnSuccessListener(unused -> {
 
                                 // 2. Após excluir, incrementa o contador no caminho especificado
-                                DatabaseReference configRef = FirebaseDatabase.getInstance().getReference()
-                                        .child("cadastros")
-                                        .child(estado)
-                                        .child(municipio)
+                                DatabaseReference configRef = databaseMunicipio.getReference()
                                         .child("config")
                                         .child(localDB);
 

@@ -156,7 +156,7 @@ public class AdminActivity extends AppCompatActivity implements NavigationView.O
 
     public void onClickAdminAcompanharReclamacoes(View v)
     {
-        Intent it = new Intent(this, ListarReclamacoesAgentes.class);
+        Intent it = new Intent(this, ListarReclamacoesAdmins.class);
         startActivity(it);
     }
 

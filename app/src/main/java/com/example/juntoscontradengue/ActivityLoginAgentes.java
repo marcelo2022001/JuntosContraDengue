@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -25,13 +26,15 @@ import com.example.juntoscontradengue.extras.Alertas;
 import com.example.juntoscontradengue.extras.AppConfig;
 import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TopicHelper;
 import com.example.juntoscontradengue.extras.ValidaCpf;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
@@ -44,14 +47,15 @@ public class ActivityLoginAgentes extends AppCompatActivity {
 
     private androidx.appcompat.app.AlertDialog loadingDialog;
     private FirebaseAuth mAuth;
-    private DatabaseReference usersRef;
+    private FirebaseDatabase databaseMunicipio;
     private final CompositeDisposable disposables = new CompositeDisposable();
     private boolean isPasswordVisible = false;
     private EditText edt_txt_email_agente, edt_txt_senha_agente, edt_txt_pre_cadastro;
     private ActivityLoginAgentesBinding loguinAgentesBinding;
     private String  emailAgente, senhaAgente,  estado, municipio;
-    private String cpf, cpfLimpo, mensagem;
-    private String nome_usuario, emailSharedPrefers, endereco, num_casa, conjunto, telefone, dataCadastro, updateAt;
+    private String cpf, cpfLimpo, nome, email;
+    private Long dataCadastro, updatedAt;
+    private String  emailSharedPrefers;
     boolean isConnected;
 
     @Override
@@ -64,9 +68,6 @@ public class ActivityLoginAgentes extends AppCompatActivity {
         setContentView(loguinAgentesBinding.getRoot());
 
         mAuth = FirebaseAuth.getInstance();
-        usersRef = com.google.firebase.database.FirebaseDatabase
-                .getInstance()
-                .getReference("cadastros");
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", null);
@@ -74,6 +75,9 @@ public class ActivityLoginAgentes extends AppCompatActivity {
 
         SharedPreferences prefsUser = getSharedPreferences("UserData", MODE_PRIVATE);
         emailSharedPrefers = prefsUser.getString("email", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         setupToolbar();
         initializeViews();
@@ -104,8 +108,25 @@ public class ActivityLoginAgentes extends AppCompatActivity {
         TextView txtRecuperarSenha = loguinAgentesBinding.txtRecupSenhaLoguinAgentes;
         txtRecuperarSenha.setOnClickListener(v -> recuperarSenhaAgente());
 
-       Button continuar_pre_cadastro = loguinAgentesBinding.btnContinuarPreCadastro;
-       continuar_pre_cadastro.setOnClickListener(v -> pre_cadastro());
+        TextView txtRecupEmailAgentes = loguinAgentesBinding.txtRecupEmailAgentes;
+        txtRecupEmailAgentes.setOnClickListener(v -> {
+
+            // Instancia o fragmento que criamos
+            RecuperarContaFragment fragment = RecuperarContaFragment.newInstance("index_email_agentes");
+
+
+            // Inicia a transição de tela para exibir o Fragment
+            getSupportFragmentManager().beginTransaction()
+                    // R.id.fragment_container deve ser o ID do container de layout na sua activity_login (ex: FrameLayout)
+                    // Se você não tiver um container específico, pode usar o id do layout raiz da Activity
+                    .replace(R.id.fragment_container_recup_email_agentes, fragment)
+                    // Adiciona na pilha para que, se o usuário clicar no botão "Voltar" do celular, ele retorne para a tela de login
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+       Button continuar_pre_cadastro_agentes = loguinAgentesBinding.btnContinuarPreCadastroAgentes;
+       continuar_pre_cadastro_agentes.setOnClickListener(v -> pre_cadastro());
 
        Button cancelar_pre_cadastro = loguinAgentesBinding.btnCancelarPreCadastro;
        cancelar_pre_cadastro.setOnClickListener(v -> sair_pre_cadastro());
@@ -167,8 +188,7 @@ public class ActivityLoginAgentes extends AppCompatActivity {
 
     private void buscaCadExiste(CadastroCallback callback) {
         showLoading();
-        usersRef.child(Objects.requireNonNull(estado))
-                .child(Objects.requireNonNull(municipio))
+        databaseMunicipio.getReference()
                 .child("cpf_index")
                 .child(cpfLimpo)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -202,8 +222,7 @@ public class ActivityLoginAgentes extends AppCompatActivity {
             showLoading();
 
             // Primeiro, vamos verificar se o nó pre_cadastro_admins existe
-            DatabaseReference preCadastroRef = usersRef.child(Objects.requireNonNull(estado))
-                    .child(Objects.requireNonNull(municipio))
+        DatabaseReference preCadastroRef = databaseMunicipio.getReference()
                     .child("config")
                     .child("pre_cadastro_agentes");
 
@@ -355,203 +374,135 @@ public class ActivityLoginAgentes extends AppCompatActivity {
     }
 
     private void loginAgentes() {
-
         mAuth.signInWithEmailAndPassword(emailAgente, senhaAgente)
                 .addOnCompleteListener(task -> {
 
-                    if (task.isSuccessful()) {
-
-                        // Salvar dados do usuário no SharedPreferences
-                        // Shared dados usuario null ou vazio
-                        if( !emailAgente.equals(emailSharedPrefers)){
-
-                            buscaDadosUsuario(emailAgente, new EmailCallback() {
-                                @Override
-                                public void onEmailEncontrado(String emailResult, String nomeResult) {
-
-                                    salvarDadosLocalmente(); // Função auxiliar para organizar o código
-                                    irParaActivityPrincipal(nomeResult);
-
-                                }
-                                @Override
-                                public void onErro(String erro) {
-                                    hideLoading();
-                                    Toast.makeText(ActivityLoginAgentes.this, erro, Toast.LENGTH_SHORT).show();
-                                }
-                            });
-
-                        } else {
-                            Bundle extras = getIntent().getExtras();
-                            if (extras != null && extras.getString("nome") != null) {
-                                mensagem += extras.getString("nome");
-                            } else {
-                                mensagem += "Agente de Endemias";
-                            }
-                            salvarDadosLocalmente();
-                            Toast.makeText(this, mensagem, Toast.LENGTH_LONG).show();
-                            startActivity(new Intent(this, ActivityLoginAgentes.class));
-                        }
-                    } else {
-
+                    if (!task.isSuccessful()) {
                         hideLoading();
+                        tratarErroLogin(task.getException());
+                        return;
+                    }
 
-                        Exception e = task.getException();
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    if (user == null) {
+                        hideLoading();
+                        Toast.makeText(this, "Erro ao obter os dados do usuário.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                        if (e instanceof com.google.firebase.auth.FirebaseAuthInvalidCredentialsException) {
+                    // E-mail realmente usado/validado pelo Auth (já normalizado)
+                    String emailLogado = user.getEmail() != null ? user.getEmail() : emailAgente;
 
-                            Alertas.showAlertDialog(
-                                    ActivityLoginAgentes.this,
-                                    "Falha no login",
-                                    "E-mail ou senha incorretos."
-                            );
+                    sincronizarPerfilAdmin(user.getUid(), emailLogado);
+                });
+    }
 
-                        } else if (e instanceof com.google.firebase.auth.FirebaseAuthInvalidUserException) {
+    private void sincronizarPerfilAdmin(String uid, String emailLogado) {
 
-                            Alertas.showAlertDialog(
-                                    ActivityLoginAgentes.this,
-                                    "Conta não encontrada",
-                                    "Não existe uma conta cadastrada com este e-mail."
-                            );
+        databaseMunicipio.getReference()
+                .child("logins").child("Agentes").child(uid)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                        } else {
-
-                            Alertas.showAlertDialog(
-                                    ActivityLoginAgentes.this,
-                                    "Erro",
-                                    e != null ? e.getMessage() : "Não foi possível realizar o login."
-                            );
+                        if (!snapshot.exists()) {
+                            falhaAposAutenticar("Esta conta não possui perfil de administrador.");
+                            return;
                         }
+
+                        nome      = snapshot.child("nome").getValue(String.class);
+                        cpf       = snapshot.child("cpf").getValue(String.class);
+                        email     = snapshot.child("email").getValue(String.class);
+                        Long dc = snapshot.child("dataCadastro").getValue(Long.class);
+                        Long up = snapshot.child("updatedAt").getValue(Long.class);
+                        dataCadastro = dc != null ? dc : 0L;
+                        updatedAt     = up != null ? up : 0L;
+
+                        // Compara o e-mail do login com o salvo no banco
+                        boolean emailMudou = email == null || !email.equalsIgnoreCase(emailLogado);
+
+                        if (emailMudou) {
+                            atualizarEmailNoBanco(uid, emailLogado, cpf);
+                            email    = emailLogado;
+                            updatedAt = System.currentTimeMillis();
+                        }
+
+                        concluirLogin();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        falhaAposAutenticar("Erro ao carregar seu perfil: " + error.getMessage());
                     }
                 });
     }
 
-    private void irParaActivityPrincipal(String nomeOpcional) {
-        hideLoading();
+    private void atualizarEmailNoBanco(String uid, String novoEmail, String cpfDoAgente) {
 
-         mensagem = "Bem vindo, ";
+        Map<String, Object> updates = new HashMap<>();
 
-        // Tenta pegar o nome que veio do banco ou dos Extras
-        if (nomeOpcional != null) {
-            mensagem += nomeOpcional;
-        } else {
-            Bundle extras = getIntent().getExtras();
-            if (extras != null && extras.getString("nome") != null) {
-                mensagem += extras.getString("nome");
-            } else {
-                mensagem += "Agente de Endemias";
+        // 1) logins/agentes/{uid}
+        String base = "logins/agentes/" + uid + "/";
+        updates.put(base + "email", novoEmail);
+        updates.put(base + "novoEmail", null);              // limpa pendência, se existir
+        updates.put(base + "updatedAt", ServerValue.TIMESTAMP);
+
+        // 2) index_email/{cpf} (chave sem máscara)
+        if (!TextUtils.isEmpty(cpfDoAgente)) {
+            String cpfChave = cpfDoAgente.replaceAll("[^0-9]", "");
+            if (!cpfChave.isEmpty()) {
+                updates.put("index_email_agentes/" + cpfChave + "/email", novoEmail);
+                updates.put("index_email_agentes/" + cpfChave + "/novo_email", null);
             }
         }
-        Toast.makeText(this, mensagem, Toast.LENGTH_LONG).show();
-        startActivity(new Intent(this, AgentesMainActivity.class));
 
+        // Update multi-path a partir da raiz: grava tudo junto ou nada.
+        // Se falhar, não trava o login: no próximo login o e-mail ainda vai diferir e tenta de novo.
+        databaseMunicipio.getReference().updateChildren(updates)
+                .addOnFailureListener(e ->
+                        Log.e("LoginAdmin", "Falha ao sincronizar e-mail: " + e.getMessage()));
+    }
+
+    private void concluirLogin() {
+        salvarDadosLocalmente();
+        hideLoading();
+
+        String saudacao = "Bem vindo, " + (!TextUtils.isEmpty(nome) ? nome : "Agente");
+        Toast.makeText(this, saudacao, Toast.LENGTH_LONG).show();
+        startActivity(new Intent(this, AdminActivity.class));
+    }
+
+    private void falhaAposAutenticar(String msg) {
+        hideLoading();
+        mAuth.signOut();   // não deixa uma sessão do Auth aberta sem perfil admin válido
+        Alertas.showAlertDialog(this, "Falha no login", msg);
+    }
+
+    private void tratarErroLogin(Exception e) {
+        if (e instanceof com.google.firebase.auth.FirebaseAuthInvalidCredentialsException) {
+            Alertas.showAlertDialog(this, "Falha no login", "E-mail ou senha incorretos.");
+        } else if (e instanceof com.google.firebase.auth.FirebaseAuthInvalidUserException) {
+            Alertas.showAlertDialog(this, "Conta não encontrada",
+                    "Não existe uma conta cadastrada com este e-mail.");
+        } else {
+            Alertas.showAlertDialog(this, "Erro",
+                    e != null ? e.getMessage() : "Não foi possível realizar o login.");
+        }
     }
 
     private void salvarDadosLocalmente() {
+
         SharedPreferences pref = getSharedPreferences("UserData", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
-        editor.putString("nome", nome_usuario);
+        editor.putString("nome", nome);
         editor.putString("cpf", cpf);
         editor.putString("email", emailSharedPrefers);
-        editor.putString("endereco", endereco);
-        editor.putString("num_casa", num_casa);
-        editor.putString("conjunto", conjunto);
-        editor.putString("telefone", telefone);
-        editor.putString("dataCadastro", dataCadastro);
-        editor.putString("updateAt", updateAt);
+        editor.putLong("dataCadastro", dataCadastro);
+        editor.putLong("updateAt", updatedAt);
         editor.putString("perfil", "agentes");
         editor.apply();
-    }
-    private void buscaDadosUsuario(String emailAgente, EmailCallback emailCallback) {
+        TopicHelper.inscreverNoTopicoDoPerfil(this, "agentes");
 
-        usersRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child("agentes");
-
-        Query query = usersRef.orderByChild("email").equalTo(emailAgente);
-
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    processarDadosUsuario(snapshot, emailCallback);
-                } else {
-                    // 2ª Tentativa: Se não achou pelo email, busca pelo "novoEmail"
-                    Query queryNovoEmail = usersRef.orderByChild("novoEmail").equalTo(emailAgente);
-
-                    queryNovoEmail.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshotNovo) {
-                            if (snapshotNovo.exists()) {
-                                // Se encontrou pelo novo email, atualiza o banco principal para efetivar a troca
-                                for (DataSnapshot userSnapshot : snapshotNovo.getChildren()) {
-                                    String uidEncontrado = userSnapshot.getKey();
-                                    if (uidEncontrado != null) {
-
-                                        // 1. Efetiva a troca no banco: o email principal vira o emailAgente (novo) e limpa o pendente (novoEmail = null)
-                                        Map<String, Object> atualizacao = new HashMap<>();
-                                        atualizacao.put("email", emailAgente);
-                                        atualizacao.put("novoEmail", null);
-
-                                        usersRef.child(uidEncontrado).updateChildren(atualizacao);
-
-                                        // 2. Atualiza localmente no SharedPreferences o novo email
-                                        SharedPreferences pref = getSharedPreferences("UserData", MODE_PRIVATE);
-                                        SharedPreferences.Editor editor = pref.edit();
-                                        editor.putString("email", emailAgente);
-                                        editor.putString("updateAt", updateAt);
-                                        editor.apply();
-                                    }
-                                }
-                                processarDadosUsuario(snapshotNovo, emailCallback);
-                            } else {
-                                hideLoading();
-                                emailCallback.onErro("Usuário não encontrado na base de dados.");
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            hideLoading();
-                            emailCallback.onErro(error.getMessage());
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                hideLoading();
-                emailCallback.onErro(error.getMessage());
-            }
-        });
-    }
-
-    private void processarDadosUsuario(DataSnapshot snapshot, EmailCallback callback) {
-        for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-            // Busca no db
-            nome_usuario = userSnapshot.child("nome").getValue(String.class);
-            cpf = userSnapshot.child("cpf").getValue(String.class);
-            emailSharedPrefers = userSnapshot.child("email").getValue(String.class);
-            endereco = userSnapshot.child("endereco").getValue(String.class);
-            num_casa = userSnapshot.child("num_casa").getValue(String.class);
-            conjunto = userSnapshot.child("conjunto").getValue(String.class);
-            telefone = userSnapshot.child("telefone").getValue(String.class);
-
-            // Busca como Long (o tipo real no banco)
-            Long dataLong = userSnapshot.child("dataCadastro").getValue(Long.class);
-            Long updateLong = userSnapshot.child("updateAt").getValue(Long.class);
-
-            // Converte para String com segurança (evitando NullPointerException)
-            dataCadastro = (dataLong != null) ? String.valueOf(dataLong) : "0";
-            updateAt = (updateLong != null) ? String.valueOf(updateLong) : "0";
-
-            callback.onEmailEncontrado(emailSharedPrefers, nome_usuario);
-            return;
-        }
     }
 
     private void showLoading() {
@@ -578,11 +529,6 @@ public class ActivityLoginAgentes extends AppCompatActivity {
     interface CadastroCallback {
         void onLiberado();
         void onErro(String msg);
-    }
-
-    public interface EmailCallback {
-        void onEmailEncontrado(String email, String nome);
-        void onErro(String erro);
     }
 
     @Override

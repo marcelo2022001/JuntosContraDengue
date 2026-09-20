@@ -30,11 +30,11 @@ import java.util.Objects;
 
 public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity {
     private ActivityExcluirLocaisDescartesEletronicosBinding bindingDescartesEletronicos;
-    private DatabaseReference databaseDescartesEletronicos;
     private ChildEventListener childEventListenerDescartesEletronicos;
     private AdapterExcluirLocaisDescartesEletronicos adapterDescartesEletronicos;
     private final List<ClassDescarteConsciente> listDescartesEletronicos = new ArrayList<>();
-    private String estado, municipio;
+    private FirebaseDatabase databaseMunicipio;
+    private DatabaseReference databaseDescartesEletronicos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +54,14 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
 
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
-        estado = prefs.getString("estado", null);
-        municipio = prefs.getString("municipio", null);
+        String estado = prefs.getString("estado", null);
+        String municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+        // INICIALIZA A REFERÊNCIA DO BANCO
+        databaseDescartesEletronicos = databaseMunicipio.getReference().child("descarte_eletronicos");
+        
         initializeFirebaseDescartesEletronicos();
         setupRecyclerViewDescartesEletronicos();
         loadInitialData();
@@ -72,10 +77,7 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
     }
 
     private void initializeFirebaseDescartesEletronicos() {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        databaseDescartesEletronicos = database.getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        databaseMunicipio.getReference()
                 .child("descarte_eletronicos");
     }
 
@@ -201,7 +203,7 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
 
     private void deletarCadastroEntregaEletronicos(String id) {
         if (id != null && !id.isEmpty()) {
-            DatabaseReference deletarDescarteEletronicos = databaseDescartesEletronicos.child(id);
+            DatabaseReference deletarDescarteEletronicos = databaseMunicipio.getReference().child(id);
             deletarDescarteEletronicos.removeValue()
                     .addOnSuccessListener(aVoid -> {
                         if (!isFinishing() && !isDestroyed()) {

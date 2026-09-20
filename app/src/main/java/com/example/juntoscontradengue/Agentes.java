@@ -73,6 +73,9 @@ public class Agentes extends AppCompatActivity implements AdapterAgentes.OnImage
         estado = AppConfig.getEstado(this);
         municipio = AppConfig.getMunicipio(this);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
         atualizarBannerOffline();
 
         List<ClassAgentes> listAgentes = new ArrayList<>();
@@ -89,10 +92,7 @@ public class Agentes extends AppCompatActivity implements AdapterAgentes.OnImage
         recyclerView.setAdapter(adapterAgentes);
 
         if (estado != null && municipio != null) {
-            agentesRef = FirebaseDatabase.getInstance()
-                    .getReference("cadastros")
-                    .child(estado)
-                    .child(municipio)
+             agentesRef = databaseMunicipio.getReference()
                     .child("logins")
                     .child("agentes");
 

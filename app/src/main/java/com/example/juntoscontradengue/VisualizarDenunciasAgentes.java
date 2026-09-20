@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.juntoscontradengue.database.adapters.AdapterVisualizarDenunciasAgentes;
-import com.example.juntoscontradengue.database.classes_database.ClassReclamacoes;
+import com.example.juntoscontradengue.database.classes_database.ClassReclamacoesAdminsAgentes;
 import com.example.juntoscontradengue.databinding.ActivityVisualizarDenunciasAgentesBinding;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,7 +33,7 @@ import java.util.Objects;
 
 public class VisualizarDenunciasAgentes extends AppCompatActivity {
 
-    private DatabaseReference databaseReference;
+    DatabaseReference databaseReference;
     private String uuid;
     private String id;
     private String status_reclamacao;
@@ -65,6 +65,10 @@ public class VisualizarDenunciasAgentes extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         String estado = prefs.getString("estado", null);
         String municipio = prefs.getString("municipio", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
 
         Button responder_reclamacao = binding.btnResponderReclamacao;
 
@@ -102,10 +106,7 @@ public class VisualizarDenunciasAgentes extends AppCompatActivity {
         assert estado != null;
         assert municipio != null;
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("reclamacoes")
+        databaseReference = databaseMunicipio.getReference("reclamacoes")
                 .child(uuid)
                 .child(id);
 
@@ -156,7 +157,7 @@ public class VisualizarDenunciasAgentes extends AppCompatActivity {
                 }
 
 
-                ClassReclamacoes r = snapshot.getValue(ClassReclamacoes.class);
+                ClassReclamacoesAdminsAgentes r = snapshot.getValue(ClassReclamacoesAdminsAgentes.class);
                 if (r != null) {
                     binding.txtReclamacaoVisualizarReclamacao.setText(r.getReclamacao());
                     binding.txtEndReclamacao.setText(

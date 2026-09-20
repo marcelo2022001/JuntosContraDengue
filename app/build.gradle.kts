@@ -38,7 +38,8 @@ android {
 dependencies {
     // Firebase BoM (Gerencia as versões automaticamente para evitar conflitos)
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
-    implementation("androidx.activity:activity-ktx:1.8.0") // Versão estável 2026
+    implementation("androidx.activity:activity-ktx:1.8.0")
+    implementation("androidx.cardview:cardview:1.0.0") // Versão estável 2026
 
     // Firebase (Sem versão manual, o BoM resolve)
     implementation("com.google.firebase:firebase-analytics")

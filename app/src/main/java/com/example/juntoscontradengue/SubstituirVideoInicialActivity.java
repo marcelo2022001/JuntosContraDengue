@@ -15,7 +15,6 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.example.juntoscontradengue.databinding.ActivitySubstituirVideoInicialBinding;
 import com.example.juntoscontradengue.extras.NetworkUtils;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -26,9 +25,9 @@ public class SubstituirVideoInicialActivity extends AppCompatActivity {
     private androidx.appcompat.app.AlertDialog loadingDialog;
     private ActivitySubstituirVideoInicialBinding binding;
     private final StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-    private final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     private String estado, municipio; private Uri uri_video;
     private ActivityResultLauncher<Intent> videoLauncher;
+    private FirebaseDatabase databaseMunicipio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +54,9 @@ public class SubstituirVideoInicialActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", "");
         municipio = prefs.getString("municipio", "");
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         // Configurar o seletor de vídeo
         videoLauncher = registerForActivityResult( new ActivityResultContracts.StartActivityForResult(),
@@ -128,11 +130,7 @@ private void exibirVideoSelecionado() {
 
     private void atualizarUrlNoRealtime(String url) {
     // .setValue(url) substitui o valor antigo pela nova URL no banco de dados
-        databaseReference.child("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("config")
-                .child("video_inicia_app")
+        databaseMunicipio.getReference("config/video_inicia_app")
                 .setValue(url)
                 .addOnSuccessListener(aVoid -> { hideLoading();
                     Toast.makeText(this, "Vídeo substituído com sucesso!", Toast.LENGTH_SHORT).show();

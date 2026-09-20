@@ -75,7 +75,7 @@
                     android:autofillHints="@string/cpf"
                     android:background="@drawable/border_rounded_gray"
                     android:hint="@string/cpf"
-                    android:inputType="number"
+                    android:inputType="phone|number"
                     android:minHeight="48dp"
                     android:padding="8dp">
                 </EditText>

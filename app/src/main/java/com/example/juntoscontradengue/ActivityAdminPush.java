@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -99,8 +100,11 @@ public class ActivityAdminPush extends AppCompatActivity {
 
         HashMap<String, Object> notificacao = new HashMap<>();
 
+        String topico = TopicHelper.getUsuariosTopic(this);
+
         notificacao.put("titulo", titulo);
         notificacao.put("mensagem", mensagem);
+        notificacao.put("topicos", topico);
 
         ArrayList<String> topicos = new ArrayList<>();
         topicos.add(topicoUsuarios);
@@ -124,11 +128,11 @@ public class ActivityAdminPush extends AppCompatActivity {
                         finish();
 
                     } else {
-
+                        Log.e("ADMIN_PUSH", "Erro ao gravar: ", task.getException()); // <-- ADICIONE
                         Toast.makeText(
                                 ActivityAdminPush.this,
-                                "Erro ao gravar no banco.",
-                                Toast.LENGTH_SHORT
+                                "Erro ao gravar no banco: " + (task.getException() != null ? task.getException().getMessage() : "desconhecido"), // <-- mostra o motivo real
+                                Toast.LENGTH_LONG
                         ).show();
                     }
                 });

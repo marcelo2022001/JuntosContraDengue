@@ -48,14 +48,16 @@ public class TrabalhosAgentes extends AppCompatActivity {
          estado = prefs.getString("estado", null);
          municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
           isConnected = NetworkUtils.isNetworkAvailable(TrabalhosAgentes.this);
         if (!isConnected){
             Intent itente = new Intent(this, SemInternetActivity.class);
             itente.putExtra("id_activity", "trabalhos_agentes");
             startActivity(itente);
         }
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference("cadastros/" + estado + "/" + municipio + "/trabalhos_agentes");
+        DatabaseReference databaseReference = databaseMunicipio.getReference("trabalhos_agentes");
 
         listTrabAgentes = new ArrayList<>();
 
