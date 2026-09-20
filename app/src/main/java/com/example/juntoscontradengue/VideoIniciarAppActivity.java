@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,7 +29,7 @@ public class VideoIniciarAppActivity extends AppCompatActivity {
     private static final int TEMPO_ATIVAR_BOTAO = 10000; // 10 segundos
 
     private FloatingActionButton btnFecharVideo;
-    private VideoView videoIn;
+    private FullScreenVideoView videoIn;
     private DatabaseReference refVideo;
 
     // HANDLERS CONTROLADOS
@@ -54,13 +53,19 @@ public class VideoIniciarAppActivity extends AppCompatActivity {
         configurarVideoView();
         configurarBotaoFlutuante();
 
+        // Impede que a camada de vídeo cubra as views filhas da janela
+        if (videoIn.getHolder() != null) {
+            videoIn.setZOrderMediaOverlay(true);
+        }
+
+
         boolean isConnected = NetworkUtils.isNetworkAvailable(this);
 
         if (AppConfig.temLocalidadeSalva(this)) {
             String estado = AppConfig.getEstado(this).toLowerCase();
             String municipio = AppConfig.getMunicipio(this).toLowerCase();
 
-            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
             FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
             if (!isConnected) {
@@ -72,8 +77,6 @@ public class VideoIniciarAppActivity extends AppCompatActivity {
                 carregarVideoDoFirebase();
                 agendarFallback();
 
-                // Agenda o botão para aparecer após 10 segundos
-                agendarBotaoPular();
             }
         } else {
             iniciarEscolherLocalidade();
@@ -113,13 +116,14 @@ public class VideoIniciarAppActivity extends AppCompatActivity {
         });
 
         // O botão começa invisível
-        btnFecharVideo.setVisibility(View.GONE);
+        btnFecharVideo.setVisibility(View.INVISIBLE);
         btnFecharVideo.setAlpha(0f);
         btnFecharVideo.setScaleX(0.5f);
         btnFecharVideo.setScaleY(0.5f);
     }
 
     private void configurarVideoView() {
+        videoIn.setZOrderOnTop(false);
         videoIn.setOnPreparedListener(mp -> {
             mp.setLooping(false);
             mp.setVolume(1f, 1f);
@@ -128,18 +132,18 @@ public class VideoIniciarAppActivity extends AppCompatActivity {
 
             // Cancela o fallback se o vídeo começou a tocar
             cancelarFallback();
+
+            // Inicia o cronômetro dos 10s SOMENTE quando o vídeo der o play
+            agendarBotaoPular();
+
         });
 
         // QUANDO O VÍDEO TERMINAR, VAI PARA MAINACTIVITY
         videoIn.setOnCompletionListener(mp -> {
             isVideoCompleted = true;
 
-            // Mostra o botão se ainda não foi mostrado
-            if (btnFecharVideo.getVisibility() != View.VISIBLE) {
-                mostrarBotaoPular();
-            }
+            mostrarBotaoPular();
 
-            // Vai para MainActivity após 1.5 segundos
             handler.postDelayed(() -> {
                 if (!isFinishing() && !isDestroyed()) {
                     iniciarMainActivity();
@@ -178,6 +182,7 @@ public class VideoIniciarAppActivity extends AppCompatActivity {
             if (isFinishing() || isDestroyed()) return;
 
             btnFecharVideo.setVisibility(View.VISIBLE);
+            btnFecharVideo.bringToFront(); // Garante o foco visual da View
             btnFecharVideo.animate()
                     .alpha(1f)
                     .scaleX(1f)

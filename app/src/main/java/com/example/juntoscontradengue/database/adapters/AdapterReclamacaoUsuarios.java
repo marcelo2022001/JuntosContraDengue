@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,8 +20,6 @@ import com.example.juntoscontradengue.ActivityVisualizarDenunciasUsuario;
 import com.example.juntoscontradengue.R;
 import com.example.juntoscontradengue.database.classes_database.ClassListarReclamacoesUsuarios;
 import com.example.juntoscontradengue.extras.DateUtilsApp;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -151,45 +148,25 @@ String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData
                     String idUser = reclamacao.getUid();
                     String idDoc = reclamacao.getIdReclamacao();
 
-                    // 1. Referência da Reclamação
-                    DatabaseReference refDB = FirebaseDatabase.getInstance().getReference("cadastros")
-                            .child(estado).child(municipio).child("reclamacoes").child(idUser).child(idDoc);
+                    // 1. URL do banco específico do município
+                    String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+                    FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
-                    // 2. Referência do Contador de Reclamações do Usuário
-                    DatabaseReference refContador = FirebaseDatabase.getInstance().getReference("cadastros")
-                            .child(estado).child(municipio).child("usuarios").child(idUser).child("total_reclamacoes");
+                    // 2. Referência da Reclamação
+                    DatabaseReference refDB = databaseMunicipio.getReference()
+                            .child("reclamacoes")
+                            .child(idUser)
+                            .child(idDoc);
 
                     // 3. Referência do Storage
                     StorageReference refStorage = FirebaseStorage.getInstance().getReference()
                             .child(estado).child(municipio).child("reclamacoesUsuarios").child(idUser).child(idDoc);
-
                     // --- EXECUÇÃO ---
 
                     // Passo A: Deletar a reclamação do banco
                     refDB.removeValue().addOnSuccessListener(unused -> {
 
-                        // Passo B: Incrementar +1 no total_reclamacoes (usando Transaction para evitar erros)
-                        refContador.runTransaction(new com.google.firebase.database.Transaction.Handler() {
-                            @NonNull
-                            @Override
-                            public com.google.firebase.database.Transaction.Result doTransaction(@NonNull com.google.firebase.database.MutableData mutableData) {
-                                Long valorAtual = mutableData.getValue(Long.class);
-                                if (valorAtual == null) {
-                                    mutableData.setValue(1);
-                                } else {
-                                    mutableData.setValue(valorAtual + 1);
-                                }
-                                return com.google.firebase.database.Transaction.success(mutableData);
-                            }
-
-                            @Override
-                            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
-
-                            }
-
-                        });
-
-                        // Passo C: Limpar Storage
+                    // Passo B: Limpar Storage
                         refStorage.listAll().addOnSuccessListener(listResult -> {
                             for (StorageReference file : listResult.getItems()) { file.delete(); }
                             refStorage.child("midia").listAll().addOnSuccessListener(midiaRes -> {
@@ -202,7 +179,7 @@ String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData
                         // o Firebase vai disparar o onChildRemoved automaticamente
                         // e a lista vai atualizar sozinha sem fechar a tela.
 
-                        Toast.makeText(context, "Excluído e contador atualizado!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Reclamação excluída com sucesso!", Toast.LENGTH_SHORT).show();
 
                     }).addOnFailureListener(e -> Toast.makeText(context, "Erro: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                 })

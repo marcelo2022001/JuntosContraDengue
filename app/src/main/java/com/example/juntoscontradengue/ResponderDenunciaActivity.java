@@ -40,9 +40,11 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -137,7 +139,7 @@ public class ResponderDenunciaActivity extends AppCompatActivity {
         municipio = prefs.getString("municipio", null);
         nome = prefs.getString("nome", null);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         Bundle extras = getIntent().getExtras();
@@ -162,33 +164,64 @@ public class ResponderDenunciaActivity extends AppCompatActivity {
                 token = snapshot.child("tokenFCM").getValue(String.class);
                 tokenCarregado = token != null && !token.isEmpty();
 
-                if(tokenCarregado){
+                if (tokenCarregado) {
                     btnEnviarRespostaReclamacao.setEnabled(true);
                     btnEnviarRespostaReclamacao.setOnClickListener(v -> salvarResposta());
-
                 }
 
                 dataReclamacao = snapshot.child("data_envio").getValue(Long.class);
                 reclamacao = snapshot.child("resposta_reclamacao").getValue(String.class);
                 if (reclamacao != null && !reclamacao.isEmpty()) {
-
                     inputEditTextRespReclamacao.setText(reclamacao);
-
                 }
+
+                // NOVO: se já foi respondida, carrega as fotos da resposta
+                if (status_reclamacao != null && !"Aguardando resposta".equals(status_reclamacao)) {
+                    List<String> urlsResposta = new ArrayList<>();
+                    DataSnapshot midiasResposta = snapshot.child("midias_resposta");
+                    if (midiasResposta.exists()) {
+                        for (DataSnapshot midia : midiasResposta.getChildren()) {
+                            String url = midia.getValue(String.class);
+                            if (url != null && !url.isEmpty()) {
+                                urlsResposta.add(url);
+                            }
+                        }
+                    }
+                    exibirImagensRespostaExistente(urlsResposta);
+                }
+
                 Log.d("TOKEN", token);
                 if (dataReclamacao != null) {
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                     dataFormatada = sdf.format(new Date(dataReclamacao));
-
                     Log.d("DATA", dataFormatada);
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
             }
         });
+    }
+
+    // NOVO método: mostra as fotos já salvas da resposta (não usadas para novo upload)
+    private void exibirImagensRespostaExistente(List<String> urls) {
+        ImageView[] imageViews = {img_1, img_2, img_3, img_4};
+
+        for (int i = 0; i < imageViews.length; i++) {
+            if (i < urls.size()) {
+                String url = urls.get(i);
+                imageViews[i].setVisibility(View.VISIBLE);
+                Glide.with(this)
+                        .load(url)
+                        .centerCrop()
+                        .into(imageViews[i]);
+
+                imageViews[i].setOnClickListener(v -> abrirFullscreen(Uri.parse(url)));
+            } else {
+                imageViews[i].setVisibility(View.GONE);
+            }
+        }
     }
 
     private void inicializarComponentes() {
@@ -411,10 +444,10 @@ public class ResponderDenunciaActivity extends AppCompatActivity {
             inputLayoutRespReclamacao.setEnabled(false);
 
             // Desabilita cliques nas imagens se já foi respondido
-            img_1.setClickable(false);
+         /*   img_1.setClickable(false);
             img_2.setClickable(false);
             img_3.setClickable(false);
-            img_4.setClickable(false);
+            img_4.setClickable(false);   */
         }
     }
 

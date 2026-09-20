@@ -48,7 +48,7 @@ public class AgentesMainActivity extends AppCompatActivity {
         // Inicializa configurações do município
         String estado = AppConfig.getEstado(this);
         String municipio = AppConfig.getMunicipio(this);
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         // Configuração da Toolbar

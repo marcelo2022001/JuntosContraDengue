@@ -9,6 +9,15 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary" />
 
+    <TextView
+        android:id="@+id/txtAvisoOfflineEscorpionismo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFC107"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="@string/voce_esta_offline_exibindo_dados_salvos_localmente"
+        android:visibility="gone" />
     <WebView
         android:id="@+id/webViewEscorpiao"
         android:layout_width="match_parent"

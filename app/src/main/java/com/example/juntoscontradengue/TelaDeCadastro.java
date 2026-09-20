@@ -24,6 +24,7 @@ import com.example.juntoscontradengue.extras.AppConfig;
 import com.example.juntoscontradengue.extras.EmailValidator;
 import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TopicHelper;
 import com.example.juntoscontradengue.extras.ValidaCpf;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -74,7 +75,7 @@ public class TelaDeCadastro extends AppCompatActivity {
         String estado = AppConfig.getEstado(this);
         String municipio = AppConfig.getMunicipio(this);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
 
@@ -158,7 +159,13 @@ public class TelaDeCadastro extends AppCompatActivity {
         }
 
 
-        checkBoxCad.setOnCheckedChangeListener((buttonView, isChecked) -> verificarCampo());
+        checkBoxCad.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked){
+                verificarCampo();
+            } else{
+                btnCad.setEnabled(false);
+            }
+        });
 
         termos.setOnClickListener(v -> startActivity(new Intent(TelaDeCadastro.this, TermosDeUsoActivity.class)));
 
@@ -303,7 +310,7 @@ public class TelaDeCadastro extends AppCompatActivity {
     }
 
     private void verificarTelefoneAntesCadastro(CadastroCallback cadastroCallback) {
-        DatabaseReference baseRefFone = databaseMunicipio.getReference();
+        DatabaseReference baseRefFone = databaseMunicipio.getReference("telefone_index");
 
         baseRefFone.child(telLimpo)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -419,7 +426,13 @@ public class TelaDeCadastro extends AppCompatActivity {
         dados.put("email", email);
         dados.put("dataCadastro", dataCadastro);
         dados.put("uuid", uuid);
-        dados.put("updatedAt", "");
+        dados.put("updatedAt", 0);
+
+        if(tipoConta.equals("admins")){
+
+            dados.put("index_email_admin/" + cpfLimpo + "/email", email);
+
+        }
 
         userRef.setValue(dados)
                 .addOnSuccessListener(aVoid -> {
@@ -432,6 +445,7 @@ public class TelaDeCadastro extends AppCompatActivity {
 // 2. Grava os dois índices em uma única operação atômica
                     databaseMunicipio.getReference().updateChildren(atualizacoes);
 
+                    TopicHelper.inscreverNoTopicoDoPerfil(this, tipoConta);
 
                     if (tipoConta.equals("admins")) {
                         deletar_pre_cadastro();
@@ -458,6 +472,7 @@ public class TelaDeCadastro extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     Log.e("Firebase", "Erro ao salvar", e);
+                    checkBoxCad.setChecked(false);
                     finish();
                 });
     }

@@ -66,7 +66,7 @@ public class ActivityVisualizarDenunciasUsuario extends AppCompatActivity {
         String estado = prefs.getString("estado", null);
         String municipio = prefs.getString("municipio", null);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         Button visualizar_resposta_reclamacao = bindingUsers.btnVisualizarRespostaReclamacao;

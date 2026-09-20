@@ -293,7 +293,7 @@ public class AdapterReclamacaoAdmins
             status = itemView.findViewById(R.id.txt_status_reclamacao);
             viewRespondido_por = itemView.findViewById(R.id.txtView_respondido_por);
             respondido_por = itemView.findViewById(R.id.txt_respondido_por);
-            cardReclamacoesAgentes = itemView.findViewById(R.id.cardView_reclamacoes_agentes);
+            cardReclamacoesAgentes = itemView.findViewById(R.id.cardView_reclamacoes_admin);
 
         }
     }

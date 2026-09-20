@@ -53,7 +53,7 @@ public class ExcluirPreCadastro extends AppCompatActivity {
              estado = prefs.getString("estado", null);
              municipio = prefs.getString("municipio", null);
 
-            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
             databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
             adapter = new AdapterExcluirPreCadastros(lista);

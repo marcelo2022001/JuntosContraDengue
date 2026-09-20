@@ -83,9 +83,9 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:autofillHints="CPF"
+                android:inputType="phone"
                 android:ems="10"
                 android:hint="@string/cpf"
-                android:inputType="number"
                 android:textSize="24sp" />
 
             <EditText
@@ -208,16 +208,38 @@
                     android:text="@string/cancelar" />
             </LinearLayout>
 
-            <!-- Link -->
             <TextView
-                android:id="@+id/TextViewLinkIcones"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_marginHorizontal="16dp"
-                android:autoLink="web"
+                android:textStyle="bold"
                 android:gravity="center"
-                android:text="@string/download_dos_icones"
+                android:text="Cadastros possíveis:"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/TextViewTotalAdmins"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_gravity="left"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:text="Total admins"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/TextViewTotalAgentes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_gravity="left"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:text="Total agentes"
                 android:textSize="12sp" />
 
         </LinearLayout>

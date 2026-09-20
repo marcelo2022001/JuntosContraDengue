@@ -56,7 +56,7 @@ public class AddSlidersMain extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         RecyclerView recyclerView = findViewById(R.id.rvAddSliders);

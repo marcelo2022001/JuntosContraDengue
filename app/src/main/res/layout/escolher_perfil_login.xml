@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#F5F7FA"
+    android:fitsSystemWindows="true"
     tools:context=".EscolherPerfilLogin">
 
     <!-- Toolbar Topo com Botão Voltar -->

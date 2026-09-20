@@ -61,7 +61,7 @@ public class TelefonesUteis extends AppCompatActivity implements AdapterTelefone
         String estado = Objects.requireNonNull(prefs.getString("estado", null)).toLowerCase();
         String municipio = Objects.requireNonNull(prefs.getString("municipio", null)).toLowerCase();
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         atualizarBannerOffline();

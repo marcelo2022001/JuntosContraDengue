@@ -25,6 +25,7 @@ import com.example.juntoscontradengue.databinding.ActivityTelaLoguinBinding;
 import com.example.juntoscontradengue.extras.AppConfig;
 import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TopicHelper;
 import com.example.juntoscontradengue.extras.ValidaCpf;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -114,7 +115,7 @@ public class TelaLoguin extends AppCompatActivity {
         estado = AppConfig.getEstado(this);
         municipio = AppConfig.getMunicipio(this);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         SharedPreferences prefsUser = getSharedPreferences("UserData", MODE_PRIVATE);
@@ -318,7 +319,7 @@ public class TelaLoguin extends AppCompatActivity {
 
         salvarDadosLocalmente();
 
-        Log.e("shared_2", "shared");
+        TopicHelper.inscreverNoTopicoDoPerfil(this, "usuarios");
 
         mensagem = "Bem vindo, ";
 
@@ -351,8 +352,11 @@ public class TelaLoguin extends AppCompatActivity {
         editor.putString("perfil", "usuarios");
         editor.apply();
 
-        Log.e("Shared_1 UserData", "Dados salvo Localmente");
+        TopicHelper.inscreverNoTopicoDoPerfil(this, "usuarios");
 
+        hideLoading();
+        Log.e("Shared_1 UserData", "Dados salvo Localmente");
+        navigateBackToMainActivity();
     }
 
     private void buscarEmailPorCpf(String cpf_user, EmailCallback callback) {

@@ -11,6 +11,7 @@ import android.text.method.PasswordTransformationMethod;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -27,6 +28,7 @@ import com.example.juntoscontradengue.extras.Alertas;
 import com.example.juntoscontradengue.extras.AppConfig;
 import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TopicHelper;
 import com.example.juntoscontradengue.extras.ValidaCpf;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -52,6 +54,7 @@ public class CriarCadastroAgente extends AppCompatActivity {
         private EditText nomeAgente, cpfAgente, telefoneAgente, emailAgente, cEmailAgente;
         private EditText senhaAgente;
         private EditText cSenhaAgente;
+        private CheckBox checkBoxCriarCadAgente;
         private Button btnCadAgente;
         ImageView img_agente;
         private Uri imageUri;
@@ -113,7 +116,7 @@ public class CriarCadastroAgente extends AppCompatActivity {
             municipio = AppConfig.getMunicipio(this);
 
 
-            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
             databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
             img_agente = cadastro_binding.imgCriarCadAgenteAdmin;
@@ -141,6 +144,8 @@ public class CriarCadastroAgente extends AppCompatActivity {
             setupPasswordVisibilityToggle(senhaAgente);
             setupPasswordVisibilityToggle(cSenhaAgente);
 
+            checkBoxCriarCadAgente = cadastro_binding.checkBoxCriarCadAgenteAdmin;
+
             btnCadAgente = cadastro_binding.btnCriarContaCadAgenteAdmin;
             TextView ler_termos_cad_agentes = cadastro_binding.lerTermosCadAgentes;
 
@@ -150,7 +155,7 @@ public class CriarCadastroAgente extends AppCompatActivity {
                 imagePickerLauncher.launch(intent);
             });
 
-            cadastro_binding.checkBoxCriarCadAgenteAdmin.setOnCheckedChangeListener((buttonView, isChecked) -> btnCadAgente.setEnabled(isChecked));
+            checkBoxCriarCadAgente.setOnCheckedChangeListener((buttonView, isChecked) -> btnCadAgente.setEnabled(isChecked));
 
             ler_termos_cad_agentes.setOnClickListener(v -> startActivity(new Intent(CriarCadastroAgente.this, TermosDeUsoActivity.class)));
 
@@ -252,6 +257,7 @@ public class CriarCadastroAgente extends AppCompatActivity {
                         public void onFailure(String erro) {
                             if (erro.contains("already in use")) {
                                 Alertas.showAlertDialog(CriarCadastroAgente.this, "Erro", "Este e-mail já está em uso!");
+                                checkBoxCriarCadAgente.setChecked(false);
                             } else {
                                 Toast.makeText(CriarCadastroAgente.this, erro, Toast.LENGTH_SHORT).show();
                             }
@@ -344,7 +350,7 @@ public class CriarCadastroAgente extends AppCompatActivity {
 
                 Map<String, Object> dados = new HashMap<>();
                 dados.put("nome", nome_agente);
-                dados.put("cpf", cpf_agente);
+                dados.put("cpf", cpfLimpo);
                 dados.put("telefone", telefone_agente);
                 dados.put("email", email_agente);
                 dados.put("funcao", sFuncao_agente);
@@ -359,7 +365,7 @@ public class CriarCadastroAgente extends AppCompatActivity {
                     SharedPreferences.Editor editor = prefUser.edit();
                     editor.putString("perfil", "agentes");
                     editor.putString("nome_usuario", nome_agente);
-                    editor.putString("cpf", cpf_agente);
+                    editor.putString("cpf", cpfLimpo);
                     editor.putString("user_id", uuid);
                     editor.apply();
 
@@ -370,8 +376,12 @@ public class CriarCadastroAgente extends AppCompatActivity {
                     Map<String, Object> indices = new HashMap<>();
                     indices.put("cpf_index/" + cpfLimpo, uuid);
                     indices.put("telefone_index/" + telLimpo, uuid);
+                    indices.put("index_email_agente/" + cpfLimpo + "/email", email_agente);
 
                     baseRef.updateChildren(indices).addOnSuccessListener(aVoid1 -> {
+
+                        TopicHelper.inscreverNoTopicoDoPerfil(this, "agentes");
+
                         // Mostrar AlertDialog de sucesso
                         new AlertDialog.Builder(CriarCadastroAgente.this)
                                 .setTitle("Sucesso")

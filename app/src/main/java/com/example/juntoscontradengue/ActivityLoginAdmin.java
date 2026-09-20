@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +24,7 @@ import com.example.juntoscontradengue.databinding.ActivityLoginAdminBinding;
 import com.example.juntoscontradengue.extras.Alertas;
 import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TopicHelper;
 import com.example.juntoscontradengue.extras.ValidaCpf;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,7 +32,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
@@ -46,11 +48,13 @@ public class ActivityLoginAdmin extends AppCompatActivity {
     private boolean isPasswordVisible = false;
     private EditText edt_txt_email_admin, edt_txt_senha_admin, edt_txt_pre_cadastro;
     private ActivityLoginAdminBinding loguinAdminBinding;
-    private String  emailAdmin, senhaAdmin,  cpfLimpo, estado, municipio;
-    private  String nome_cadastrado, cpf_cadastrado, emailShared;
-    private String nome, cpf, email, endereco, num_casa, conjunto, telefone, dataCadastro, updateAt;
+    private String  emailAdmin;
+    private String senhaAdmin;
+    private String cpfLimpo;
+    private  String nome_cadastrado, cpf_cadastrado;
+    private String nome, cpf, email;
+    private Long dataCadastro, updateAt;
     boolean isConnected;
-    String MENSAGEM = "Bem vindo, ";
     private FirebaseDatabase databaseMunicipio;
 
     @Override
@@ -63,14 +67,13 @@ public class ActivityLoginAdmin extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
-        estado = prefs.getString("estado", "");
-        municipio = prefs.getString("municipio", "");
+        String estado = prefs.getString("estado", "");
+        String municipio = prefs.getString("municipio", "");
 
         SharedPreferences prefsUser = getSharedPreferences("UserData", MODE_PRIVATE);
-        emailShared = prefsUser.getString("email", null);
         nome_cadastrado = prefsUser.getString("nome", null);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         setupToolbar();
@@ -99,14 +102,30 @@ public class ActivityLoginAdmin extends AppCompatActivity {
 
         btnEntrarTelaLoguinAdmin.setOnClickListener(v -> entrar_conta_admin());
 
-        TextView txtRecuperarSenha = loguinAdminBinding.txtRecupSenhaLoguinAdmin;
-        txtRecuperarSenha.setOnClickListener(v -> recuperarSenhaAdmin());
+        TextView txtRecuperarSenhaAdmin = loguinAdminBinding.txtRecupSenhaLoguinAdmin;
+        txtRecuperarSenhaAdmin.setOnClickListener(v -> recuperarSenhaAdmin());
 
-        Button continuar_pre_cadastro = loguinAdminBinding.btnContinuarPreCadastro;
-        continuar_pre_cadastro.setOnClickListener(v -> pre_cadastro());
+        TextView txtRecupEmailAdmin = loguinAdminBinding.txtRecupEmailAdmin;
+        txtRecupEmailAdmin.setOnClickListener(v -> {
 
-        Button cancelar_pre_cadastro = loguinAdminBinding.btnCancelarPreCadastro;
-        cancelar_pre_cadastro.setOnClickListener(v -> sair_pre_cadastro());
+            // Instancia o fragmento que criamos
+            RecuperarContaFragment fragment = RecuperarContaFragment.newInstance("index_email_admin");
+
+            // Inicia a transição de tela para exibir o Fragment
+            getSupportFragmentManager().beginTransaction()
+                    // R.id.fragment_container deve ser o ID do container de layout na sua activity_login (ex: FrameLayout)
+                    // Se você não tiver um container específico, pode usar o id do layout raiz da Activity
+                    .replace(R.id.fragment_container_recup_email_admin, fragment)
+                    // Adiciona na pilha para que, se o usuário clicar no botão "Voltar" do celular, ele retorne para a tela de login
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        Button continuar_pre_cadastro_admin = loguinAdminBinding.btnContinuarPreCadastroAdmin;
+        continuar_pre_cadastro_admin.setOnClickListener(v -> pre_cadastro());
+
+        Button cancelar_pre_cadastro_admin = loguinAdminBinding.btnCancelarPreCadastroAdmin;
+        cancelar_pre_cadastro_admin.setOnClickListener(v -> sair_pre_cadastro());
 
         edt_txt_senha_admin.setOnTouchListener((v, event) -> {
             final android.graphics.drawable.Drawable drawableEnd = edt_txt_senha_admin.getCompoundDrawables()[2];
@@ -227,8 +246,7 @@ public class ActivityLoginAdmin extends AppCompatActivity {
     }
     private void buscaCadExiste(CadastroCallback callback) {
         showLoading();
-        databaseMunicipio.getReference().child(Objects.requireNonNull(estado))
-                .child(Objects.requireNonNull(municipio))
+        databaseMunicipio.getReference()
                 .child("cpf_index")
                 .child(cpfLimpo)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -327,172 +345,120 @@ public class ActivityLoginAdmin extends AppCompatActivity {
     }
 
     private void loginAdmin() {
-
         mAuth.signInWithEmailAndPassword(emailAdmin, senhaAdmin)
                 .addOnCompleteListener(task -> {
 
-                    if (task.isSuccessful()) {
+                    if (!task.isSuccessful()) {
+                        hideLoading();
+                        tratarErroLogin(task.getException());
+                        return;
+                    }
 
-                        FirebaseUser user = mAuth.getCurrentUser();
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    if (user == null) {
+                        hideLoading();
+                        Toast.makeText(this, "Erro ao obter os dados do usuário.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                        if (user == null) {
-                            hideLoading();
-                            Toast.makeText(this,
-                                    "Erro ao obter os dados do usuário.",
-                                    Toast.LENGTH_SHORT).show();
+                    // E-mail realmente usado/validado pelo Auth (já normalizado)
+                    String emailLogado = user.getEmail() != null ? user.getEmail() : emailAdmin;
+
+                    sincronizarPerfilAdmin(user.getUid(), emailLogado);
+                });
+    }
+
+    private void sincronizarPerfilAdmin(String uid, String emailLogado) {
+
+        databaseMunicipio.getReference()
+                .child("logins").child("admins").child(uid)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        if (!snapshot.exists()) {
+                            falhaAposAutenticar("Esta conta não possui perfil de administrador.");
                             return;
                         }
 
-                        if (!emailAdmin.equals(emailShared)) {
+                        nome      = snapshot.child("nome").getValue(String.class);
+                        cpf       = snapshot.child("cpf").getValue(String.class);
+                        email     = snapshot.child("email").getValue(String.class);
+                        Long dc = snapshot.child("dataCadastro").getValue(Long.class);
+                        Long up = snapshot.child("updatedAt").getValue(Long.class);
+                        dataCadastro = dc != null ? dc : 0L;
+                        updateAt     = up != null ? up : 0L;
 
-                            buscaDadosUsuario(emailAdmin, new EmailCallback() {
-                                @Override
-                                public void onEmailEncontrado(String emailResult, String nomeResult) {
-                                    salvarDadosLocalmente();
-                                    irParaActivityPrincipal(nomeResult);
-                                }
+                        // Compara o e-mail do login com o salvo no banco
+                        boolean emailMudou = email == null || !email.equalsIgnoreCase(emailLogado);
 
-                                @Override
-                                public void onErro(String erro) {
-                                    hideLoading();
-                                    Toast.makeText(ActivityLoginAdmin.this,
-                                            erro,
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                        if (emailMudou) {
+                            atualizarEmailNoBanco(uid, emailLogado, cpf);
+                            email    = emailLogado;
 
-                        } else {
-
-                            if (nome_cadastrado != null) {
-                                MENSAGEM += nome_cadastrado;
-                            } else {
-                                MENSAGEM += "Administrador";
-                            }
-
-                            salvarDadosLocalmente();
-                            hideLoading();
-                            Toast.makeText(this, MENSAGEM, Toast.LENGTH_LONG).show();
-                            startActivity(new Intent(this, AdminActivity.class));
                         }
 
-                    } else {
+                        concluirLogin();
+                    }
 
-                        hideLoading();
-
-                        Exception e = task.getException();
-
-                        if (e instanceof com.google.firebase.auth.FirebaseAuthInvalidCredentialsException) {
-
-                            Alertas.showAlertDialog(
-                                    ActivityLoginAdmin.this,
-                                    "Falha no login",
-                                    "E-mail ou senha incorretos."
-                            );
-
-                        } else if (e instanceof com.google.firebase.auth.FirebaseAuthInvalidUserException) {
-
-                            Alertas.showAlertDialog(
-                                    ActivityLoginAdmin.this,
-                                    "Conta não encontrada",
-                                    "Não existe uma conta cadastrada com este e-mail."
-                            );
-
-                        } else {
-
-                            Alertas.showAlertDialog(
-                                    ActivityLoginAdmin.this,
-                                    "Erro",
-                                    e != null ? e.getMessage() : "Não foi possível realizar o login."
-                            );
-                        }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        falhaAposAutenticar("Erro ao carregar seu perfil: " + error.getMessage());
                     }
                 });
     }
 
-    private void buscaDadosUsuario(String emailAdmin, EmailCallback emailCallback) {
+    private void atualizarEmailNoBanco(String uid, String novoEmail, String cpfDoAdmin) {
 
-        DatabaseReference usersRef = databaseMunicipio.getReference()
-                .child("logins")
-                .child("admins");
+        Map<String, Object> updates = new HashMap<>();
 
-        // 1ª Tentativa: Busca pelo campo "email" tradicional
-        Query queryEmail = usersRef.orderByChild("email").equalTo(emailAdmin);
+        // 1) logins/admins/{uid}
+        String base = "logins/admins/" + uid + "/";
+        updates.put(base + "email", novoEmail);
+        updates.put(base + "novoEmail", null);              // limpa pendência, se existir
+        updates.put(base + "updatedAt", ServerValue.TIMESTAMP);
 
-        queryEmail.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    processarDadosUsuario(snapshot, emailCallback);
-                } else {
-                    // 2ª Tentativa: Se não achou pelo email, busca pelo "novoEmail"
-                    Query queryNovoEmail = usersRef.orderByChild("novoEmail").equalTo(emailAdmin);
-
-                    queryNovoEmail.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshotNovo) {
-                            if (snapshotNovo.exists()) {
-                                // Se encontrou pelo novo email, atualiza o banco principal para efetivar a troca
-                                for (DataSnapshot userSnapshot : snapshotNovo.getChildren()) {
-                                    String uidEncontrado = userSnapshot.getKey();
-                                    if (uidEncontrado != null) {
-
-                                        // 1. Efetiva a troca no banco: o email principal vira o emailBuscado e limpa o pendente (novoEmail = null)
-                                        Map<String, Object> atualizacao = new HashMap<>();
-                                        atualizacao.put("email", emailAdmin);
-                                        atualizacao.put("novoEmail", null);
-
-                                        // Aplica a atualização diretamente no nó do usuário encontrado
-                                        usersRef.child(uidEncontrado).updateChildren(atualizacao);
-
-                                        // 2. Atualiza localmente no SharedPreferences o novo email
-                                        SharedPreferences pref = getSharedPreferences("UserData", MODE_PRIVATE);
-                                        SharedPreferences.Editor editor = pref.edit();
-                                        editor.putString("email", emailAdmin);
-                                        editor.putString("updateAt", updateAt);
-                                        editor.apply();
-                                    }
-                                }
-                                processarDadosUsuario(snapshotNovo, emailCallback);
-                            } else {
-                                hideLoading();
-                                emailCallback.onErro("Usuário não encontrado na base de dados.");
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            hideLoading();
-                            emailCallback.onErro(error.getMessage());
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                hideLoading();
-                emailCallback.onErro(error.getMessage());
-            }
-        });
-    }
-
-
-    private void irParaActivityPrincipal(String nomeOpcional) {
-        hideLoading();
-
-        // Tenta pegar o nome que veio do banco ou dos Extras
-        if (nomeOpcional != null && !nomeOpcional.isEmpty()) {
-            MENSAGEM += nomeOpcional;
-        } else {
-            if (nome_cadastrado != null) {
-                MENSAGEM += nome_cadastrado;
-            } else {
-                MENSAGEM += "Administrador";
+        // 2) index_email/{cpf} (chave sem máscara)
+        if (!TextUtils.isEmpty(cpfDoAdmin)) {
+            String cpfChave = cpfDoAdmin.replaceAll("[^0-9]", "");
+            if (!cpfChave.isEmpty()) {
+                updates.put("index_email_admin/" + cpfChave + "/email", novoEmail);
+                updates.put("index_email_admin/" + cpfChave + "/novo_email", null);
             }
         }
-        Toast.makeText(this, MENSAGEM, Toast.LENGTH_LONG).show();
-        startActivity(new Intent(this, AdminActivity.class));
 
+        // Update multi-path a partir da raiz: grava tudo junto ou nada.
+        // Se falhar, não trava o login: no próximo login o e-mail ainda vai diferir e tenta de novo.
+        databaseMunicipio.getReference().updateChildren(updates)
+                .addOnFailureListener(e ->
+                        Log.e("LoginAdmin", "Falha ao sincronizar e-mail: " + e.getMessage()));
+    }
+
+    private void concluirLogin() {
+        salvarDadosLocalmente();
+        hideLoading();
+
+        String saudacao = "Bem vindo, " + (!TextUtils.isEmpty(nome) ? nome : "Administrador");
+        Toast.makeText(this, saudacao, Toast.LENGTH_LONG).show();
+        startActivity(new Intent(this, AdminActivity.class));
+    }
+
+    private void falhaAposAutenticar(String msg) {
+        hideLoading();
+        mAuth.signOut();   // não deixa uma sessão do Auth aberta sem perfil admin válido
+        Alertas.showAlertDialog(this, "Falha no login", msg);
+    }
+
+    private void tratarErroLogin(Exception e) {
+        if (e instanceof com.google.firebase.auth.FirebaseAuthInvalidCredentialsException) {
+            Alertas.showAlertDialog(this, "Falha no login", "E-mail ou senha incorretos.");
+        } else if (e instanceof com.google.firebase.auth.FirebaseAuthInvalidUserException) {
+            Alertas.showAlertDialog(this, "Conta não encontrada",
+                    "Não existe uma conta cadastrada com este e-mail.");
+        } else {
+            Alertas.showAlertDialog(this, "Erro",
+                    e != null ? e.getMessage() : "Não foi possível realizar o login.");
+        }
     }
 
     private void salvarDadosLocalmente() {
@@ -501,39 +467,14 @@ public class ActivityLoginAdmin extends AppCompatActivity {
         editor.putString("nome", nome);
         editor.putString("cpf", cpf);
         editor.putString("email", email);
-        editor.putString("endereco", endereco);
-        editor.putString("num_casa", num_casa);
-        editor.putString("conjunto", conjunto);
-        editor.putString("telefone", telefone);
-        editor.putString("dataCadastro", dataCadastro);
-        editor.putString("updateAt", updateAt);
+        editor.putLong("dataCadastro", dataCadastro);
+        editor.putLong("updateAt", updateAt);
         editor.putString("perfil", "admins");
         editor.apply();
+
+        TopicHelper.inscreverNoTopicoDoPerfil(this, "admins");
     }
 
-
-
-    // Método auxiliar para extrair os dados e evitar repetição de código
-    private void processarDadosUsuario(DataSnapshot snapshot, ActivityLoginAdmin.EmailCallback callback) {
-        for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-            nome = userSnapshot.child("nome").getValue(String.class);
-            cpf = userSnapshot.child("cpf").getValue(String.class);
-            email = userSnapshot.child("email").getValue(String.class);
-            endereco = userSnapshot.child("endereco").getValue(String.class);
-            num_casa = userSnapshot.child("num_casa").getValue(String.class);
-            conjunto = userSnapshot.child("conjunto").getValue(String.class);
-            telefone = userSnapshot.child("telefone").getValue(String.class);
-
-            Long dataLong = userSnapshot.child("dataCadastro").getValue(Long.class);
-            Long updateLong = userSnapshot.child("updateAt").getValue(Long.class);
-
-            dataCadastro = (dataLong != null) ? String.valueOf(dataLong) : "0";
-            updateAt = (updateLong != null) ? String.valueOf(updateLong) : "0";
-
-            callback.onEmailEncontrado(email, nome);
-            return;
-        }
-    }
 
     private void showLoading() {
 
@@ -560,11 +501,6 @@ public class ActivityLoginAdmin extends AppCompatActivity {
     interface CadastroCallback {
         void onLiberado();
         void onErro(String msg);
-    }
-
-    public interface EmailCallback {
-        void onEmailEncontrado(String email, String nome);
-        void onErro(String erro);
     }
 
     @Override

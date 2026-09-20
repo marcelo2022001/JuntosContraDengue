@@ -34,6 +34,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TopicHelper;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -42,7 +43,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity
         tutorial = prefs.getInt("tutorial", 1);
 
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         if (!prefs.getBoolean("tutorialFull", false)) {
@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         criarCanalNotificacao();
-        configurarTopicosFCM();
 
         v_flipper = findViewById(R.id.v_flipper);
 
@@ -139,39 +138,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void configurarTopicosFCM() {
-
-
-        if (estado == null || municipio == null || perfil == null) return;
-
-        if (estado.isEmpty() || municipio.isEmpty() || perfil.isEmpty()) return;
-
-        String topicoUsuarios = estado + "_" + municipio + "_usuarios";
-        String topicoAdmins   = estado + "_" + municipio + "_admins";
-        String topicoAgentes  = estado + "_" + municipio + "_agentes";
-
-        FirebaseMessaging.getInstance().unsubscribeFromTopic(topicoUsuarios);
-        FirebaseMessaging.getInstance().unsubscribeFromTopic(topicoAdmins);
-        FirebaseMessaging.getInstance().unsubscribeFromTopic(topicoAgentes);
-
-        switch (perfil) {
-
-            case "usuarios":
-                FirebaseMessaging.getInstance().subscribeToTopic(topicoUsuarios);
-                Log.d("FCM", "Inscrito em " + topicoUsuarios);
-                break;
-
-            case "admins":
-                FirebaseMessaging.getInstance().subscribeToTopic(topicoAdmins);
-                Log.d("FCM", "Inscrito em " + topicoAdmins);
-                break;
-
-            case "agentes":
-                FirebaseMessaging.getInstance().subscribeToTopic(topicoAgentes);
-                Log.d("FCM", "Inscrito em " + topicoAgentes);
-                break;
-        }
-    }
 
     // =====================================================
     // UI
@@ -474,6 +440,8 @@ public class MainActivity extends AppCompatActivity
     // =====================================================
     private void logout() {
 
+        TopicHelper.sairDoTopicoAtual(this);
+
         // 1️⃣ Logout Firebase
         FirebaseAuth.getInstance().signOut();
 
@@ -541,7 +509,7 @@ public class MainActivity extends AppCompatActivity
     // ... (Método onNavigationItemSelected completo)
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Seu código original completo para o Drawer (mantido)
+        // O seu código original completo para o Drawer (mantido)
         int id = item.getItemId();
         if (id == R.id.nav_configuracoes) {
             startActivity(new Intent(MainActivity.this, ProfileActivity.class));

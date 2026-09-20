@@ -16,22 +16,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <VideoView
+    <com.example.juntoscontradengue.FullScreenVideoView
         android:id="@+id/videoViewInitial"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:keepScreenOn="true"
         app:layout_constraintTop_toBottomOf="@id/toolbarVideoIni"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnFecharVideo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
+        android:layout_margin="24dp"
         android:contentDescription="@string/fechar_video"
         android:visibility="invisible"
         android:alpha="0"
+        android:elevation="12dp"
         app:srcCompat="@drawable/ic_close"
         app:backgroundTint="@color/white"
         app:tint="@color/black"

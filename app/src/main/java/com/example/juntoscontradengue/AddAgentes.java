@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -40,7 +38,7 @@ public class AddAgentes extends AppCompatActivity {
     RadioButton rbSelecione, rbAdmin, rbAgente, rbOutro;
     CheckBox chkBoxMostrarImagemAgente;
     EditText edtCpfAgenteCad, edtOutroAgenteCad, edtNomeCad;
-    TextView imgCadastroApareceraTelaAgentes;
+    TextView imgCadastroApareceraTelaAgentes, totalAdminsPossivelCadastro, totalAgentesPossivelCadastro;
     String estado, municipio, db_salvar_pre_cadastro, sCpf, sNomeCad;
     String decrementarOnde, verifica_outro_pre_cadastro, funcao_pre_cadastro;
     Long data_atual;
@@ -66,7 +64,7 @@ public class AddAgentes extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
 
@@ -74,19 +72,22 @@ public class AddAgentes extends AppCompatActivity {
         edtCpfAgenteCad.addTextChangedListener(MaskEditUtil.mask(MaskEditUtil.FORMAT_CPF));
         edtNomeCad = findViewById(R.id.edtNomeCadAgentes);
 
-        // No firebase verifica se total_admins e total_agentes, outros é igual a 0, se não pode cadastrar
-        verificarPossibilidadeNovoCadastroAdmin();
-        verificarPossibilidadeNovoCadastroAgentes();
-
 
         radioGroup = findViewById(R.id.rdGroup);
         rbSelecione = findViewById(R.id.radioButtonSelOpcao);
         rbAdmin = findViewById(R.id.radioButtonAdmin);
         rbAgente = findViewById(R.id.radioButtonAgente);
         rbOutro = findViewById(R.id.radioButtonOutros);
+        totalAdminsPossivelCadastro = findViewById(R.id.TextViewTotalAdmins);
+        totalAgentesPossivelCadastro = findViewById(R.id.TextViewTotalAgentes);
         edtOutroAgenteCad = findViewById(R.id.edtOutrosCadAgentes);
         chkBoxMostrarImagemAgente = findViewById(R.id.chekBoxMostrarImagemAgente);
         imgCadastroApareceraTelaAgentes = findViewById(R.id.msgSobreFotoSeAparecera);
+
+        // No firebase verifica se total_admins e total_agentes, outros é igual a 0, se não pode cadastrar
+        verificarPossibilidadeNovoCadastroAdmin();
+        verificarPossibilidadeNovoCadastroAgentes();
+
 
         // Define o ouvinte de mudança de seleção
         radioGroup.setOnCheckedChangeListener( (group, checkedId) -> {
@@ -147,77 +148,48 @@ public class AddAgentes extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_toolbar_add_agentes_info, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-
-        if (item.getItemId() == R.id.menu_info) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Informações")
-                    .setMessage("Total de cadastro de administrador possível: " + totalAdminPodeCadastrar + "\n" +
-                            "Total de cadastro de agentes ou outros possível: " + totalAgentePodeCadastrar )
-                    .setPositiveButton("OK", null)
-                    .show();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     private void verificarPossibilidadeNovoCadastroAdmin() {
 
-            String pathConfig = "/config/total_admins";
+        String pathConfig = "/config/total_admins";
 
-            databaseMunicipio.getReference(pathConfig)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.exists()) {
-
-                                totalAdminPodeCadastrar = snapshot.getValue(Long.class);
-                            }
-
+        databaseMunicipio.getReference(pathConfig)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            totalAdminPodeCadastrar = snapshot.getValue(Long.class);
+                            totalAdminsPossivelCadastro.setText(
+                                    String.format("Total de administrador para cadastro: %s", totalAdminPodeCadastrar));
                         }
+                    }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                        }
-                    });
-
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                    }
+                });
     }
 
     private void verificarPossibilidadeNovoCadastroAgentes() {
 
-            String pathConfig = "/config/total_agentes";
+        String pathConfig = "/config/total_agentes";
 
         databaseMunicipio.getReference(pathConfig)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                            if (snapshot.exists()) {
-
-                                totalAgentePodeCadastrar = snapshot.getValue(Long.class);
-
-                            }
-
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            totalAgentePodeCadastrar = snapshot.getValue(Long.class);
+                            totalAgentesPossivelCadastro.setText(
+                                    String.format("Total de agentes para cadastro: %s", totalAgentePodeCadastrar));
                         }
+                    }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                        }
-                    });
-        }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                    }
+                });
+    }
 
     private void checkNetworkConnection() {
         boolean isConnected = NetworkUtils.isNetworkAvailable(this);
@@ -459,6 +431,9 @@ public class AddAgentes extends AppCompatActivity {
             db_salvar_pre_cadastro = "pre_cadastro_agentes";
         }
 
+        verificarPossibilidadeNovoCadastroAdmin();
+        verificarPossibilidadeNovoCadastroAgentes();
+
         return true; // Retorno final de sucesso
 
 
@@ -502,7 +477,7 @@ public class AddAgentes extends AppCompatActivity {
 
     private void decrementarContador() {
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         DatabaseReference configRef = databaseMunicipio.getReference()
@@ -523,6 +498,9 @@ public class AddAgentes extends AppCompatActivity {
             @Override
             public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
                 Toast.makeText(AddAgentes.this, "Dados salvo com sucesso", Toast.LENGTH_SHORT).show();
+                verificarPossibilidadeNovoCadastroAdmin();
+                verificarPossibilidadeNovoCadastroAgentes();
+
             }
         });
     }

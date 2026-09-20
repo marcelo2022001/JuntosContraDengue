@@ -91,7 +91,7 @@ public class UploadTrabAgentes extends AppCompatActivity {
 
         municipio = prefs.getString("municipio", null);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
          databaseReference = databaseMunicipio.getReference("trabalhos_agentes");

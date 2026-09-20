@@ -49,7 +49,7 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         ActivityReclamacoesUsuariosBinding bindingUsers = ActivityReclamacoesUsuariosBinding.inflate(getLayoutInflater());
@@ -159,21 +159,24 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
                 int index = findComplaintIndexById(snapshot.getKey());
                 if (index != -1) {
-                    imageViewSemReclamacao.setVisibility(View.VISIBLE);
-                    btnFazerReclamacao.setVisibility(View.VISIBLE);
-                    recyclerViewReclamacaoUsers.setVisibility(View.GONE);
                     listClassReclamacoes.remove(index);
                     adapterReclamacaoUsuarios.notifyItemRemoved(index);
+
+                    // Só atualiza a UI se a lista ficou VAZIA
+                    if (listClassReclamacoes.isEmpty()) {
+                        imageViewSemReclamacao.setVisibility(View.VISIBLE);
+                        btnFazerReclamacao.setVisibility(View.VISIBLE);
+                        recyclerViewReclamacaoUsers.setVisibility(View.GONE);
+                    }
                 }
             }
 
             @Override
             public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                // Handle item reordering if needed
-                imageViewSemReclamacao.setVisibility(View.VISIBLE);
-                btnFazerReclamacao.setVisibility(View.VISIBLE);
-                recyclerViewReclamacaoUsers.setVisibility(View.GONE);
+                // Nada a fazer aqui — reordenação não altera a visibilidade
+                // Se quiser reordenar, implemente a lógica de mover o item na lista
             }
+
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {

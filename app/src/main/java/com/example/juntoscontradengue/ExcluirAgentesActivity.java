@@ -63,7 +63,7 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         // Configuração do RecyclerView e do Listener de Clique do Adapter

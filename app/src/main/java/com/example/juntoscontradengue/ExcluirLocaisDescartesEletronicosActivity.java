@@ -57,7 +57,7 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
         String estado = prefs.getString("estado", null);
         String municipio = prefs.getString("municipio", null);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
          databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
         // INICIALIZA A REFERÊNCIA DO BANCO
         databaseDescartesEletronicos = databaseMunicipio.getReference().child("descarte_eletronicos");

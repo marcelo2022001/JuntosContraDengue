@@ -73,7 +73,7 @@ public class ListarReclamacoesAdmins extends AppCompatActivity
         String estado = prefs.getString("estado", "");
         String municipio = prefs.getString("municipio", "");
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
 

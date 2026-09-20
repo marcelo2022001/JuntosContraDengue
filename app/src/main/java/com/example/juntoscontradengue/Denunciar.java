@@ -3,6 +3,7 @@ package com.example.juntoscontradengue;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -30,6 +31,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.example.juntoscontradengue.databinding.ActivityDenunciarBinding;
+import com.example.juntoscontradengue.extras.Alertas;
 import com.example.juntoscontradengue.extras.NetworkUtils;
 import com.example.juntoscontradengue.extras.TopicHelper;
 import com.google.firebase.auth.FirebaseAuth;
@@ -180,7 +182,7 @@ public class Denunciar extends AppCompatActivity {
         nome = Objects.requireNonNull(prefsData.getString("nome", ""));
         telefone = Objects.requireNonNull(prefsData.getString("telefone", ""));
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         Log.d("FIREBASE_DB", "Estado: " + estado);
@@ -615,7 +617,7 @@ public class Denunciar extends AppCompatActivity {
         Toast.makeText(this, "Não foi possível salvar sua reclamação", Toast.LENGTH_SHORT).show();
         return;
         } else {
-            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+            String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
             Log.d("FIREBASE_DB", "URL para verificar reclamações: " + urlBanco);
         }
 
@@ -698,10 +700,10 @@ public class Denunciar extends AppCompatActivity {
             return;
         }
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         DatabaseReference databaseReference = FirebaseDatabase.getInstance(urlBanco)
                 .getReference()
-                .child("reclamacoes")
+                .child("reclamacoesUsuarios")
                 .child(uid);
 
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -713,9 +715,28 @@ public class Denunciar extends AppCompatActivity {
 
                         if (total >= 3) {
                             hideLoading();
-                            Toast.makeText(Denunciar.this,
-                                    "Você já possui o limite máximo de 3 denúncias. Exclua 1 ou mais denúncias para continuar.",
-                                    Toast.LENGTH_LONG).show();
+
+                            Alertas.showSuccessDialog(
+                                    Denunciar.this,
+                                    "Limite de denúncias",
+                                    "Você já possui o limite máximo de 3 denúncias.\n\n" +
+                                            "Exclua 1 ou mais denúncias para continuar.",
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                            Intent intent = new Intent(Denunciar.this, MainActivity.class);
+
+                                            // Evita voltar para a tela Denunciar ao pressionar Voltar
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                                    Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    }
+                            );
+
                             return;
                         }
 

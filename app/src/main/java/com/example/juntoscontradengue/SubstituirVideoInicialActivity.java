@@ -55,7 +55,7 @@ public class SubstituirVideoInicialActivity extends AppCompatActivity {
         estado = prefs.getString("estado", "");
         municipio = prefs.getString("municipio", "");
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + ".firebaseio.com/";
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         // Configurar o seletor de vídeo
