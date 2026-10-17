@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,7 +42,7 @@ public class TrabalhosAgentes extends AppCompatActivity {
         ActivityTrabalhosAgentesBinding trabalhosAgentesBinding = ActivityTrabalhosAgentesBinding.inflate(getLayoutInflater());
         setContentView(trabalhosAgentesBinding.getRoot());
 
-        TextView txt_nada_para_ver = trabalhosAgentesBinding.txtNadaParaVer;
+        LinearLayout sem_trab_adicionados = trabalhosAgentesBinding.layoutEmptyState;
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
          estado = prefs.getString("estado", null);
@@ -84,7 +84,7 @@ public class TrabalhosAgentes extends AppCompatActivity {
                 ClassTrabAgentes classTrabAgentes = snapshot.getValue(ClassTrabAgentes.class);
                 if (classTrabAgentes != null) {
                     recyclerViewTrabAgentes.setVisibility(View.VISIBLE);
-                    txt_nada_para_ver.setVisibility(View.GONE);
+                    sem_trab_adicionados.setVisibility(View.GONE);
 
                     listTrabAgentes.add(classTrabAgentes);
                     adapterTrabAgentes.notifyItemInserted(listTrabAgentes.size() - 1); // Notifica o Adapter
@@ -101,11 +101,13 @@ public class TrabalhosAgentes extends AppCompatActivity {
                 ClassTrabAgentes classTrabAgentes = snapshot.getValue(ClassTrabAgentes.class);
                 if (classTrabAgentes != null) {
                     recyclerViewTrabAgentes.setVisibility(View.VISIBLE);
-                    txt_nada_para_ver.setVisibility(View.GONE);
+                    sem_trab_adicionados.setVisibility(View.GONE);
+
                     int index = findIndexById(snapshot.getKey());
                     if (index != -1) {
                         listTrabAgentes.set(index, classTrabAgentes);
-                        adapterTrabAgentes.notifyItemInserted(listTrabAgentes.size() - 1);                     }
+                        adapterTrabAgentes.notifyItemChanged(index); // Notifica alteração no índice correto
+                    }
                 }
             }
 
@@ -114,7 +116,7 @@ public class TrabalhosAgentes extends AppCompatActivity {
                 int index = findIndexById(snapshot.getKey());
                 if (index != -1) {
                     recyclerViewTrabAgentes.setVisibility(View.VISIBLE);
-                    txt_nada_para_ver.setVisibility(View.GONE);
+                    sem_trab_adicionados.setVisibility(View.GONE);
                     listTrabAgentes.remove(index);
                     adapterTrabAgentes.notifyItemRemoved(index);
                 }
@@ -133,9 +135,15 @@ public class TrabalhosAgentes extends AppCompatActivity {
     }
 
     private int findIndexById(String id) {
+        if (id == null) return -1;
+
         for (int i = 0; i < listTrabAgentes.size(); i++) {
             ClassTrabAgentes agente = listTrabAgentes.get(i);
+            // Compara a chave recebida do Firebase com o ID do objeto
+            if (id.equals(agente.getId())) {
+                return i;
+            }
         }
-        return -1; // Retorna -1 se o item não for encontrado
+        return -1;
     }
 }

@@ -4,76 +4,95 @@
     android:id="@+id/cardViewDescartePneus"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:elevation="3dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginTop="6dp"
-    app:cardBackgroundColor="#E3E0E0"
-    app:cardCornerRadius="1dp"
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
     app:cardUseCompatPadding="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:gravity="left"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
+        <!-- Nome do Local / Título Principal -->
         <TextView
             android:id="@+id/local_descarte_consciente"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawableStart="@drawable/ic_home_1"
-            android:text="@string/local"
-            android:layout_marginTop="6dp"
             android:drawablePadding="12dp"
-            android:textSize="18sp"
-            android:textStyle="bold">
-        </TextView>
+            android:gravity="center_vertical"
+            android:text="@string/local"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
+        <!-- Separador sutil para organizar visualmente (Opcional) -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="#666666" />
+
+        <!-- Endereço -->
         <TextView
             android:id="@+id/endereco_descarte_consciente"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:drawablePadding="12dp"
             android:drawableStart="@drawable/location_map_navigation_pointer"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical"
             android:text="@string/endereco"
-            android:textSize="18sp"
-            android:textStyle="bold">
-        </TextView>
+            android:textColor="#666666"
+            android:textSize="14sp" />
 
-            <TextView
-                android:id="@+id/fone_descarte_consciente"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/telefone"
-                android:drawablePadding="12dp"
-                android:drawableStart="@drawable/telefone_volume"
-                android:textSize="18sp"
-                android:textStyle="bold">
-            </TextView>
+        <!-- Separador sutil para organizar visualmente (Opcional) -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="#666666" />
 
+        <!-- Telefone -->
+        <TextView
+            android:id="@+id/fone_descarte_consciente"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:drawableStart="@drawable/telefone_volume"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical"
+            android:text="@string/telefone"
+            android:textColor="#666666"
+            android:textSize="14sp" />
+
+        <!-- Separador sutil para organizar visualmente (Opcional) -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="#666666" />
+        <!-- Horário de Funcionamento -->
         <TextView
             android:id="@+id/horario_descarte_consciente"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="@string/horario"
-            android:drawablePadding="12dp"
+            android:layout_marginTop="8dp"
             android:drawableStart="@drawable/alarm_clock"
-            android:textSize="18sp"
-            android:textStyle="bold">
-        </TextView>
-
-
-
-
-
-
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical"
+            android:text="@string/horario"
+            android:textColor="#666666"
+            android:textSize="14sp" />
 
     </LinearLayout>
 

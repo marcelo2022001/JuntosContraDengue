@@ -13,7 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.juntoscontradengue.FullscreenActivity;
+import com.example.juntoscontradengue.FullscreenImageActivity;
 import com.example.juntoscontradengue.R;
 import com.example.juntoscontradengue.database.classes_database.ClassTrabAgentes;
 
@@ -53,7 +53,7 @@ public class AdapterTrabAgentes extends RecyclerView.Adapter<AdapterTrabAgentes.
                     .into(holder.imgAgente);
 
             holder.imgAgente.setOnClickListener(v -> {
-                Intent intent = new Intent(context, FullscreenActivity.class);
+                Intent intent = new Intent(context, FullscreenImageActivity.class);
                 intent.putExtra("urlMidia", url);
                 intent.putExtra("tipo", "imagem");
                 context.startActivity(intent);

@@ -39,10 +39,10 @@ public class AddAgentes extends AppCompatActivity {
     CheckBox chkBoxMostrarImagemAgente;
     EditText edtCpfAgenteCad, edtOutroAgenteCad, edtNomeCad;
     TextView imgCadastroApareceraTelaAgentes, totalAdminsPossivelCadastro, totalAgentesPossivelCadastro;
-    String estado, municipio, db_salvar_pre_cadastro, sCpf, sNomeCad;
+    String estado, municipio, db_salvar_pre_cadastro, sCpf, sNomeCad, autoriza_uso_imagem;
     String decrementarOnde, verifica_outro_pre_cadastro, funcao_pre_cadastro;
     Long data_atual;
-    Boolean autoriza_uso_imagem, radioButtomsel = false;
+    Boolean radioButtomsel = false;
     Long totalAdminPodeCadastrar, totalAgentePodeCadastrar;
     private String sFuncao_agente = ""; // agente ou admin
     private FirebaseDatabase databaseMunicipio;
@@ -78,12 +78,11 @@ public class AddAgentes extends AppCompatActivity {
         rbAdmin = findViewById(R.id.radioButtonAdmin);
         rbAgente = findViewById(R.id.radioButtonAgente);
         rbOutro = findViewById(R.id.radioButtonOutros);
-        totalAdminsPossivelCadastro = findViewById(R.id.TextViewTotalAdmins);
-        totalAgentesPossivelCadastro = findViewById(R.id.TextViewTotalAgentes);
         edtOutroAgenteCad = findViewById(R.id.edtOutrosCadAgentes);
         chkBoxMostrarImagemAgente = findViewById(R.id.chekBoxMostrarImagemAgente);
         imgCadastroApareceraTelaAgentes = findViewById(R.id.msgSobreFotoSeAparecera);
-
+        totalAdminsPossivelCadastro = findViewById(R.id.TextViewTotalAdmins);
+        totalAgentesPossivelCadastro = findViewById(R.id.TextViewTotalAgentes);
         // No firebase verifica se total_admins e total_agentes, outros é igual a 0, se não pode cadastrar
         verificarPossibilidadeNovoCadastroAdmin();
         verificarPossibilidadeNovoCadastroAgentes();
@@ -98,6 +97,7 @@ public class AddAgentes extends AppCompatActivity {
                 chkBoxMostrarImagemAgente.setChecked(false);
                 chkBoxMostrarImagemAgente.setVisibility(View.GONE);
                 edtOutroAgenteCad.setVisibility(View.GONE);
+                imgCadastroApareceraTelaAgentes.setVisibility(View.GONE);
                 radioButtomsel = false;
 
             } else if(checkedId == R.id.radioButtonAdmin) {
@@ -105,6 +105,7 @@ public class AddAgentes extends AppCompatActivity {
                 edtOutroAgenteCad.setVisibility(View.GONE);
                 chkBoxMostrarImagemAgente.setVisibility(View.GONE);
                 edtOutroAgenteCad.setVisibility(View.GONE);
+                imgCadastroApareceraTelaAgentes.setVisibility(View.GONE);
                     db_salvar_pre_cadastro = "pre_cadastro_admins";
                     decrementarOnde = "total_admins";
                      radioButtomsel = false;
@@ -113,6 +114,7 @@ public class AddAgentes extends AppCompatActivity {
 
                 chkBoxMostrarImagemAgente.setVisibility(View.VISIBLE);
                 chkBoxMostrarImagemAgente.setChecked(true);
+                imgCadastroApareceraTelaAgentes.setVisibility(View.GONE);
                    chkBoxMostrarImagemAgente.setEnabled(false);
                    edtOutroAgenteCad.setVisibility(View.GONE);
                    db_salvar_pre_cadastro = "pre_cadastro_agentes";
@@ -207,7 +209,7 @@ public class AddAgentes extends AppCompatActivity {
             AlertDialog alertDialog = new AlertDialog.Builder(AddAgentes.this).create();
 
             alertDialog.setTitle("Limite atingido");
-            alertDialog.setMessage("O limite de agentes foi atingido.\n\n" +
+            alertDialog.setMessage("O limite de administradores foi atingido.\n\n" +
                     "Remova um profissional ou um pré-cadastro não finalizado.\n\n" +
                     "Deseja conhecer nossos planos para cadastrar novos administradores?");
 
@@ -278,7 +280,6 @@ public class AddAgentes extends AppCompatActivity {
 
                    @Override
                    public void onNotExists() {
-                       autoriza_uso_imagem = chkBoxMostrarImagemAgente.isChecked();
                        salvar_dados_db();
                    }
 
@@ -440,7 +441,38 @@ public class AddAgentes extends AppCompatActivity {
     }
 
     private void salvar_dados_db() {
+
+        if (rbOutro.isChecked() && !chkBoxMostrarImagemAgente.isChecked()) {
+            AlertDialog alertDialog = new AlertDialog.Builder(AddAgentes.this).create();
+
+            alertDialog.setTitle("Aviso");
+            alertDialog.setMessage("Mostrar imagem do agente não foi selecionado, este cadastro não aparecera na tela Agentes de Vigilância em Saúde.");
+
+            // Botão SIM
+            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "CONTINUAR",
+                    (dialog, which) -> {
+                        autoriza_uso_imagem = "false";
+                        contiuar_salvar_dados_db();
+                        dialog.dismiss();
+                    });
+
+            // Botão NÃO
+            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "SAIR",
+                    (dialog, which) -> dialog.dismiss());
+
+            alertDialog.show();
+        }
+        else {
+            autoriza_uso_imagem = "true";
+            contiuar_salvar_dados_db();
+
+        }
+    }
+
+    private void contiuar_salvar_dados_db() {
         // 2. Salvar Dados no Realtime Database
+
+
         DateTimeSaver dateSaver = new DateTimeSaver();
         data_atual = dateSaver.saveCurrentDateTime();
 
@@ -449,11 +481,7 @@ public class AddAgentes extends AppCompatActivity {
                 .child(db_salvar_pre_cadastro)
                 .child(sCpf);
 
-        Map<String, Object> dados = new HashMap<>();
-        dados.put("nome_pre_cadastro", sNomeCad);
-        dados.put("funcao_pre_cadastro", sFuncao_agente);
-        dados.put("autoriza_uso_imagem", autoriza_uso_imagem);
-        dados.put("data_pre_cadastro", data_atual);
+        Map<String, Object> dados = getStringObjectMap();
 
         userRef.setValue(dados).addOnSuccessListener(aVoid -> {
             decrementarContador();
@@ -473,6 +501,22 @@ public class AddAgentes extends AppCompatActivity {
 
         }).addOnFailureListener(e -> Toast.makeText(AddAgentes.this, "Erro: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
+    }
+
+    private Map<String, Object> getStringObjectMap() {
+        Map<String, Object> dados = new HashMap<>();
+        dados.put("nome_pre_cadastro", sNomeCad);
+        dados.put("funcao_pre_cadastro", sFuncao_agente);
+        dados.put("data_pre_cadastro", data_atual);
+
+        if(rbAgente.isChecked()){
+            dados.put("autoriza_uso_imagem", "true");
+        }
+
+        if(rbOutro.isChecked() ){
+            dados.put("autoriza_uso_imagem", autoriza_uso_imagem);
+        }
+        return dados;
     }
 
     private void decrementarContador() {

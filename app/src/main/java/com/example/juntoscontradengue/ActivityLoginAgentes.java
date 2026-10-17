@@ -54,7 +54,6 @@ public class ActivityLoginAgentes extends AppCompatActivity {
     private ActivityLoginAgentesBinding loguinAgentesBinding;
     private String  emailAgente, senhaAgente,  estado, municipio;
     private String cpf, cpfLimpo, nome, email;
-    private Long dataCadastro, updatedAt;
     private String  emailSharedPrefers;
     boolean isConnected;
 
@@ -103,7 +102,7 @@ public class ActivityLoginAgentes extends AppCompatActivity {
 
 
         Button btnEntrarTelaLoguinAdmin = loguinAgentesBinding.btnEntrarTelaLoguinAgentes;
-        btnEntrarTelaLoguinAdmin.setOnClickListener(v -> entrar_conta_admin());
+        btnEntrarTelaLoguinAdmin.setOnClickListener(v -> entrar_conta_agente());
 
         TextView txtRecuperarSenha = loguinAgentesBinding.txtRecupSenhaLoguinAgentes;
         txtRecuperarSenha.setOnClickListener(v -> recuperarSenhaAgente());
@@ -117,10 +116,10 @@ public class ActivityLoginAgentes extends AppCompatActivity {
 
             // Inicia a transição de tela para exibir o Fragment
             getSupportFragmentManager().beginTransaction()
-                    // R.id.fragment_container deve ser o ID do container de layout na sua activity_login (ex: FrameLayout)
-                    // Se você não tiver um container específico, pode usar o id do layout raiz da Activity
+                    // R.id.fragment_container deve ser o "ID" do container de layout na sua activity_login (ex: FrameLayout)
+                    // Se você não tiver um container específico, pode usar o "id" do layout raiz da Activity
                     .replace(R.id.fragment_container_recup_email_agentes, fragment)
-                    // Adiciona na pilha para que, se o usuário clicar no botão "Voltar" do celular, ele retorne para a tela de login
+                    // Adiciona na pilha para que, se o usuário clicar no botão "Voltar" do celular, ele retorne para a tela de loguin
                     .addToBackStack(null)
                     .commit();
         });
@@ -238,12 +237,15 @@ public class ActivityLoginAgentes extends AppCompatActivity {
                                 // Recuperar os dados do pré-cadastro
                                 String nome = dataSnapshot.child("nome_pre_cadastro").getValue(String.class);
                                 String funcao = dataSnapshot.child("funcao_pre_cadastro").getValue(String.class);
+                                String uso_imagem = dataSnapshot.child("autoriza_uso_imagem").getValue(String.class);
+
 
                                 Intent intent = new Intent(ActivityLoginAgentes.this, CriarCadastroAgente.class);
                                 intent.putExtra("cpf", edt_txt_pre_cadastro.getText().toString().trim());
                                 intent.putExtra("nome", nome);
                                 intent.putExtra("funcao", funcao);
                                 intent.putExtra("tipo_conta", "agente");
+                                intent.putExtra("uso_imagem", uso_imagem);
                                 startActivity(intent);
 
                             } else {
@@ -279,7 +281,7 @@ public class ActivityLoginAgentes extends AppCompatActivity {
                                 String funcao = dataSnapshot.child("funcao_pre_cadastro").getValue(String.class);
 
                                 Intent intent = new Intent(ActivityLoginAgentes.this, CriarCadastroAgente.class);
-                                // DICA: Geralmente você vai querer passar o dados para a próxima tela
+                                // DICA: Geralmente você vai querer passar os dados para a próxima tela
                                 intent.putExtra("tipo_conta", "agentes");
                                 intent.putExtra("cpf", edt_txt_pre_cadastro.getText().toString().trim());
                                 intent.putExtra("nome", nome);
@@ -346,7 +348,7 @@ public class ActivityLoginAgentes extends AppCompatActivity {
         }
     }
 
-    private void entrar_conta_admin() {
+    private void entrar_conta_agente() {
 
         // Chamada ao método da classe NetworkUtils
         isConnected = NetworkUtils.isNetworkAvailable(ActivityLoginAgentes.this);
@@ -393,30 +395,26 @@ public class ActivityLoginAgentes extends AppCompatActivity {
                     // E-mail realmente usado/validado pelo Auth (já normalizado)
                     String emailLogado = user.getEmail() != null ? user.getEmail() : emailAgente;
 
-                    sincronizarPerfilAdmin(user.getUid(), emailLogado);
+                    sincronizarPerfilAgente(user.getUid(), emailLogado);
                 });
     }
 
-    private void sincronizarPerfilAdmin(String uid, String emailLogado) {
+    private void sincronizarPerfilAgente(String uid, String emailLogado) {
 
         databaseMunicipio.getReference()
-                .child("logins").child("Agentes").child(uid)
+                .child("logins").child("agentes").child(uid)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                         if (!snapshot.exists()) {
-                            falhaAposAutenticar("Esta conta não possui perfil de administrador.");
+                            falhaAposAutenticar("Conta não encontrada!.");
                             return;
                         }
 
                         nome      = snapshot.child("nome").getValue(String.class);
                         cpf       = snapshot.child("cpf").getValue(String.class);
                         email     = snapshot.child("email").getValue(String.class);
-                        Long dc = snapshot.child("dataCadastro").getValue(Long.class);
-                        Long up = snapshot.child("updatedAt").getValue(Long.class);
-                        dataCadastro = dc != null ? dc : 0L;
-                        updatedAt     = up != null ? up : 0L;
 
                         // Compara o e-mail do login com o salvo no banco
                         boolean emailMudou = email == null || !email.equalsIgnoreCase(emailLogado);
@@ -424,7 +422,6 @@ public class ActivityLoginAgentes extends AppCompatActivity {
                         if (emailMudou) {
                             atualizarEmailNoBanco(uid, emailLogado, cpf);
                             email    = emailLogado;
-                            updatedAt = System.currentTimeMillis();
                         }
 
                         concluirLogin();
@@ -456,11 +453,11 @@ public class ActivityLoginAgentes extends AppCompatActivity {
             }
         }
 
-        // Update multi-path a partir da raiz: grava tudo junto ou nada.
+        // Update multipath a partir da raiz: grava tudo junto ou nada.
         // Se falhar, não trava o login: no próximo login o e-mail ainda vai diferir e tenta de novo.
         databaseMunicipio.getReference().updateChildren(updates)
                 .addOnFailureListener(e ->
-                        Log.e("LoginAdmin", "Falha ao sincronizar e-mail: " + e.getMessage()));
+                        Log.e("LoginAgentes", "Falha ao sincronizar e-mail: " + e.getMessage()));
     }
 
     private void concluirLogin() {
@@ -469,7 +466,7 @@ public class ActivityLoginAgentes extends AppCompatActivity {
 
         String saudacao = "Bem vindo, " + (!TextUtils.isEmpty(nome) ? nome : "Agente");
         Toast.makeText(this, saudacao, Toast.LENGTH_LONG).show();
-        startActivity(new Intent(this, AdminActivity.class));
+        startActivity(new Intent(this, AgentesMainActivity.class));
     }
 
     private void falhaAposAutenticar(String msg) {
@@ -497,8 +494,6 @@ public class ActivityLoginAgentes extends AppCompatActivity {
         editor.putString("nome", nome);
         editor.putString("cpf", cpf);
         editor.putString("email", emailSharedPrefers);
-        editor.putLong("dataCadastro", dataCadastro);
-        editor.putLong("updateAt", updatedAt);
         editor.putString("perfil", "agentes");
         editor.apply();
         TopicHelper.inscreverNoTopicoDoPerfil(this, "agentes");

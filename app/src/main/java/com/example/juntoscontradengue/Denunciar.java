@@ -3,7 +3,6 @@ package com.example.juntoscontradengue;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -64,7 +63,6 @@ public class Denunciar extends AppCompatActivity {
     private String uid;
     private String tokenFCM;
     private boolean usuarioQuerSeIdentificar = false;
-    private boolean isCapturingVideo = false;
     boolean isConnected;
     String nome, telefone;
     private Uri imgUri1, imgUri2, imgUri3, videoUri, imgUriTemp;
@@ -75,14 +73,14 @@ public class Denunciar extends AppCompatActivity {
     private ActivityResultLauncher<Intent> videoLauncher;
     private final StorageReference storageReference = FirebaseStorage.getInstance().getReference();
     private FirebaseDatabase databaseMunicipio;
+    private ActivityResultLauncher<String> permissaoInicialCameraLauncher;
+    private boolean enviando = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         isConnected = NetworkUtils.isNetworkAvailable(Denunciar.this);
-
-        verificarPermissoesIniciais();
         
         binding = ActivityDenunciarBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -95,9 +93,9 @@ public class Denunciar extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Mostra a seta de voltar
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-
         inicializarDados();
         configurarLaunchers();
+        verificarPermissoesIniciais();   // ← movido pra cá
         configurarCliques();
         configurarBackPressed();
         configPerfil();
@@ -109,9 +107,16 @@ public class Denunciar extends AppCompatActivity {
         Log.d("Denunciar", "Permissão da câmera ao iniciar: " + temCamera);
 
         if (!temCamera) {
-            // Solicita permissão antecipadamente
-            verificarPermissoesEAbrirCamera(false);
+            permissaoInicialCameraLauncher.launch(Manifest.permission.CAMERA);
         }
+    }
+
+    private void voltarParaMain(String mensagem) {
+        Toast.makeText(this, mensagem, Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -124,44 +129,19 @@ public class Denunciar extends AppCompatActivity {
     }
 
     private void verificarPermissoesEAbrirCamera(boolean isForVideo) {
-        this.isCapturingVideo = isForVideo;
 
         List<String> missingPermissions = new ArrayList<>();
 
-        // PERMISSÃO DA CÂMERA
+        // Câmera (foto e vídeo)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             missingPermissions.add(Manifest.permission.CAMERA);
         }
 
-        // PERMISSÃO DE ÁUDIO PARA VÍDEO
+        // Áudio (só para gravar vídeo)
         if (isForVideo && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             missingPermissions.add(Manifest.permission.RECORD_AUDIO);
-        }
-
-        // PERMISSÕES DE ARMAZENAMENTO POR VERSÃO
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
-            // Para Android 13+, usa READ_MEDIA_IMAGES e READ_MEDIA_VIDEO
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
-                    != PackageManager.PERMISSION_GRANTED) {
-                missingPermissions.add(Manifest.permission.READ_MEDIA_IMAGES);
-            }
-            if (isForVideo && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO)
-                    != PackageManager.PERMISSION_GRANTED) {
-                missingPermissions.add(Manifest.permission.READ_MEDIA_VIDEO);
-            }
-        } else { // Android 12 ou inferior
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                missingPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            }
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) { // Android 9 ou inferior
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    missingPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                }
-            }
         }
 
         if (missingPermissions.isEmpty()) {
@@ -206,6 +186,8 @@ public class Denunciar extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+
+                if (enviando) return; // trava totalmente enquanto envia
                 mostrarDialogoSair();
             }
         });
@@ -278,60 +260,51 @@ public class Denunciar extends AppCompatActivity {
             }
         });
 
-        // Permissões múltiplas
+        permissaoInicialCameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                granted -> {
+                    if (!granted) {
+                        voltarParaMain("Permissão da câmera necessária para fazer uma denúncia");
+                    }
+                });
+
         permissionsLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
                 result -> {
-                    Log.d("Denunciar", "Resultado das permissões: " + result);
+                    boolean cameraGranted = Boolean.TRUE.equals(result.get(Manifest.permission.CAMERA))
+                            || ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+                    boolean isVideoRequest = result.containsKey(Manifest.permission.RECORD_AUDIO);
 
-                    boolean allGranted = true;
-                    for (Map.Entry<String, Boolean> entry : result.entrySet()) {
-                        Log.d("Denunciar", "Permissão " + entry.getKey() + ": " + entry.getValue());
-                        if (!entry.getValue()) {
-                            allGranted = false;
+                    if (isVideoRequest) {
+                        boolean audioGranted = Boolean.TRUE.equals(result.get(Manifest.permission.RECORD_AUDIO));
+                        if (cameraGranted && audioGranted) {
+                            abrirGravadorVideo();
+                        } else {
+                            Toast.makeText(this, "Permissão de câmera e áudio são necessárias para gravar vídeo", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        if (cameraGranted) {
+                            abrirCamera();
+                        } else {
+                            Toast.makeText(this, "Permissão de câmera necessária para tirar foto", Toast.LENGTH_SHORT).show();
                         }
                     }
-
-                    if (allGranted) {
-                        Log.d("Denunciar", "Todas as permissões concedidas");
-                        if (isCapturingVideo) abrirGravadorVideo();
-                        else abrirCamera();
-                    } else {
-                        Log.e("Denunciar", "Algumas permissões foram negadas");
-                        // MOSTRA UM DIÁLOGO EXPLICATIVO
-                        new AlertDialog.Builder(this)
-                                .setTitle("Permissões necessárias")
-                                .setMessage("Para usar a câmera, você precisa conceder as permissões solicitadas. " +
-                                        "Vá em Configurações > Apps > Juntos Contra Dengue > Permissões e ative manualmente.")
-                                .setPositiveButton("Configurações", (d, w) -> {
-                                    Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                    intent.setData(Uri.parse("package:" + getPackageName()));
-                                    startActivity(intent);
-                                })
-                                .setNegativeButton("Cancelar", null)
-                                .show();
-                    }
-                });
+                }
+        );
     }
 
     private void gerarThumbnailVideo(Uri videoUri) {
-        try (MediaMetadataRetriever retriever = new MediaMetadataRetriever()) {
-            try {
-                retriever.setDataSource(this, videoUri); // <-- corrigido: era "uri"
-                Bitmap bitmap = retriever.getFrameAtTime(1000000);
-                thumbnailVideoBitmap = bitmap;
-                binding.thumbnail.setImageBitmap(bitmap);
-            } catch (Exception e) {
-                thumbnailVideoBitmap = null;
-                binding.thumbnail.setImageResource(R.drawable.camera_video);
-            } finally {
-                try {
-                    retriever.release();
-                } catch (Exception ignored) {
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(this, videoUri);
+            Bitmap bitmap = retriever.getFrameAtTime(1000000);
+            thumbnailVideoBitmap = bitmap;
+            binding.thumbnail.setImageBitmap(bitmap);
+        } catch (Exception e) {
+            thumbnailVideoBitmap = null;
+            binding.thumbnail.setImageResource(R.drawable.camera_video);
+        } finally {
+            try { retriever.release(); } catch (Exception ignored) {}
         }
     }
 
@@ -520,6 +493,7 @@ public class Denunciar extends AppCompatActivity {
         }
 
         showLoading();
+          enviando = true;
         if (usuarioQuerSeIdentificar) {
             FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
                 tokenFCM = task.isSuccessful() ? task.getResult() : null;
@@ -670,7 +644,7 @@ public class Denunciar extends AppCompatActivity {
 
             hideLoading();
             Toast.makeText(this, "Enviado com sucesso!", Toast.LENGTH_SHORT).show();
-            finish();
+            sairDaDenuncia();
         }).addOnFailureListener(e -> {
             hideLoading();
             Toast.makeText(this, "Erro ao salvar.", Toast.LENGTH_SHORT).show();
@@ -703,7 +677,7 @@ public class Denunciar extends AppCompatActivity {
         String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         DatabaseReference databaseReference = FirebaseDatabase.getInstance(urlBanco)
                 .getReference()
-                .child("reclamacoesUsuarios")
+                .child("reclamacoes")
                 .child(uid);
 
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -721,19 +695,16 @@ public class Denunciar extends AppCompatActivity {
                                     "Limite de denúncias",
                                     "Você já possui o limite máximo de 3 denúncias.\n\n" +
                                             "Exclua 1 ou mais denúncias para continuar.",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
+                                    (dialog, which) -> {
 
-                                            Intent intent = new Intent(Denunciar.this, MainActivity.class);
+                                        Intent intent = new Intent(Denunciar.this, MainActivity.class);
 
-                                            // Evita voltar para a tela Denunciar ao pressionar Voltar
-                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                                                    Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                        // Evita voltar para a tela Denunciar ao pressionar Voltar
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                                Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-                                            startActivity(intent);
-                                            finish();
-                                        }
+                                        startActivity(intent);
+                                        finish();
                                     }
                             );
 
@@ -766,12 +737,22 @@ public class Denunciar extends AppCompatActivity {
     }
 
     private void hideLoading() {
+        enviando = false;
         if (loadingDialog != null && loadingDialog.isShowing()) loadingDialog.dismiss();
     }
 
     private void mostrarDialogoSair() {
         new AlertDialog.Builder(this).setTitle("Sair").setMessage("Deseja cancelar a denúncia?")
-                .setPositiveButton("Sim", (d, w) -> finish()).setNegativeButton("Não", null).show();
+                .setPositiveButton("Sim", (d, w) -> sairDaDenuncia())
+                .setNegativeButton("Não", null).show();
+    }
+    private void sairDaDenuncia() {
+        if (isTaskRoot()) {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+        }
+        finish();
     }
 
     // Pode colar logo abaixo do seu método inicializarDados() ou no fim da classe

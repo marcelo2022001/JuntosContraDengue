@@ -15,6 +15,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.example.juntoscontradengue.databinding.ActivityAddTelefonesUteisBinding;
 import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TelefoneUtil;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -94,6 +95,11 @@ public class AddTelefonesUteis extends AppCompatActivity {
 
         String local = local_add_telefone.getText().toString().trim();
         String telefone = telefone_add_telefone.getText().toString().trim();
+
+        if (!TelefoneUtil.telefoneValido(telefone_add_telefone.getText().toString())) {
+            telefone_add_telefone.setError("Telefone inválido");
+            return;
+        }
 
         if (!(local.isEmpty()) && !(telefone.isEmpty())) {
 

@@ -28,6 +28,7 @@ import com.example.juntoscontradengue.extras.AppConfig;
 import com.example.juntoscontradengue.extras.NetworkUtils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
@@ -93,8 +94,7 @@ public class Agentes extends AppCompatActivity implements AdapterAgentes.OnImage
 
         if (estado != null && municipio != null) {
              agentesRef = databaseMunicipio.getReference()
-                    .child("logins")
-                    .child("agentes");
+                    .child("agentes_publico");
 
             agentesRef.keepSynced(true);
 
@@ -178,7 +178,25 @@ public class Agentes extends AppCompatActivity implements AdapterAgentes.OnImage
 
                 List<ClassAgentes> newListAgentes = new ArrayList<>();
 
-                if (!snapshot.exists()) {
+
+                for (DataSnapshot agenteSnapshot : snapshot.getChildren()) {
+                    ClassAgentes agentes;
+                    try {
+                        agentes = agenteSnapshot.getValue(ClassAgentes.class);
+                    } catch (DatabaseException e) {
+                        Log.e("FIREBASE", "Agente com dados inválidos: " + agenteSnapshot.getKey(), e);
+                        continue;
+                    }
+
+                    // Só mostra quem tem uso_imagem = true (false ou ausente ficam de fora)
+                    if (agentes == null ) continue;
+
+                    String uidDoAgente = agenteSnapshot.getKey();
+                    if (uidDoAgente != null) agentes.setUuid(uidDoAgente);
+                    newListAgentes.add(agentes);
+                }
+
+                if (newListAgentes.isEmpty()) {
                     if (isConnected) {
                         Toast.makeText(Agentes.this, "Nenhum agente encontrado.", Toast.LENGTH_SHORT).show();
                         adapterAgentes.updateList(newListAgentes);
@@ -186,18 +204,6 @@ public class Agentes extends AppCompatActivity implements AdapterAgentes.OnImage
                         irParaSemInternet();
                     }
                     return;
-                }
-
-                for (DataSnapshot agenteSnapshot : snapshot.getChildren()) {
-                    ClassAgentes agentes = agenteSnapshot.getValue(ClassAgentes.class);
-
-                    if (agentes != null) {
-                        String uidDoAgente = agenteSnapshot.getKey();
-                        if (uidDoAgente != null) {
-                            agentes.setUuid(uidDoAgente);
-                        }
-                        newListAgentes.add(agentes);
-                    }
                 }
 
                 if (isConnected) {

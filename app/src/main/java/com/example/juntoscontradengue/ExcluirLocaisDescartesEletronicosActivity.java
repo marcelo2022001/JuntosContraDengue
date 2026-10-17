@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -49,7 +50,8 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
             Intent itente = new Intent(this, SemInternetActivity.class);
             itente.putExtra("id_activity", "excluir_locais_eletronicos");
             startActivity(itente);
-
+            finish();
+            return;
         }
 
 
@@ -61,10 +63,8 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
          databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
         // INICIALIZA A REFERÊNCIA DO BANCO
         databaseDescartesEletronicos = databaseMunicipio.getReference().child("descarte_eletronicos");
-        
-        initializeFirebaseDescartesEletronicos();
+
         setupRecyclerViewDescartesEletronicos();
-        loadInitialData();
         Toolbar toolbar = bindingDescartesEletronicos.toolbarExcluirLocaisDescartesEletronico;
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -76,44 +76,11 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
         return true;
     }
 
-    private void initializeFirebaseDescartesEletronicos() {
-        databaseMunicipio.getReference()
-                .child("descarte_eletronicos");
-    }
-
     private void setupRecyclerViewDescartesEletronicos() {
         RecyclerView recyclerViewDescartesEletronicos = bindingDescartesEletronicos.rvExcluirLocaisDescartesEletronico;
         recyclerViewDescartesEletronicos.setLayoutManager(new LinearLayoutManager(this));
         adapterDescartesEletronicos = new AdapterExcluirLocaisDescartesEletronicos(this, listDescartesEletronicos);
         recyclerViewDescartesEletronicos.setAdapter(adapterDescartesEletronicos);
-    }
-
-    private void loadInitialData() {
-        databaseDescartesEletronicos.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                listDescartesEletronicos.clear();
-                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                    ClassDescarteConsciente contact = childSnapshot.getValue(ClassDescarteConsciente.class);
-                    if (contact != null) {
-                        contact.setId(childSnapshot.getKey());
-                        listDescartesEletronicos.add(contact);
-                    }
-                }
-                if (adapterDescartesEletronicos != null) {
-                    adapterDescartesEletronicos.updateListExcluir(listDescartesEletronicos);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                if (!isFinishing() && !isDestroyed()) {
-                    Toast.makeText(ExcluirLocaisDescartesEletronicosActivity.this,
-                            "Erro ao carregar dados: " + error.getMessage(),
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
 
     @Override
@@ -123,6 +90,11 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
     }
 
     private void attachChildListener() {
+        // Evita itens duplicados ao voltar para a tela (onStop -> onStart)
+        listDescartesEletronicos.clear();
+        if (adapterDescartesEletronicos != null) {
+            adapterDescartesEletronicos.updateListExcluir(listDescartesEletronicos);
+        }
         childEventListenerDescartesEletronicos = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
@@ -132,6 +104,7 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
                     listDescartesEletronicos.add(contact);
                     if (adapterDescartesEletronicos != null) {
                         adapterDescartesEletronicos.updateListExcluir(listDescartesEletronicos);
+                        atualizarEstadoVazio();
                     }
                 }
             }
@@ -163,6 +136,7 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
                         listDescartesEletronicos.remove(i);
                         if (adapterDescartesEletronicos != null) {
                             adapterDescartesEletronicos.notifyItemRemoved(i);
+                            atualizarEstadoVazio();
                         }
                         break;
                     }
@@ -185,6 +159,27 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
         };
 
         databaseDescartesEletronicos.addChildEventListener(childEventListenerDescartesEletronicos);
+
+        databaseDescartesEletronicos.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                atualizarEstadoVazio();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                atualizarEstadoVazio();
+            }
+        });
+
+    }
+
+    private void atualizarEstadoVazio() {
+        if (bindingDescartesEletronicos == null) return;
+
+        boolean vazio = listDescartesEletronicos.isEmpty();
+        bindingDescartesEletronicos.layoutEmptyState.setVisibility(vazio ? View.VISIBLE : View.GONE);
+        bindingDescartesEletronicos.rvExcluirLocaisDescartesEletronico.setVisibility(vazio ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -203,7 +198,7 @@ public class ExcluirLocaisDescartesEletronicosActivity extends AppCompatActivity
 
     private void deletarCadastroEntregaEletronicos(String id) {
         if (id != null && !id.isEmpty()) {
-            DatabaseReference deletarDescarteEletronicos = databaseMunicipio.getReference().child(id);
+            DatabaseReference deletarDescarteEletronicos = databaseMunicipio.getReference().child("descarte_eletronicos")   .child(id);
             deletarDescarteEletronicos.removeValue()
                     .addOnSuccessListener(aVoid -> {
                         if (!isFinishing() && !isDestroyed()) {

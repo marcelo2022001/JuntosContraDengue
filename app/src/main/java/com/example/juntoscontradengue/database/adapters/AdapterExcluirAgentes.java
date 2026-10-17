@@ -65,7 +65,7 @@ public class AdapterExcluirAgentes extends RecyclerView.Adapter<AdapterExcluirAg
 
             if (pos == RecyclerView.NO_POSITION) return;
 
-            ClassAgentes agenteSelecionado  = lAgentesExcluir.get(position);
+            ClassAgentes agenteSelecionado  = lAgentesExcluir.get(pos);
 
             if (deleteListener != null && agente.getUuid() != null) {
                 Log.d("ADAPTER", "Solicitando exclusão do UUID: " + agente.getUuid());

@@ -349,5 +349,12 @@ Identificação (Tela Denúncia/Reclamação):\nRosto scan ícones animados cria
     <string name="recuperar_e_mail">Recuperar E-mail</string>
     <string name="digite_seu_cpf_apenas_numeros">Digite seu CPF (apenas números)</string>
     <string name="buscar_email">Buscar Email</string>
+    <string name="nenhum_trabalho_encontrado">Nenhum trabalho encontrado</string>
+    <string name="sem_conexao">Sem conexão</string>
+    <string name="aplicativo_desativado">Este aplicativo foi temporariamente desativado ou suspenso para manutenção.</string>
+    <string name="fechar_aplicativo">Fechar Aplicativo</string>
+    <string name="cadastro_de_administrador">CADASTRO DE ADMINISTRADOR</string>
+    <string name="aplicativo_indisponivel">Aplicativo Indisponível</string>
+    <string name="sem_locais_adicionados">Sem locais adicionados</string>
 
 </resources>

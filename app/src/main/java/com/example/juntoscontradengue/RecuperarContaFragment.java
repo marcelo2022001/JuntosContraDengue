@@ -27,7 +27,7 @@ public class RecuperarContaFragment extends Fragment {
 
     private EditText editCpf;
     private FirebaseDatabase databaseMunicipio;
-    private String nodoIndice;   // "index_email_admin" ou "index_email_agente"
+    private String nodoIndice;   // "index_email_admin" ou "index_email_agentes"
 
     public static RecuperarContaFragment newInstance(String nodoIndice) {
         RecuperarContaFragment fragment = new RecuperarContaFragment();

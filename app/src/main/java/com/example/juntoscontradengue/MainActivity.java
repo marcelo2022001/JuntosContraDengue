@@ -31,6 +31,8 @@ import androidx.credentials.exceptions.ClearCredentialException;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.juntoscontradengue.extras.NetworkUtils;
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity
     DrawerLayout drawerLayout;
     ImageButton btn_agentes, btn_trab_agentes, btn_denuncias, btn_dengue, btn_escorpiao;
     private FirebaseDatabase databaseMunicipio;
+
     // =====================================================
     // onCreate
     // =====================================================
@@ -85,15 +88,14 @@ public class MainActivity extends AppCompatActivity
         municipio = Objects.requireNonNull(prefs.getString("municipio", "")).toLowerCase();
         tutorial = prefs.getInt("tutorial", 1);
 
-
         String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         if (!prefs.getBoolean("tutorialFull", false)) {
-
             mostrarTutorial();
-
         }
+
+        verifica_app_ativo();
 
         SharedPreferences prefUser = getSharedPreferences("UserData", MODE_PRIVATE);
         perfil = Objects.requireNonNull(prefUser.getString("perfil", "")).toLowerCase();
@@ -114,11 +116,36 @@ public class MainActivity extends AppCompatActivity
         configurarBotoes();
         configurarToolbarEDrawer();
 
+        // Com internet -> Firebase. Sem internet -> offline.
         if (NetworkUtils.isNetworkAvailable(this)) {
             carregarImagensFirebase();
         } else {
             fallbackOuCarregarOffline();
         }
+    }
+
+    private void verifica_app_ativo() {
+        DatabaseReference configRef = databaseMunicipio.getReference()
+                .child("config")
+                .child("app_ativo");
+
+        configRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Boolean appAtivo = snapshot.getValue(Boolean.class);
+
+                if (appAtivo != null && !appAtivo) {
+                    Intent intent = new Intent(MainActivity.this, AppDesativadoActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
     }
 
     private void criarCanalNotificacao() {
@@ -137,7 +164,6 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-
 
     // =====================================================
     // UI
@@ -184,24 +210,13 @@ public class MainActivity extends AppCompatActivity
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
-            // Usuário está logado. Ir para a tela principal.
             carregarBrasao();
 
-            // ✅ Redireciona para a tela do perfil (admin/agente) só na CRIAÇÃO
-            // desta Activity — não em onStart(), que também roda quando o
-            // usuário volta pelo botão voltar. Antes isso ficava em onStart()
-            // com uma trava (VEIO_PELO_VOLTAR) que nunca era setada como true
-            // por ninguém, então todo retorno à MainActivity reabria
-            // imediatamente a AgentesMainActivity/AdminActivity — o usuário
-            // nunca conseguia "ficar" logado nesta tela.
+            // Redireciona para a tela do perfil (admin/agente) só na CRIAÇÃO desta Activity.
             redirecionarPeloPerfilSeNecessario();
         } else {
-            // Usuário não está logado. Ir para a tela de login.
             brasaoMunicipio.setImageResource(R.drawable.ic_launcher);
-
         }
-
-
     }
 
     private void redirecionarPeloPerfilSeNecessario() {
@@ -227,11 +242,10 @@ public class MainActivity extends AppCompatActivity
                     String urlImagem = snapshot.getValue(String.class);
 
                     if (urlImagem != null && !urlImagem.isEmpty()) {
-
                         Glide.with(MainActivity.this)
                                 .load(urlImagem)
-                                .placeholder(R.drawable.todos_contra_dengue) // opcional
-                                .error(R.drawable.pessoa) // opcional
+                                .placeholder(R.drawable.todos_contra_dengue)
+                                .error(R.drawable.pessoa)
                                 .into(brasaoMunicipio);
                     }
                 }
@@ -244,19 +258,25 @@ public class MainActivity extends AppCompatActivity
     }
 
     // =====================================================
-    // FLIPPER
+    // FLIPPER (online / offline)
     // =====================================================
+
+    /** ONLINE: lê as URLs em config/sliders_main, salva localmente e mostra no slider. */
     private void carregarImagensFirebase() {
-        DatabaseReference ref = databaseMunicipio.getReference("/config/sliders_main");
+        DatabaseReference ref = databaseMunicipio.getReference("config/sliders_main");
 
         ref.get().addOnSuccessListener(snapshot -> {
             List<String> urls = new ArrayList<>();
 
-            int x = 1;
-            for (DataSnapshot s : snapshot.getChildren()) {
-                String u = s.child("image_" + x).getValue(String.class);
-                if (u != null) urls.add(u);
-                x = x + 1;
+            // Cada filho é {"image_N": "url"} -> pega o valor, qualquer que seja o N
+            for (DataSnapshot item : snapshot.getChildren()) {
+                for (DataSnapshot campo : item.getChildren()) {
+                    String u = campo.getValue(String.class);
+                    if (u != null && !u.isEmpty()) {
+                        urls.add(u);
+                        break;
+                    }
+                }
             }
 
             if (urls.isEmpty()) {
@@ -265,45 +285,76 @@ public class MainActivity extends AppCompatActivity
             }
 
             salvarUrlsLocais(urls);
-            carregarUrlsParaFlipper(urls);
+            carregarUrlsParaFlipper(urls, false);   // online: pode baixar da rede
 
         }).addOnFailureListener(e -> fallbackOuCarregarOffline());
     }
 
-    private void carregarUrlsParaFlipper(List<String> urls) {
+    /**
+     * Carrega as imagens com o Glide mantendo a ordem da lista.
+     *
+     * @param somenteCache true = só usa o que já está no cache de disco do Glide (offline);
+     *                     false = pode baixar da internet (online).
+     */
+    private void carregarUrlsParaFlipper(List<String> urls, boolean somenteCache) {
         if (v_flipper == null) return;
+        v_flipper.stopFlipping();
         v_flipper.removeAllViews();
 
-        AtomicInteger count = new AtomicInteger(0);
-        int total = urls.size();
+        final int total = urls.size();
+        final Drawable[] resultado = new Drawable[total];   // mantém a ordem original
+        final AtomicInteger concluidos = new AtomicInteger(0);
 
-        for (String url : urls) {
-            Glide.with(getApplicationContext())
-                    .load(url)
-                    .placeholder(R.drawable.ic_launcher)
-                    .error(R.drawable.error_image)
-                    .into(new CustomTarget<Drawable>() {
+        for (int i = 0; i < total; i++) {
+            final int pos = i;
 
-                        @Override
-                        public void onResourceReady(@NonNull Drawable resource,
-                                                    @Nullable Transition<? super Drawable> transition) {
-                            adicionarImagem(resource, url, count.incrementAndGet(), total);
-                        }
+            RequestBuilder<Drawable> req = Glide.with(getApplicationContext())
+                    .load(urls.get(i))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL);
 
-                        @Override
-                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                            adicionarImagem(errorDrawable, url, count.incrementAndGet(), total);
-                        }
+            if (somenteCache) {
+                req = req.onlyRetrieveFromCache(true);
+            }
 
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-                        }
-                    });
+            req.into(new CustomTarget<Drawable>() {
+                @Override
+                public void onResourceReady(@NonNull Drawable resource,
+                                            @Nullable Transition<? super Drawable> transition) {
+                    resultado[pos] = resource;
+                    finalizarSeCompleto(urls, resultado, concluidos.incrementAndGet(), total);
+                }
+
+                @Override
+                public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                    resultado[pos] = null;   // falhou: será ignorada
+                    finalizarSeCompleto(urls, resultado, concluidos.incrementAndGet(), total);
+                }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
+                }
+            });
         }
     }
 
-    private void adicionarImagem(Drawable drawable, String url, int atual, int total) {
-        if (v_flipper == null) return;
+    private void finalizarSeCompleto(List<String> urls, Drawable[] resultado, int atual, int total) {
+        if (atual != total) return;
+        if (v_flipper == null || isFinishing() || isDestroyed()) return;
+
+        v_flipper.removeAllViews();
+        for (int i = 0; i < total; i++) {
+            if (resultado[i] != null) adicionarImagem(resultado[i], urls.get(i));
+        }
+
+        if (v_flipper.getChildCount() == 0) {
+            // Nada carregou (ex.: offline e sem cache de imagem) -> imagens do app
+            carregarImagensOffline();
+        } else {
+            iniciarFlipper();
+        }
+    }
+
+    private void adicionarImagem(Drawable drawable, String url) {
         ImageView img = new ImageView(this);
         img.setLayoutParams(new ViewFlipper.LayoutParams(
                 ViewFlipper.LayoutParams.MATCH_PARENT,
@@ -318,8 +369,6 @@ public class MainActivity extends AppCompatActivity
         });
 
         v_flipper.addView(img);
-
-        if (atual == total) iniciarFlipper();
     }
 
     private void iniciarFlipper() {
@@ -327,76 +376,16 @@ public class MainActivity extends AppCompatActivity
             v_flipper.setFlipInterval(3500);
             v_flipper.startFlipping();
         }
-
-    }
-
-    private void mostrarTutorial() {
-
-        if (tutorial <= 2) {
-
-            tutorial = tutorial + 1;
-
-            // 1. Criar ou abrir o arquivo de preferências
-            SharedPreferences sharedPref = getSharedPreferences("configApp", Context.MODE_PRIVATE);
-// 2. Salvar dados
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putInt("tutorial", tutorial);
-            editor.apply(); // Salva de forma rápida em segundo plano
-
-        } else{
-            SharedPreferences sharedPref = getSharedPreferences("configApp", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean("tutorialFull", true);
-            editor.apply();
-
-        }
-        View tutorial = findViewById(R.id.layoutTutorial);
-        if (tutorial == null) return;
-
-        tutorial.setVisibility(View.VISIBLE);
-        tutorial.setAlpha(0f);
-        tutorial.setScaleX(0.7f);
-        tutorial.setScaleY(0.7f);
-
-        tutorial.animate()
-                .alpha(1f)
-                .scaleX(1f)
-                .scaleY(1f)
-                .setDuration(500)
-                .withEndAction(() -> {
-
-                    ImageView hand = findViewById(R.id.imgHand);
-                    if (hand == null) return;
-
-                    hand.animate()
-                            .translationY(18)
-                            .setDuration(250)
-                            .withEndAction(() ->
-                                    hand.animate()
-                                            .translationY(0)
-                                            .setDuration(250)
-                                            .withEndAction(() ->
-
-                                                    tutorial.postDelayed(() ->
-                                                            tutorial.animate()
-                                                                    .alpha(0f)
-                                                                    .setDuration(600)
-                                                                    .withEndAction(() -> tutorial.setVisibility(View.GONE))
-                                                                    .start(), 2000)
-
-                                            ).start())
-                            .start();
-
-                }).start();
-
     }
 
     // =====================================================
     // OFFLINE
     // =====================================================
+
+    /** OFFLINE: usa as URLs salvas (só cache do Glide); se não houver, usa os drawables do app. */
     private void fallbackOuCarregarOffline() {
         List<String> cache = carregarUrlsLocais();
-        if (!cache.isEmpty()) carregarUrlsParaFlipper(cache);
+        if (!cache.isEmpty()) carregarUrlsParaFlipper(cache, true);
         else carregarImagensOffline();
     }
 
@@ -425,37 +414,96 @@ public class MainActivity extends AppCompatActivity
     private void salvarUrlsLocais(List<String> urls) {
         getSharedPreferences("configApp", MODE_PRIVATE)
                 .edit()
-                .putString("cached_flipper_urls", TextUtils.join(",", urls))
+                .putString("cached_flipper_urls", TextUtils.join("|", urls))
                 .apply();
     }
 
     private List<String> carregarUrlsLocais() {
         String s = getSharedPreferences("configApp", MODE_PRIVATE)
                 .getString("cached_flipper_urls", null);
-        return s == null ? new ArrayList<>() : Arrays.asList(s.split(","));
+        if (s == null || s.isEmpty()) return new ArrayList<>();
+        return new ArrayList<>(Arrays.asList(s.split("\\|")));
     }
 
     // =====================================================
-    // LOGOUT (CORRIGIDO)
+    // TUTORIAL
+    // =====================================================
+    private void mostrarTutorial() {
+
+        if (tutorial <= 2) {
+
+            tutorial = tutorial + 1;
+
+            SharedPreferences sharedPref = getSharedPreferences("configApp", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putInt("tutorial", tutorial);
+            editor.apply();
+
+        } else {
+            SharedPreferences sharedPref = getSharedPreferences("configApp", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean("tutorialFull", true);
+            editor.apply();
+        }
+
+        View tutorial = findViewById(R.id.layoutTutorial);
+        if (tutorial == null) return;
+
+        tutorial.setVisibility(View.VISIBLE);
+        tutorial.setAlpha(0f);
+        tutorial.setScaleX(0.7f);
+        tutorial.setScaleY(0.7f);
+
+        tutorial.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(500)
+                .withEndAction(() -> {
+
+                    ImageView hand = findViewById(R.id.imgHand);
+                    if (hand == null) return;
+
+                    hand.animate()
+                            .translationY(18)
+                            .setDuration(250)
+                            .withEndAction(() ->
+                                    hand.animate()
+                                            .translationY(0)
+                                            .setDuration(250)
+                                            .withEndAction(() ->
+                                                    tutorial.postDelayed(() ->
+                                                            tutorial.animate()
+                                                                    .alpha(0f)
+                                                                    .setDuration(600)
+                                                                    .withEndAction(() -> tutorial.setVisibility(View.GONE))
+                                                                    .start(), 2000)
+                                            ).start())
+                            .start();
+
+                }).start();
+    }
+
+    // =====================================================
+    // LOGOUT
     // =====================================================
     private void logout() {
 
         TopicHelper.sairDoTopicoAtual(this);
 
-        // 1️⃣ Logout Firebase
+        // 1) Logout Firebase
         FirebaseAuth.getInstance().signOut();
 
-        // 2️⃣ Limpa credenciais do Google (Credential Manager)
+        // 2) Limpa credenciais do Google (Credential Manager)
         CredentialManager credentialManager = CredentialManager.create(this);
 
-        ClearCredentialStateRequest request =
-                new ClearCredentialStateRequest();
+        ClearCredentialStateRequest request = new ClearCredentialStateRequest();
 
         credentialManager.clearCredentialStateAsync(
                 request,
                 null,
                 Runnable::run,
-                new CredentialManagerCallback<Void, ClearCredentialException>() {
+                new CredentialManagerCallback<>() {
 
                     @Override
                     public void onResult(Void result) {
@@ -472,11 +520,9 @@ public class MainActivity extends AppCompatActivity
         );
     }
 
-
     private void goToLogin() {
 
-        Intent intent = new Intent(MainActivity.this, EscolherPerfilLogin
-                .class);
+        Intent intent = new Intent(MainActivity.this, EscolherPerfilLogin.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finishAffinity();
@@ -487,7 +533,6 @@ public class MainActivity extends AppCompatActivity
                 Toast.LENGTH_LONG
         ).show();
     }
-
 
     // =====================================================
     // LISTENERS
@@ -506,13 +551,11 @@ public class MainActivity extends AppCompatActivity
             startActivity(new Intent(this, Escorpionismo.class));
     }
 
-    // ... (Método onNavigationItemSelected completo)
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // O seu código original completo para o Drawer (mantido)
         int id = item.getItemId();
         if (id == R.id.nav_configuracoes) {
-            startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+            startActivity(new Intent(MainActivity.this, ProfileUsuarioActivity.class));
         } else if (id == R.id.nav_minhas_reclamacoes) {
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                 Intent intent = new Intent(MainActivity.this, ListarReclamacoesUsuarios.class);
@@ -551,7 +594,7 @@ public class MainActivity extends AppCompatActivity
             intentPlayerStore.setData(Uri.parse("market://details?id=" + appId));
             startActivity(intentPlayerStore);
         } catch (android.content.ActivityNotFoundException anfe) {
-            intentPlayerStore.setData(Uri.parse("htpp://google.com " + appId));
+            intentPlayerStore.setData(Uri.parse("https://play.google.com/store/apps/details?id=" + appId));
             startActivity(intentPlayerStore);
         }
     }
@@ -586,12 +629,6 @@ public class MainActivity extends AppCompatActivity
 
         String usuario = (nome_usuario == null || nome_usuario.isEmpty()) ? "Usuário" : nome_usuario;
         txtNomeUsuario.setText(usuario);
-
-        // ✅ O redirecionamento por perfil (admin/agente) agora acontece só em
-        // onCreate() -> configurarToolbarEDrawer() -> redirecionarPeloPerfilSeNecessario().
-        // Aqui em onStart() só atualizamos os textos do cabeçalho do drawer,
-        // que devem ficar sempre em dia mesmo quando a Activity só volta ao
-        // primeiro plano (sem recriar).
     }
 
     @Override

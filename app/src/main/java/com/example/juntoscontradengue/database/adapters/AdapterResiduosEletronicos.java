@@ -37,8 +37,10 @@ public class AdapterResiduosEletronicos extends RecyclerView.Adapter<AdapterResi
         final ClassDescarteConsciente descarteConcienteClass1 = descarteConscienteClass.get(position);
 
         holder.local.setText(String.format("  %s", descarteConcienteClass1.getLocal() != null ? descarteConcienteClass1.getLocal() : ""));
-        holder.endereco.setText(String.format("  %s", descarteConcienteClass1.getEndereco() != null ? descarteConcienteClass1.getEndereco() : ""));
-        holder.fone.setText(String.format("  %s", descarteConcienteClass1.getFone() != null ? descarteConcienteClass1.getFone() : ""));
+        String end = descarteConcienteClass1.getEndereco() != null ? descarteConcienteClass1.getEndereco() : "";
+        String num = descarteConcienteClass1.getNumero() != null && !descarteConcienteClass1.getNumero().trim().isEmpty()
+                ? ", " + descarteConcienteClass1.getNumero() : "";
+        holder.endereco.setText(String.format("  %s%s", end, num));        holder.fone.setText(String.format("  %s", descarteConcienteClass1.getFone() != null ? descarteConcienteClass1.getFone() : ""));
         holder.horario.setText(String.format("  %s", descarteConcienteClass1.getHorario() != null ? descarteConcienteClass1.getHorario() : ""));
 
         holder.cardView.setOnClickListener(view -> {

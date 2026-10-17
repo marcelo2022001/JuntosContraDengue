@@ -38,6 +38,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/local"
             android:padding="16dp"
+            android:inputType="textCapCharacters"
             android:background="@drawable/border_rounded_gray"
             android:layout_marginBottom="16dp"
             android:textSize="16sp"/>
@@ -47,6 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/endereco"
+            android:inputType="textCapCharacters"
             android:padding="16dp"
             android:background="@drawable/border_rounded_gray"
             android:layout_marginBottom="16dp"
@@ -69,6 +71,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/horario_de_funcionamento"
             android:padding="16dp"
+            android:inputType="textCapCharacters"
             android:background="@drawable/border_rounded_gray"
             android:textSize="16sp"
             android:layout_marginBottom="16dp"/>

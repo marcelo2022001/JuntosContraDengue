@@ -41,6 +41,39 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- ADICIONE O QUERIES PARA COMPATIBILIDADE COM ANDROID 11+ -->
+    <queries>
+
+        <!-- Para câmera -->
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+        <!-- Para gravação de vídeo -->
+        <intent>
+            <action android:name="android.media.action.VIDEO_CAPTURE" />
+        </intent>
+        <!-- Para galeria -->
+        <intent>
+            <action android:name="android.intent.action.PICK" />
+
+            <data android:mimeType="image/*" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.PICK" />
+
+            <data android:mimeType="video/*" />
+        </intent>
+
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+
+    </queries>
 
     <application
         android:name=".JuntosContraDengueApp"
@@ -63,7 +96,7 @@
         <activity
             android:name=".SolicitacaoPlano"
             android:exported="false"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".FullScreenVisualizarMidiaReclamacoes"
             android:configChanges="orientation|screenSize"
@@ -84,8 +117,8 @@
         <activity
             android:name=".ResponderDenunciaActivity"
             android:exported="false"
-            android:windowSoftInputMode="stateHidden"
-            android:parentActivityName=".AdminActivity" />
+            android:parentActivityName=".AdminActivity"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ExcluirPreCadastro"
             android:exported="false"
@@ -112,7 +145,7 @@
             android:name=".ActivityLoginAdmin"
             android:exported="false"
             android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ActivityLoginAgentes"
             android:exported="false"
@@ -121,7 +154,8 @@
         <activity
             android:name=".CriarCadastroAgente"
             android:exported="false"
-            android:parentActivityName=".ActivityLoginAgentes" />
+            android:parentActivityName=".ActivityLoginAgentes"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".VideoIniciarAppActivity"
             android:exported="false" />
@@ -148,7 +182,7 @@
             android:hardwareAccelerated="false"
             android:label="Denúncias"
             android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".DescartePneus"
             android:exported="false"
@@ -157,8 +191,8 @@
             android:name=".TelefonesUteis"
             android:exported="false"
             android:label="@string/title_activity_telefones_uteis"
-            android:windowSoftInputMode="stateHidden"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".Escorpionismo"
             android:exported="false"
@@ -188,7 +222,8 @@
         <activity
             android:name=".TelaDeCadastro"
             android:exported="false"
-            android:parentActivityName=".TelaLoguin" />
+            android:parentActivityName=".TelaLoguin"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".AdminActivity"
             android:exported="false"
@@ -247,7 +282,7 @@
         <activity
             android:name=".VisualizarResposta"
             android:exported="false"
-            android:windowSoftInputMode="stateHidden"/>
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ExcluirAgentesActivity"
             android:exported="false" />
@@ -303,26 +338,21 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <activity
+            android:name=".AppDesativadoActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".CriarCadastroAdmin"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ProfileUsuarioActivity" android:exported="false"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity android:name=".ProfileAdminActivity" android:exported="false"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity android:name=".ProfileAgenteActivity" android:exported="false"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
     </application>
-    <!-- ADICIONE O QUERIES PARA COMPATIBILIDADE COM ANDROID 11+ -->
-    <queries>
-        <!-- Para câmera -->
-        <intent>
-            <action android:name="android.media.action.IMAGE_CAPTURE" />
-        </intent>
-        <!-- Para gravação de vídeo -->
-        <intent>
-            <action android:name="android.media.action.VIDEO_CAPTURE" />
-        </intent>
-        <!-- Para galeria -->
-        <intent>
-            <action android:name="android.intent.action.PICK" />
-            <data android:mimeType="image/*" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.PICK" />
-            <data android:mimeType="video/*" />
-        </intent>
-    </queries>
 
 </manifest>

@@ -95,7 +95,7 @@ public class ExcluirProfissionaisPreCadastro extends AppCompatActivity {
     private void contarCadastrosAdmins() {
 
          databaseReference = databaseMunicipio.getReference()
-                .child("admins");
+                 .child("logins").child("admins");
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -129,7 +129,7 @@ public class ExcluirProfissionaisPreCadastro extends AppCompatActivity {
 
     private void contarCadastrosAgentes() {
         databaseReference = databaseMunicipio.getReference()
-                .child("agentes");
+                .child("logins").child("agentes");
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -244,12 +244,12 @@ private void contarPreCadastroAdmins() {
 
     private void excluir_admin() {
         Intent itente = new Intent(this, ExcluirAgentesActivity.class);
-        itente.putExtra("local_db", "admins");
+        itente.putExtra("local_db", "logins/admins");
         startActivity(itente);
     }
     private void excluir_agentes() {
         Intent it = new Intent(this, ExcluirAgentesActivity.class);
-        it.putExtra("local_db", "agentes");
+        it.putExtra("local_db", "logins/agentes");
         startActivity(it);
     }
     private void excluir_pre_cad_admins() {

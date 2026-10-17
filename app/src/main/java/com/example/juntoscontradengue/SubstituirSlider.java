@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -25,9 +24,11 @@ import com.bumptech.glide.Glide;
 import com.example.juntoscontradengue.databinding.ActivitySubstituirSliderBinding;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -41,7 +42,7 @@ public class SubstituirSlider extends AppCompatActivity {
 
     ProgressBar pgBarSubsSlider;
 
-    // to check whether sub FABs are visible or not
+    // para saber se os sub FABs estão visíveis
     Boolean isAllFabsVisible;
 
     ImageView imgSubstImagem;
@@ -55,29 +56,24 @@ public class SubstituirSlider extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_substituir_slider);
 
-
+        // (removido o setContentView(R.layout...) duplicado: só o binding)
         activitySubstituirSliderBinding = ActivitySubstituirSliderBinding.inflate(getLayoutInflater());
         setContentView(activitySubstituirSliderBinding.getRoot());
-
 
         Toolbar toolbarSubstSliders = findViewById(R.id.toolbarSubsSliders);
         setSupportActionBar(toolbarSubstSliders);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        Bundle extras = getIntent().getExtras();
+        imgSubstImagem = activitySubstituirSliderBinding.imgViewSubsSliders;
 
+        Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            photoUrl = extras.getString("urlImagem");
+            photoUrl = extras.getString("urlImagem");   // URL da imagem ATUAL (a que será substituída)
             id_slider = extras.getString("idSlider");
 
-            Log.d("id_slider", "recebido apos extras: " + id_slider);
-            // LOGS PARA DEBUG
             Log.d("SUBSTITUIR_SLIDER", "photoUrl recebido: " + photoUrl);
             Log.d("SUBSTITUIR_SLIDER", "id_slider recebido: " + id_slider);
-
-            imgSubstImagem = activitySubstituirSliderBinding.imgViewSubsSliders;
 
             Glide.with(SubstituirSlider.this).load(photoUrl).into(imgSubstImagem);
         }
@@ -86,20 +82,18 @@ public class SubstituirSlider extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
-        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
-        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
-
-        Log.d("SUBSTITUIR_SLIDER", "Estado: " + estado + ", Município: " + municipio);
-
-        // Verifica se os dados estão OK
         if (estado == null || municipio == null) {
             Toast.makeText(this, "Erro: Estado ou município não encontrados", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        pgBarSubsSlider = activitySubstituirSliderBinding.pBarSubstSlider;
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
+        Log.d("SUBSTITUIR_SLIDER", "Estado: " + estado + ", Município: " + municipio);
+
+        pgBarSubsSlider = activitySubstituirSliderBinding.pBarSubstSlider;
 
         mAddFab = activitySubstituirSliderBinding.addFabExtSlider;
         fab_AddSlider = activitySubstituirSliderBinding.fabAddSlider;
@@ -108,192 +102,169 @@ public class SubstituirSlider extends AppCompatActivity {
         txt_fabAddSlider = activitySubstituirSliderBinding.txtAddSlider;
         txt_fabEnviaSlider = activitySubstituirSliderBinding.txtAddSalvarSlider;
 
-
-        // Agora defina todos os FABs e todos os textos de nome de ação como GONE
-
+        // Começa com os sub FABs e seus textos escondidos
         fab_AddSlider.setVisibility(View.GONE);
         fabSalvarSlider.setVisibility(View.GONE);
-
         txt_fabAddSlider.setVisibility(View.GONE);
         txt_fabEnviaSlider.setVisibility(View.GONE);
 
-        // torne a variável booleana falsa, pois todos os
-        // textos de nome de ação e todos os sub FABs são
-        // invisíveis
         isAllFabsVisible = false;
-
-        // Defina o botão de ação flutuante estendido para
-        // estado reduzido inicialmente
         mAddFab.shrink();
 
-        // Faremos com que todos os FABs e textos de nomes de ações
-        // sejam visíveis somente quando o botão FAB pai for clicado. Então
-        // temos que manipular o botão FAB pai primeiro,
-        // usando setOnClickListener, você pode ver abaixo
-        mAddFab.setOnClickListener(
-                view -> {
-                    if (!isAllFabsVisible) {
-                        // quando isAllFabsVisible se torna
-                        // verdadeiro, torna todos os textos de nomes de ação // e FABs VISÍVEIS.
-                        fab_AddSlider.show();
-                        fabSalvarSlider.show();
+        mAddFab.setOnClickListener(view -> {
+            if (!isAllFabsVisible) {
+                fab_AddSlider.show();
+                fabSalvarSlider.show();
 
-                        txt_fabAddSlider.setVisibility(View.VISIBLE);
-                        txt_fabEnviaSlider.setVisibility(View.VISIBLE);
+                txt_fabAddSlider.setVisibility(View.VISIBLE);
+                txt_fabEnviaSlider.setVisibility(View.VISIBLE);
 
-                        // Agora estenda o FAB pai, conforme o usuário clica no FAB pai reduzido
-                        // mAddFab.extend();
-                        mAddFab.setIcon(ContextCompat.getDrawable(SubstituirSlider.this, R.drawable.baseline_arrow_downward));
+                mAddFab.setIcon(ContextCompat.getDrawable(SubstituirSlider.this, R.drawable.baseline_arrow_downward));
+                isAllFabsVisible = true;
+            } else {
+                fab_AddSlider.hide();
+                fabSalvarSlider.hide();
 
-                        // torne a variável booleana verdadeira como
-                        // definimos os sub FABs
-                        // visibilidade para GONE
-                        isAllFabsVisible = true;
-                    } else {
-                        // quando isAllFabsVisible se torna
-                        // verdadeiro, todos os nomes de ação
-                        // textos e FABs desaparecem.
-                        fab_AddSlider.hide();
-                        fabSalvarSlider.hide();
+                txt_fabAddSlider.setVisibility(View.GONE);
+                txt_fabEnviaSlider.setVisibility(View.GONE);
 
-                        txt_fabAddSlider.setVisibility(View.GONE);
-                        txt_fabEnviaSlider.setVisibility(View.GONE);
-
-                        // Defina o FAB para encolher após o usuário
-                        // fechar todos os sub FABs
-                        // mAddFab.shrink();
-                        mAddFab.setIcon(ContextCompat.getDrawable(SubstituirSlider.this, R.drawable.baseline_add));
-
-                        // torne a variável booleana falsa
-                        // pois definimos os sub FABs
-                        // visibilidade como GONE
-                        isAllFabsVisible = false;
-                    }
-                });
-
-        // abaixo está a ação de exemplo para manipular adicionar imagem
-        // Somente quando estiver visível e somente
-        // quando o usuário clicar nele
-        fab_AddSlider.setOnClickListener( view -> {
-                    Intent photoPicker = new Intent();
-                    photoPicker.setAction(Intent.ACTION_GET_CONTENT);
-                    photoPicker.setType("image/*");
-                    activityResultLauncher.launch(photoPicker);
-                } );
-
-        // abaixo está a ação de exemplo para manipular salvar imagem
-        // Somente quando estiver visível e somente
-        // quando o usuário clicar nele
-        fabSalvarSlider.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (imageUri != null){
-                    uploadToFirebase(imageUri);
-                } else  {
-                    Toast toast = Toast.makeText(SubstituirSlider.this, "Por favor, selecione uma imagem", Toast.LENGTH_SHORT);
-                    Objects.requireNonNull(toast.getView()).setBackgroundColor(Color.parseColor("#F6AE2D"));
-                    toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0);
-                    toast.show();
-                }
-                
+                mAddFab.setIcon(ContextCompat.getDrawable(SubstituirSlider.this, R.drawable.baseline_add));
+                isAllFabsVisible = false;
             }
-
-            private void uploadToFirebase(Uri uri) {
-                // Verifica e loga com segurança
-                Log.d("SUBSTITUIR_SLIDER", "ID do slider: " + (id_slider != null ? id_slider : "null"));
-                Log.d("SUBSTITUIR_SLIDER", "Estado: " + (estado != null ? estado : "null") + ", Município: " + (municipio != null ? municipio : "null"));
-
-                // Verifica se os dados necessários estão presentes
-                if (id_slider == null || estado == null || municipio == null) {
-                    pgBarSubsSlider.setVisibility(View.GONE);
-                    Toast.makeText(SubstituirSlider.this,
-                            "Erro: Dados de localização não encontrados",
-                            Toast.LENGTH_SHORT).show();
-                    Log.e("SUBSTITUIR_SLIDER", "Dados nulos - id_slider: " + id_slider + ", estado: " + estado + ", municipio: " + municipio);
-                    return;
-                }
-
-                pgBarSubsSlider.setVisibility(View.VISIBLE);
-
-                // Nome do campo no Realtime Database
-                String fieldName = "image_" + id_slider; // image_1, image_2, etc.
-
-                // Nome do arquivo no Storage (apenas o ID)
-               // String fileName = id_slider + ".jpg";
-
-                Log.d("SUBSTITUIR_SLIDER", "FieldName: " + fieldName);
-               // Log.d("SUBSTITUIR_SLIDER", "FileName: " + fileName);
-
-                final StorageReference imageReference = storageReference
-                        .child(estado)
-                        .child(municipio)
-                        .child("sliders_main")
-                        .child(fieldName); // ← Usa apenas o ID como nome do arquivo
-
-                // Faz o upload da imagem
-                UploadTask uploadTask = imageReference.putFile(uri);
-
-                uploadTask.addOnProgressListener(taskSnapshot -> {
-                    // Opcional: Mostrar progresso
-                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                    Log.d("SUBSTITUIR_SLIDER", "Upload progress: " + progress + "%");
-                });
-
-                uploadTask.addOnSuccessListener(taskSnapshot -> {
-                    Log.d("SUBSTITUIR_SLIDER", "Upload concluído com sucesso!");
-
-                    // Pega a URL da imagem
-                    imageReference.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                        String downloadUrl = downloadUri.toString();
-                        Log.d("SUBSTITUIR_SLIDER", "Nova URL: " + downloadUrl);
-
-                        DatabaseReference ref = databaseMunicipio
-                                .getReference("config/sliders_main/" + id_slider);
-
-                                    // Atualiza também o campo url_imagem
-                                    ref.child(fieldName).setValue(downloadUrl)
-                                            .addOnSuccessListener(aVoid -> {
-                                                Log.d("SUBSTITUIR_SLIDER", "url_imagem atualizado com sucesso!");
-
-                                                pgBarSubsSlider.setVisibility(View.GONE);
-                                                Toast.makeText(SubstituirSlider.this,
-                                                        "Imagem atualizada com sucesso!",
-                                                        Toast.LENGTH_SHORT).show();
-
-                                           Intent itent = new Intent(SubstituirSlider.this, AddSlidersMain.class);
-                                          itent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                           startActivity(itent);
-                                             finish();
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                pgBarSubsSlider.setVisibility(View.GONE);
-                                                Log.e("SUBSTITUIR_SLIDER", "Erro ao atualizar url_imagem", e);
-                                                Toast.makeText(SubstituirSlider.this,
-                                                        "Erro ao atualizar URL",
-                                                        Toast.LENGTH_SHORT).show();
-                                            });
-                                })
-                                .addOnFailureListener(e -> {
-                                    pgBarSubsSlider.setVisibility(View.GONE);
-                                    Log.e("SUBSTITUIR_SLIDER", "Erro ao atualizar " + fieldName, e);
-                                    Toast.makeText(SubstituirSlider.this,
-                                            "Erro ao atualizar imagem: " + e.getMessage(),
-                                            Toast.LENGTH_LONG).show();
-                                });
-                    }).addOnFailureListener(e -> {
-                        pgBarSubsSlider.setVisibility(View.GONE);
-                        Log.e("SUBSTITUIR_SLIDER", "Erro ao obter URL", e);
-                        Toast.makeText(SubstituirSlider.this,
-                                "Erro ao obter URL da imagem",
-                                Toast.LENGTH_SHORT).show();
-                    });
-
-            }
-
-
         });
-}
+
+        // Escolher imagem
+        fab_AddSlider.setOnClickListener(view -> {
+            Intent photoPicker = new Intent();
+            photoPicker.setAction(Intent.ACTION_GET_CONTENT);
+            photoPicker.setType("image/*");
+            activityResultLauncher.launch(photoPicker);
+        });
+
+        // Salvar imagem
+        fabSalvarSlider.setOnClickListener(v -> {
+            if (imageUri != null) {
+                uploadToFirebase(imageUri);
+            } else {
+                Snackbar snackbar = Snackbar.make(
+                        activitySubstituirSliderBinding.getRoot(),
+                        "Por favor, selecione uma imagem",
+                        Snackbar.LENGTH_SHORT);
+                snackbar.setBackgroundTint(Color.parseColor("#F6AE2D"));
+                snackbar.setTextColor(Color.BLACK);
+                snackbar.show();
+            }
+        });
+    }
+
+    // =====================================================
+    // UPLOAD
+    // =====================================================
+    private void uploadToFirebase(Uri uri) {
+        Log.d("SUBSTITUIR_SLIDER", "ID do slider: " + id_slider);
+
+        if (id_slider == null || estado == null || municipio == null) {
+            pgBarSubsSlider.setVisibility(View.GONE);
+            Toast.makeText(SubstituirSlider.this,
+                    "Erro: Dados de localização não encontrados",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        pgBarSubsSlider.setVisibility(View.VISIBLE);
+
+        // Nome do campo no Realtime Database e do arquivo no Storage: image_0, image_1...
+        final String fieldName = "image_" + id_slider;
+
+        final StorageReference imageReference = storageReference
+                .child(estado)
+                .child(municipio)
+                .child("sliders_main")
+                .child(fieldName);
+
+        // O arquivo não tem extensão, então informamos o tipo para o Storage
+        String tipo = getContentResolver().getType(uri);
+        StorageMetadata metadata = new StorageMetadata.Builder()
+                .setContentType(tipo != null ? tipo : "image/jpeg")
+                .build();
+
+        UploadTask uploadTask = imageReference.putFile(uri, metadata);
+
+        uploadTask.addOnProgressListener(taskSnapshot -> {
+            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+            Log.d("SUBSTITUIR_SLIDER", "Upload progress: " + progress + "%");
+        });
+
+        uploadTask.addOnSuccessListener(taskSnapshot ->
+                imageReference.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+
+                    String downloadUrl = downloadUri.toString();
+                    Log.d("SUBSTITUIR_SLIDER", "Nova URL: " + downloadUrl);
+
+                    DatabaseReference ref = databaseMunicipio
+                            .getReference("config/sliders_main/" + id_slider);
+
+                    ref.child(fieldName).setValue(downloadUrl)
+                            .addOnSuccessListener(aVoid -> {
+                                // Só apaga o arquivo antigo DEPOIS de o banco já apontar para o novo
+                                apagarArquivoAntigoSeDiferente(imageReference);
+
+                                pgBarSubsSlider.setVisibility(View.GONE);
+                                Toast.makeText(SubstituirSlider.this,
+                                        "Imagem atualizada com sucesso!",
+                                        Toast.LENGTH_SHORT).show();
+
+                                Intent itent = new Intent(SubstituirSlider.this, AddSlidersMain.class);
+                                itent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(itent);
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                pgBarSubsSlider.setVisibility(View.GONE);
+                                Log.e("SUBSTITUIR_SLIDER", "Erro ao atualizar " + fieldName, e);
+                                Toast.makeText(SubstituirSlider.this,
+                                        "Erro ao atualizar imagem: " + e.getMessage(),
+                                        Toast.LENGTH_LONG).show();
+                            });
+
+                }).addOnFailureListener(e -> {
+                    pgBarSubsSlider.setVisibility(View.GONE);
+                    Log.e("SUBSTITUIR_SLIDER", "Erro ao obter URL", e);
+                    Toast.makeText(SubstituirSlider.this,
+                            "Erro ao obter URL da imagem",
+                            Toast.LENGTH_SHORT).show();
+                })
+        ).addOnFailureListener(e -> {
+            pgBarSubsSlider.setVisibility(View.GONE);
+            Log.e("SUBSTITUIR_SLIDER", "Erro no upload", e);
+            Toast.makeText(SubstituirSlider.this,
+                    "Erro ao enviar imagem: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
+        });
+    }
+
+    /**
+     * O arquivo antigo (ex.: image_0.png) tem nome diferente do novo (image_0, sem extensão),
+     * por isso o upload não o sobrescreve. Aqui ele é apagado pela URL antiga.
+     * Se o caminho for o mesmo, o upload já sobrescreveu e não há nada a apagar.
+     */
+    private void apagarArquivoAntigoSeDiferente(StorageReference novoRef) {
+        if (photoUrl == null || photoUrl.isEmpty()) return;
+
+        try {
+            StorageReference antigo = FirebaseStorage.getInstance().getReferenceFromUrl(photoUrl);
+
+            if (!antigo.getPath().equals(novoRef.getPath())) {
+                antigo.delete()
+                        .addOnSuccessListener(v ->
+                                Log.d("SUBSTITUIR_SLIDER", "Arquivo antigo apagado: " + antigo.getPath()))
+                        .addOnFailureListener(e ->
+                                Log.w("SUBSTITUIR_SLIDER", "Não foi possível apagar o antigo: " + e.getMessage()));
+            }
+        } catch (IllegalArgumentException e) {
+            Log.w("SUBSTITUIR_SLIDER", "URL antiga inválida: " + photoUrl);
+        }
+    }
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -304,10 +275,8 @@ public class SubstituirSlider extends AppCompatActivity {
     ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == Activity.RESULT_OK){
-                    Intent data = result.getData();
-                    assert data != null;
-                    imageUri = data.getData();
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    imageUri = result.getData().getData();
                     imgSubstImagem.setImageURI(imageUri);
                 } else {
                     Toast.makeText(SubstituirSlider.this, "Nenhuma imagem selecionada.", Toast.LENGTH_SHORT).show();

@@ -468,6 +468,7 @@ public class ResponderDenunciaActivity extends AppCompatActivity {
 
 
         if (!"Aguardando resposta".equals(status_reclamacao)) {
+            btnEnviarRespostaReclamacao.setVisibility(View.GONE);
             Toast.makeText(this, "Reclamação já respondida!", Toast.LENGTH_LONG).show();
             btnEnviarRespostaReclamacao.setEnabled(false);
             return;

@@ -115,7 +115,7 @@ public class EmailValidator {
             return localPart + "@" + COMMON_TYPO_CORRECTIONS.get(domain);
         }
 
-        // 2. Verifica duplicação no início (ex: "hhotmail.com")
+        // 2. Verifica duplicação no início (ex: "hotmail.com")
         if (domain.matches("^([a-z])\\1.*")) {
             String correctedDomain = domain.substring(1); // Remove a letra duplicada
             // Verifica se o domínio corrigido existe no mapa

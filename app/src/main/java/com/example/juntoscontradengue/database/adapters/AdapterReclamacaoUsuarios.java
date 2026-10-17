@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +47,6 @@ public class AdapterReclamacaoUsuarios extends RecyclerView.Adapter<AdapterRecla
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         ClassListarReclamacoesUsuarios objetoReclamacao = listaReclamacoes.get(position);
-String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData_envio());
 
         holder.data_reclamacao.setText(DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData_envio()));
         holder.reclamacao.setText(objetoReclamacao.getReclamacao());
@@ -70,8 +70,6 @@ String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData
         }
 
 
-        String opcaoStatus = objetoReclamacao.getStatus();
-
         holder.abrir_reclamacao.setOnClickListener(v -> {
 
             Context context = v.getContext();
@@ -82,9 +80,10 @@ String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData
             context.startActivity(intent);
         });
 
-        switch (objetoReclamacao.getStatus()) {
+        String status = objetoReclamacao.getStatus() != null ? objetoReclamacao.getStatus() : "";
+        switch (status) {
             case "Aguardando resposta":
-                // Amarelo claro para atenção
+                // Amarelo-claro para atenção
                 holder.cardReclamacoesUsuario.setCardBackgroundColor(Color.parseColor("#FFF9C4"));
                 holder.status_reclamacao.setTextColor(Color.parseColor("#FBC02D"));
                 break;
@@ -104,7 +103,7 @@ String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData
             default:
                 // Cor padrão (Branco ou Cinza)
                 //holder.cardReclamacoesUsuario.setCardBackgroundColor(Color.WHITE);
-                holder.cardReclamacoesUsuario.setBackgroundColor(Color.parseColor("#F0ECEB"));
+                holder.cardReclamacoesUsuario.setCardBackgroundColor(Color.parseColor("#F0ECEB"));
                 holder.status_reclamacao.setTextColor(Color.BLACK); // Resetar a cor do texto também
                 break;
         }
@@ -112,7 +111,7 @@ String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData
         holder.excluir_reclamacao.setOnClickListener(v -> {
             int positionAdapter = holder.getBindingAdapterPosition();
             if (positionAdapter != RecyclerView.NO_POSITION) {
-                excluirReclamacao(v, objetoReclamacao, holder);
+                excluirReclamacao(v, objetoReclamacao);
             }
         });
     }
@@ -135,7 +134,7 @@ String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData
         return listaReclamacoes.size();
     }
 
-    private void excluirReclamacao(View view, ClassListarReclamacoesUsuarios reclamacao, MyViewHolder holder) {
+    private void excluirReclamacao(View view, ClassListarReclamacoesUsuarios reclamacao) {
         Context context = view.getContext();
         new AlertDialog.Builder(context)
                 .setTitle("Excluir Reclamação")
@@ -148,43 +147,60 @@ String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData
                     String idUser = reclamacao.getUid();
                     String idDoc = reclamacao.getIdReclamacao();
 
-                    // 1. URL do banco específico do município
+                    // 1. Banco do município
                     String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
                     FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
-                    // 2. Referência da Reclamação
+                    // 2. Referência da reclamação no banco
                     DatabaseReference refDB = databaseMunicipio.getReference()
                             .child("reclamacoes")
                             .child(idUser)
                             .child(idDoc);
 
-                    // 3. Referência do Storage
-                    StorageReference refStorage = FirebaseStorage.getInstance().getReference()
-                            .child(estado).child(municipio).child("reclamacoesUsuarios").child(idUser).child(idDoc);
-                    // --- EXECUÇÃO ---
+                    // 3. Referências do Storage (as duas pastas)
+                    StorageReference raiz = FirebaseStorage.getInstance().getReference()
+                            .child(estado).child(municipio);
 
-                    // Passo A: Deletar a reclamação do banco
+                    StorageReference refMidiasReclamacao = raiz
+                            .child("reclamacoes").child(idUser).child(idDoc);
+
+                    StorageReference refMidiasResposta = raiz
+                            .child("reclamacoesUsuarios").child(idUser).child(idDoc);
+
+                    // Passo A: apagar do banco
                     refDB.removeValue().addOnSuccessListener(unused -> {
 
-                    // Passo B: Limpar Storage
-                        refStorage.listAll().addOnSuccessListener(listResult -> {
-                            for (StorageReference file : listResult.getItems()) { file.delete(); }
-                            refStorage.child("midia").listAll().addOnSuccessListener(midiaRes -> {
-                                for (StorageReference video : midiaRes.getItems()) { video.delete(); }
-                            });
-                        });
+                        // Passo B: limpar as duas pastas do Storage
+                        excluirPastaStorage(refMidiasReclamacao);
+                        excluirPastaStorage(refMidiasResposta);
 
-                        // ATENÇÃO: NÃO use finish() ou Intent aqui.
-                        // Como você está usando ChildEventListener na Activity,
-                        // o Firebase vai disparar o onChildRemoved automaticamente
-                        // e a lista vai atualizar sozinha sem fechar a tela.
-
+                        // Não use finish()/Intent: o ChildEventListener da Activity
+                        // dispara onChildRemoved e a lista atualiza sozinha.
                         Toast.makeText(context, "Reclamação excluída com sucesso!", Toast.LENGTH_SHORT).show();
 
-                    }).addOnFailureListener(e -> Toast.makeText(context, "Erro: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    }).addOnFailureListener(e ->
+                            Toast.makeText(context, "Erro: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
+    }
+
+    /**
+     * Apaga todos os arquivos de uma "pasta" do Storage, inclusive de subpastas.
+     * (O Storage não tem pasta de verdade: é preciso listar e apagar cada arquivo.)
+     */
+    private void excluirPastaStorage(StorageReference pasta) {
+        pasta.listAll().addOnSuccessListener(listResult -> {
+            for (StorageReference arquivo : listResult.getItems()) {
+                arquivo.delete().addOnFailureListener(e ->
+                        Log.e("ExcluirStorage", "Falha ao apagar " + arquivo.getPath() + ": " + e.getMessage()));
+            }
+            // Por segurança, desce em subpastas (caso existam)
+            for (StorageReference sub : listResult.getPrefixes()) {
+                excluirPastaStorage(sub);
+            }
+        }).addOnFailureListener(e ->
+                Log.e("ExcluirStorage", "Falha ao listar " + pasta.getPath() + ": " + e.getMessage()));
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
@@ -196,7 +212,8 @@ String data = DateUtilsApp.ConverteDataTimeStampLegivel(objetoReclamacao.getData
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             abrir_reclamacao = itemView.findViewById(R.id.img_verificar_reclamacaoUser);
-            excluir_reclamacao = itemView.findViewById(R.id.img_excluir_reclamacaoUser);
+
+             excluir_reclamacao = itemView.findViewById(R.id.img_excluir_reclamacaoUser);
             data_reclamacao = itemView.findViewById(R.id.txt_dt_reclamacaoUser);
             reclamacao = itemView.findViewById(R.id.txt_titulo_reclamacaoUser);
             status_reclamacao = itemView.findViewById(R.id.txt_status_reclamacaoUser);

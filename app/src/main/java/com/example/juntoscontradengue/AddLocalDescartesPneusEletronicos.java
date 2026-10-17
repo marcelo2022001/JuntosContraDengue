@@ -15,6 +15,7 @@ import com.example.juntoscontradengue.databinding.ActivityAddLocaisDescartesPneu
 import com.example.juntoscontradengue.extras.Alertas;
 import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TelefoneUtil;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -66,6 +67,11 @@ public class AddLocalDescartesPneusEletronicos extends AppCompatActivity {
 
         Button btnOkDescartes = bindingDescartes.btnOkDescartes;
         btnOkDescartes.setOnClickListener(v -> {
+
+            if (!TelefoneUtil.telefoneValido(edtTxtDescartesTelefone.getText().toString())) {
+                edtTxtDescartesTelefone.setError("Telefone inválido");
+                return;
+            }
 
             if (rbDescarteEletronico.isChecked()) {
                 cadastraEletronicos();

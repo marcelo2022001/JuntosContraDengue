@@ -33,7 +33,7 @@
             android:id="@+id/imgViewFullScreen"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:scaleType="centerCrop"
+            android:scaleType="fitCenter"
             android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/toolbarFullScreen"
             app:layout_constraintBottom_toBottomOf="parent"

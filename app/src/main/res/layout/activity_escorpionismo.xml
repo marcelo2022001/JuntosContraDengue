@@ -13,6 +13,7 @@
         android:id="@+id/txtAvisoOfflineEscorpionismo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbarEscorpiao"
         android:background="#FFC107"
         android:gravity="center"
         android:padding="8dp"

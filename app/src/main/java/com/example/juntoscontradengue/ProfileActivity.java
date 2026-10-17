@@ -40,15 +40,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -75,9 +72,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Uri url_img_agente;
     private String trocaSenha;
     private String verificaEmail;
-    private Long dataCadastro;
-    private Long updatedAt;
-    private TextView nomeUsers, tCpf, dataCadastroEm, cadastroAtualizadoEm, txtSuggestion;
+    private TextView nomeUsers, tCpf, txtSuggestion;
     private EditText enderecoUsers, numCasaUsers, conjuntoEnderecoUsers, telefoneUsers, emailUsers;
    private ImageView img_profile;
     private LinearLayout suggestionLayout;
@@ -95,7 +90,7 @@ public class ProfileActivity extends AppCompatActivity {
             Intent itente = new Intent(this, SemInternetActivity.class);
             itente.putExtra("id_activity", "profile_admin_agentes");
             startActivity(itente);
-
+            return;
         }
 
 
@@ -165,9 +160,9 @@ public class ProfileActivity extends AppCompatActivity {
         } else if (ehUsuario) {
             perfil = "usuarios";
         }
-
         setupAuthListener();
         setupEmailValidation();
+        setupTelefoneMask();
         buscarDadosUsuarioNoFirebase();
 
         // No onCreate, inicialize o launcher
@@ -226,8 +221,6 @@ public class ProfileActivity extends AppCompatActivity {
         conjuntoEnderecoUsers = b.edtProfileConjunto;
         telefoneUsers = b.edtProfileTelefone;
         emailUsers = b.edtProfileEmail;
-        dataCadastroEm = b.dtcadastroEm;
-        cadastroAtualizadoEm = b.updateAt;
         suggestionLayout = b.suggestionLayout;
         txtSuggestion = b.txtSuggestion;
         Button btnAcceptSuggestion = b.btnAcceptSuggestion;
@@ -397,10 +390,6 @@ public class ProfileActivity extends AppCompatActivity {
                                 num_casaSalvoSharedOuFirebase = user.getNum_casa();
                                 conjuntoSalvoSharedOuFirebase = user.getConjunto();
                                 telefoneSalvoSharedOuFirebase = user.getTelefone();
-                                dataCadastro = user.getDataCadastro();
-                                updatedAt = user.getUpdatedAt();
-
-
 
                                 // Atualiza as views
                                 adicionaDadosUsuarioNaTela();
@@ -436,35 +425,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         emailUsers.setText(emailSalvoSharedOuFirebase);
 
-        // ✅ DATA DE CADASTRO (sempre existe)
-        if (dataCadastro != null && dataCadastro > 0) {
-            String dataCadastroFormatada = formatarDataLong(dataCadastro);
-            dataCadastroEm.setText(String.format("Data do cadastro: %s", dataCadastroFormatada));
-            dataCadastroEm.setVisibility(View.VISIBLE);
-        } else {
-            dataCadastroEm.setVisibility(GONE);
-        }
-
-        // ✅ UPDATED AT (0 = nunca atualizado)
-        if (updatedAt != null && updatedAt > 0) {
-            cadastroAtualizadoEm.setVisibility(View.VISIBLE);
-            String dataFormatada = formatarDataLong(updatedAt);
-            cadastroAtualizadoEm.setText(String.format("Cadastro atualizado em: %s", dataFormatada));
-        } else {
-            cadastroAtualizadoEm.setVisibility(GONE);  // ← Não mostra se for 0
-        }
-
         verificaEmail = emailSalvoSharedOuFirebase;
-    }
-
-    private String formatarDataLong(Long timestamp) {
-        try {
-            Date date = new Date(timestamp);
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            return sdf.format(date);
-        } catch (Exception e) {
-            return "";
-        }
     }
 
 
@@ -594,7 +555,7 @@ public class ProfileActivity extends AppCompatActivity {
                         })
                         .addOnSuccessListener(uri -> {
                             updates.put("urlImagem", uri.toString());
-                            updates.put("updatedAt", ServerValue.TIMESTAMP);
+
                             salvarUpdatesNoFirebase(ref, updates, end, num, conj, fone, mail);
                         })
                         .addOnFailureListener(e ->
@@ -605,7 +566,6 @@ public class ProfileActivity extends AppCompatActivity {
                 return;
             }
 
-            updates.put("updatedAt", ServerValue.TIMESTAMP);
         }
 
         salvarUpdatesNoFirebase(ref, updates, end, num, conj, fone, mail);
@@ -638,7 +598,7 @@ public class ProfileActivity extends AppCompatActivity {
                 numCasaUsers.clearFocus();
                 conjuntoEnderecoUsers.setText(conj);
                 conjuntoEnderecoUsers.clearFocus();
-                telefoneUsers.setText(fone);
+                telefoneUsers.setText(MaskEditUtil.formatarTelefone(fone));
                 telefoneUsers.clearFocus();
             }
 
@@ -684,46 +644,46 @@ public class ProfileActivity extends AppCompatActivity {
     private void enviarVerificacaoNovoEmail(FirebaseUser user, String email) {
         user.verifyBeforeUpdateEmail(email)
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-
-                        // 1. Salvamos no banco ANTES de deslogar e usando o UID correto
-                        DatabaseReference mDatabase = databaseMunicipio.getReference();
-
-                        mDatabase
-                                .child("logins")
-                                .child(perfil)
-                                .child(uid) // O UID do usuário faltava aqui
-                                .child("novoEmail")
-                                .setValue(email) // Usando a variável passada por parâmetro com segurança
-                                .addOnSuccessListener(aVoid -> {
-                                    Log.d("Firebase", "E-mail salvo com sucesso!");
-
-                                    // 2. Mostramos o alerta apenas após garantir que salvou
-                                    Alertas.showAlertDialog(ProfileActivity.this, "Verificação Enviada",
-                                            "Um link de confirmação foi enviado para: " + email + ".\n\nVocê será deslogado. Acesse seu e-mail, clique no link e faça o login com o novo endereço.",
-                                            (dialog, which) -> {
-
-                                                // Desloga do Firebase Auth por último
-                                                if (mAuth != null) {
-                                                    mAuth.signOut();
-                                                }
-
-                                                // Redireciona para a tela inicial
-                                                Intent intent = new Intent(ProfileActivity.this, EscolherPerfilLogin.class);
-                                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                startActivity(intent);
-                                                finish();
-                                            });
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e("Firebase", "Erro ao salvar novo email", e);
-                                    Toast.makeText(ProfileActivity.this, "Erro ao salvar pendência no banco: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                });
-
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Erro ao enviar e-mail: " +
-                                Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
+                    if (!task.isSuccessful()) {
+                        Toast.makeText(getApplicationContext(),
+                                "Erro ao enviar e-mail: " +
+                                        Objects.requireNonNull(task.getException()).getMessage(),
+                                Toast.LENGTH_LONG).show();
+                        return;
                     }
+
+                    DatabaseReference root = databaseMunicipio.getReference();
+                    Map<String, Object> updates = new HashMap<>();
+
+                    // 1) logins/{perfil}/{uid}/novoEmail
+                    updates.put("logins/" + perfil + "/" + uid + "/novoEmail", email);
+
+                    // 2) index_email_admin ou index_email_agentes (conforme o perfil)
+                    if (!TextUtils.isEmpty(cpfSalvoSharedOuFirebase)) {
+                        String cpfKey = cpfSalvoSharedOuFirebase.replaceAll("[^0-9]", "");
+                        if (!cpfKey.isEmpty()) {
+                            if ("admins".equals(perfil)) {
+                                updates.put("index_email_admin/" + cpfKey + "/novo_email", email);
+                            } else if ("agentes".equals(perfil)) {
+                                updates.put("index_email_agentes/" + cpfKey + "/novo_email", email);
+                            }
+                        }
+                    }
+
+                    root.updateChildren(updates)
+                            .addOnSuccessListener(aVoid -> Alertas.showAlertDialog(ProfileActivity.this, "Verificação Enviada",
+                                    "Um link de confirmação foi enviado para: " + email +
+                                            ".\n\nVocê será deslogado. Acesse seu e-mail, clique no link e faça o login com o novo endereço.",
+                                    (dialog, which) -> {
+                                        if (mAuth != null) mAuth.signOut();
+                                        Intent intent = new Intent(ProfileActivity.this, EscolherPerfilLogin.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        startActivity(intent);
+                                        finish();
+                                    }))
+                            .addOnFailureListener(e -> Toast.makeText(ProfileActivity.this,
+                                    "Erro ao salvar pendência no banco: " + e.getMessage(),
+                                    Toast.LENGTH_LONG).show());
                 });
     }
 
@@ -759,6 +719,50 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void setupTelefoneMask() {
+
+        telefoneUsers.addTextChangedListener(new TextWatcher() {
+
+            private boolean alterando = false;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+                if (alterando) return;
+
+                String texto = editable.toString();
+
+                // Mantém somente os números
+                String numeros = texto.replaceAll("\\D", "");
+
+                // Limita a 11 dígitos
+                if (numeros.length() > 11) {
+                    numeros = numeros.substring(0, 11);
+                }
+
+                String formatado = MaskEditUtil.formatarTelefone(numeros);
+
+                if (!texto.equals(formatado)) {
+
+                    alterando = true;
+
+                    telefoneUsers.setText(formatado);
+                    telefoneUsers.setSelection(formatado.length());
+
+                    alterando = false;
+                }
+            }
+        });
     }
     private void validateEmailInRealTime(String email) {
         EmailValidator validator = EmailValidator.getInstance();
@@ -993,6 +997,10 @@ public class ProfileActivity extends AppCompatActivity {
         updates.put("/logins/admins/" + userId, null);
         updates.put("/logins/agentes/" + userId, null);
         updates.put("/reclamacoes/" + userId, null);
+
+        if ("agentes".equals(perfil)) {
+            updates.put("/agentes_publico/" + userId, null);   // ← novo
+        }
 
         if (!TextUtils.isEmpty(cpfSalvoSharedOuFirebase)) {
             String cpfKey = sanitizarParaPath(cpfSalvoSharedOuFirebase);

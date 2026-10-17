@@ -208,13 +208,13 @@ public class VisualizarResposta extends AppCompatActivity {
         // item, "topicos" seria ignorado). Por isso mandamos dois itens separados na fila.
         filaRef.push().setValue(notificacao);
 
-        if (tokenDestinatario != null && !tokenDestinatario.isEmpty()) {
+     /*   if (tokenDestinatario != null && !tokenDestinatario.isEmpty()) {
             Map<String, Object> notificacaoUsuario = new HashMap<>();
             notificacaoUsuario.put("titulo", "Sua Reclamação");
             notificacaoUsuario.put("mensagem", "Sua reclamação foi marcada como: " + novoStatus);
             notificacaoUsuario.put("token", tokenDestinatario);
             filaRef.push().setValue(notificacaoUsuario);
-        }
+        }*/
     }
 
     private void buscarDadosFirebase() {

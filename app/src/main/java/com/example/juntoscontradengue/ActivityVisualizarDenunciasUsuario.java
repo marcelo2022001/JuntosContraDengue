@@ -71,12 +71,16 @@ public class ActivityVisualizarDenunciasUsuario extends AppCompatActivity {
 
         Button visualizar_resposta_reclamacao = bindingUsers.btnVisualizarRespostaReclamacao;
 
+        if (status_reclamacao.equals("Aguardando resposta")) {
+            bindingUsers.btnVisualizarRespostaReclamacao.setText("Aguardando resposta");
+        }
+
                 visualizar_resposta_reclamacao.setOnClickListener(v -> {
 
                             if (!(status_reclamacao == null && status_reclamacao.isEmpty())) {
 
                                 if (status_reclamacao.equals("Aguardando resposta")) {
-                                    Toast.makeText(v.getContext(), "Aguarde a avaliação. Obrigado!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(v.getContext(), "Aguarde responderem. Obrigado!", Toast.LENGTH_LONG).show();
 
                                 } else {
 

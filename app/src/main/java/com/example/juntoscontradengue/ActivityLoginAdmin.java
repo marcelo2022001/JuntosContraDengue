@@ -201,7 +201,8 @@ public class ActivityLoginAdmin extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 boolean encontrado = false;
-
+                Log.d("BANCO_FIREBASE", "URL: " + databaseMunicipio.getReference());
+                Log.d("BANCO_FIREBASE", "PATH: " + preCadastroRef);
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     String cpfNoBanco = snapshot.getKey();
 
@@ -215,8 +216,7 @@ public class ActivityLoginAdmin extends AppCompatActivity {
                         cpf_cadastrado = edt_txt_pre_cadastro.getText().toString().trim();
                         nome_cadastrado = snapshot.child("nome_pre_cadastro").getValue(String.class);
 
-                        Intent intent = new Intent(ActivityLoginAdmin.this, TelaDeCadastro.class);
-                        intent.putExtra("tipo_conta", "admin");
+                        Intent intent = new Intent(ActivityLoginAdmin.this, CriarCadastroAdmin.class);
                         intent.putExtra("cpf", cpf_cadastrado);
                         intent.putExtra("nome", nome_cadastrado);
                         startActivity(intent);
@@ -237,6 +237,9 @@ public class ActivityLoginAdmin extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("PRE_CADASTRO",
+                        "ERRO: " + error.getCode() +
+                                " | " + error.getMessage());
                 hideLoading();
                 Toast.makeText(ActivityLoginAdmin.this,
                         "Erro: " + error.getMessage(),
@@ -268,6 +271,9 @@ public class ActivityLoginAdmin extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("PRE_CADASTRO",
+                                "ERRO: " + error.getCode() +
+                                        " | " + error.getMessage());
                         hideLoading();
                         callback.onErro("Erro ao verificar CPF: " + error.getMessage());
                     }
@@ -403,6 +409,9 @@ public class ActivityLoginAdmin extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("PRE_CADASTRO",
+                                "ERRO: " + error.getCode() +
+                                        " | " + error.getMessage());
                         falhaAposAutenticar("Erro ao carregar seu perfil: " + error.getMessage());
                     }
                 });

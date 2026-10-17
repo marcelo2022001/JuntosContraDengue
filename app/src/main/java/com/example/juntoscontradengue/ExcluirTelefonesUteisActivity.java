@@ -18,7 +18,6 @@ import com.example.juntoscontradengue.database.adapters.AdapterExcluirTelefone;
 import com.example.juntoscontradengue.database.classes_database.ClassTelefonesUteis;
 import com.example.juntoscontradengue.databinding.ActivityExcluirTelefonesUteisBinding;
 import com.example.juntoscontradengue.extras.NetworkUtils;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,12 +31,12 @@ import java.util.Objects;
 public class ExcluirTelefonesUteisActivity extends AppCompatActivity {
     private ActivityExcluirTelefonesUteisBinding bindingExcluirFone;
     private DatabaseReference databaseReferenceExcluirFone;
-    private ChildEventListener childEventListener;
     private AdapterExcluirTelefone adapterExcluirTelefone;
     RecyclerView recyclerViewExcluirFone;
     private final List<ClassTelefonesUteis> telefoneListExcluir = new ArrayList<>();
     private final List<ClassTelefonesUteis> filteredListExcluir = new ArrayList<>();
     private String lastQuery = "";
+    private ValueEventListener valueListener;
     String estado, municipio;
 
     @Override
@@ -53,6 +52,7 @@ public class ExcluirTelefonesUteisActivity extends AppCompatActivity {
             Intent itente = new Intent(this, SemInternetActivity.class);
             itente.putExtra("id_activity", "excluir_telefones_uteis");
             startActivity(itente);
+            return;
 
         }
 
@@ -63,10 +63,9 @@ public class ExcluirTelefonesUteisActivity extends AppCompatActivity {
 
         String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
         FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
-        databaseReferenceExcluirFone = databaseMunicipio.getReference();
+        databaseReferenceExcluirFone = databaseMunicipio.getReference().child("telefones_uteis");
 
         setupToolbar();
-        initializeFirebase();
         setupRecyclerView();
         setupSearch();
     }
@@ -76,12 +75,6 @@ public class ExcluirTelefonesUteisActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         toolbar.setTitle(getTitle());
-    }
-
-    private void initializeFirebase() {
-
-       databaseReferenceExcluirFone
-                .child("telefones_uteis");
     }
 
     private void setupRecyclerView() {
@@ -127,98 +120,45 @@ public class ExcluirTelefonesUteisActivity extends AppCompatActivity {
         }
         adapterExcluirTelefone.updateListExcluir(filteredListExcluir);
     }
-    private void loadInitialData() {
-        databaseReferenceExcluirFone.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                telefoneListExcluir.clear(); // Limpa apenas uma vez no início
-                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                    ClassTelefonesUteis contact = childSnapshot.getValue(ClassTelefonesUteis.class);
-                    if (contact != null) {
-                        contact.setId(childSnapshot.getKey());
-                        telefoneListExcluir.add(contact);
-                    }
-                }
-                filterContacts(lastQuery);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(ExcluirTelefonesUteisActivity.this,
-                        "Erro ao carregar dados: " + error.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     @Override
     protected void onStart() {
         super.onStart();
-        telefoneListExcluir.clear();
-        attachChildListener();
+        if (databaseReferenceExcluirFone != null) {
+            attachListener();
+        }
     }
 
-    private void attachChildListener() {
-        childEventListener = new ChildEventListener() {
+    private void attachListener() {
+        valueListener = new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
-                ClassTelefonesUteis contact = snapshot.getValue(ClassTelefonesUteis.class);
-                if (contact != null) {
-                    contact.setId(snapshot.getKey());
-                    telefoneListExcluir.add(contact);
-                    filterContacts(lastQuery);
-                }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {
-                ClassTelefonesUteis updated = snapshot.getValue(ClassTelefonesUteis.class);
-                if (updated == null) return;
-
-                updated.setId(snapshot.getKey());
-
-                for (int i = 0; i < telefoneListExcluir.size(); i++) {
-                    if (telefoneListExcluir.get(i).getId().equals(updated.getId())) {
-                        telefoneListExcluir.set(i, updated);
-                        break;
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                telefoneListExcluir.clear();
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    ClassTelefonesUteis contact = child.getValue(ClassTelefonesUteis.class);
+                    if (contact != null) {
+                        contact.setId(child.getKey());
+                        telefoneListExcluir.add(contact);
                     }
                 }
-                filterContacts(lastQuery);
+                filterContacts(lastQuery);   // chamado uma vez por atualização
             }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                String removedId = snapshot.getKey();
-
-                for (int i = 0; i < telefoneListExcluir.size(); i++) {
-                    if (telefoneListExcluir.get(i).getId().equals(removedId)) {
-                        telefoneListExcluir.remove(i);
-                        break;
-                    }
-                }
-
-                filterContacts(lastQuery);
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, String previousChildName) {}
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(ExcluirTelefonesUteisActivity.this,
-                        "Erro: " + error.getMessage(),
-                        Toast.LENGTH_SHORT).show();
+                        "Erro: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         };
-
-        databaseReferenceExcluirFone.addChildEventListener(childEventListener);
+        databaseReferenceExcluirFone.addValueEventListener(valueListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (childEventListener != null) {
-            databaseReferenceExcluirFone.removeEventListener(childEventListener);
+        if (valueListener != null && databaseReferenceExcluirFone != null) {
+            databaseReferenceExcluirFone.removeEventListener(valueListener);
+            valueListener = null;
         }
     }
 

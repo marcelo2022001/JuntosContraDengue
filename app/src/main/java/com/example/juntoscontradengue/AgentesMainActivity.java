@@ -281,7 +281,7 @@ public class AgentesMainActivity extends AppCompatActivity {
     }
 
     private void config_conta() {
-        Intent itent_agentes = new Intent(this, ProfileActivity.class);
+        Intent itent_agentes = new Intent(this, ProfileAgenteActivity.class);
         startActivity(itent_agentes);
     }
 

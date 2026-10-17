@@ -13,6 +13,7 @@
         android:id="@+id/txtAvisoOfflineDengue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbarDengue"
         android:background="#FFC107"
         android:gravity="center"
         android:padding="8dp"

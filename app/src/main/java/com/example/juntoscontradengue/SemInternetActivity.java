@@ -38,10 +38,11 @@ public class SemInternetActivity extends AppCompatActivity {
             case "telefones_uteis":
             case "trabalhos_agentes":
             case "denunciar":
-            case "profile":
+            case "profile_usuario":
             case "reclamacoes_usuarios":
             case "material_educativo":
             case "termos":
+            case "Activity_cad_adm":
                 Intent intent = new Intent(SemInternetActivity.this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
@@ -70,7 +71,7 @@ public class SemInternetActivity extends AppCompatActivity {
             case "agentes_reclamacoes":
             case "upload_trab_agentes_agentes":
             case "agentes_excluir_trab":
-            case "profile_admin_agentes":
+            case "profile_agentes":
                 Intent intentAgentes = new Intent(SemInternetActivity.this, AgentesMainActivity.class);
                 intentAgentes.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 

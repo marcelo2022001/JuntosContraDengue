@@ -82,7 +82,7 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private MaterialButton btnSalvarLocalidade;
     private TextView tvLocalizacaoAutomatica;
-
+    private String estadoSalvo, municipioSalvo;
     private String estadoSelecionado, municipioSelecionado;
     private final List<String> listaEstados = new ArrayList<>();
     private final List<String> listaMunicipios = new ArrayList<>();
@@ -135,15 +135,49 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
     // agora retorna boolean: true = já redirecionou
     private boolean verificarLocalizacaoSalva() {
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
-        String estadoSalvo = prefs.getString("estado", null);
-        String municipioSalvo = prefs.getString("municipio", null);
+         estadoSalvo = prefs.getString("estado", null);
+         municipioSalvo = prefs.getString("municipio", null);
 
         if (estadoSalvo != null && municipioSalvo != null) {
+
+
+            verificaSeAppAtivo();
+
             startActivity(new Intent(this, VideoIniciarAppActivity.class));
             finish();
             return true;
         }
         return false;
+    }
+
+    private void verificaSeAppAtivo() {
+
+        String urlBanco = "https://juntos-contra-dengue-" + estadoSalvo + "-" + municipioSalvo + "-db.firebaseio.com/";
+        FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
+        DatabaseReference configRef = databaseMunicipio.getReference()
+                .child("config")
+                .child("app_ativo");
+
+        configRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Boolean appAtivo = snapshot.getValue(Boolean.class);
+
+                if (appAtivo != null && !appAtivo) {
+                    // Se for false, redireciona para a tela de bloqueio
+                    Intent intent = new Intent(EscolherLocalidadeActivity.this, AppDesativadoActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Impede o usuário de voltar
+                    startActivity(intent);
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Tratar erro se necessário
+            }
+        });
     }
 
     private void initViews() {

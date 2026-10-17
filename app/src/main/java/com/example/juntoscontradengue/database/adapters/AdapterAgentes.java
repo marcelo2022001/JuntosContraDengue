@@ -72,7 +72,7 @@ public class AdapterAgentes extends RecyclerView.Adapter<AdapterAgentes.AgenteVi
                 agente.getFuncao() : "Função não disponível");
 
         String imageUrl = agente.getUrlImagem();
-        final int posicao = holder.getAdapterPosition();
+        final int posicao = holder.getBindingAdapterPosition();
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
             Glide.with(holder.itemView.getContext())
@@ -100,21 +100,23 @@ public class AdapterAgentes extends RecyclerView.Adapter<AdapterAgentes.AgenteVi
                         }
                     })
                     .into(holder.imgAgente);
+
+            holder.imgAgente.setOnClickListener(v -> {
+                Intent intent = new Intent(context, FullscreenActivity.class);
+                intent.putExtra("urlMidia", imageUrl);
+                intent.putExtra("tipo", "imagem");
+                intent.putExtra("nome", agente.getNome());
+                intent.putExtra("funcao", agente.getFuncao());
+                context.startActivity(intent);
+            });
         } else {
+            Glide.with(holder.itemView.getContext()).clear(holder.imgAgente);
             holder.imgAgente.setImageResource(R.drawable.placeholder);
+            holder.imgAgente.setOnClickListener(null);   // antes abria o Fullscreen com URL nula
             if (imageResultListener != null && posicao != RecyclerView.NO_POSITION) {
                 imageResultListener.onImageResult(posicao, false);
             }
         }
-
-        holder.imgAgente.setOnClickListener(v -> {
-            Intent intent = new Intent(context, FullscreenActivity.class);
-            intent.putExtra("urlMidia", imageUrl);
-            intent.putExtra("tipo", "imagem");
-            intent.putExtra("nome", agente.getNome());
-            intent.putExtra("funcao", agente.getFuncao());
-            context.startActivity(intent);
-        });
     }
 
     @Override

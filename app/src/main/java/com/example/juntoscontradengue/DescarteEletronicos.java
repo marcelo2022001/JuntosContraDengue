@@ -1,7 +1,9 @@
 package com.example.juntoscontradengue;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -17,13 +19,17 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.example.juntoscontradengue.database.adapters.AdapterResiduosPneus;
+import com.example.juntoscontradengue.database.classes_database.ClassDescarteConsciente;
 import com.example.juntoscontradengue.databinding.ActivityDescarteEletronicosBinding;
 import com.example.juntoscontradengue.extras.NetworkUtils;
 import com.google.firebase.database.DataSnapshot;
@@ -32,12 +38,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -66,6 +74,8 @@ public class DescarteEletronicos extends AppCompatActivity {
     private String htmlAtual = null;
     private boolean conteudoExibido = false;
     private boolean redirecionadoSemInternet = false;
+    private AdapterResiduosPneus adapterLocais;
+    private final List<ClassDescarteConsciente> listaLocais = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +90,7 @@ public class DescarteEletronicos extends AppCompatActivity {
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
+        configurarLocais();
         setupWebView();
         atualizarBannerOffline();
 
@@ -94,6 +105,65 @@ public class DescarteEletronicos extends AppCompatActivity {
         // 2) Firebase (fonte da verdade): atualiza sozinho quando o admin mudar ou a internet voltar
         carregarDoFirebase();
         iniciarTimeout();
+    }
+
+    private void configurarLocais() {
+        bindingDescarteEletronicos.rvDescarteEletronicos.setLayoutManager(new LinearLayoutManager(this));
+
+        adapterLocais = new AdapterResiduosPneus(this, listaLocais, local -> {
+            if (local.getEndereco() == null || local.getEndereco().trim().isEmpty()) return;
+            String busca = local.getEndereco()
+                    + (local.getNumero() != null ? ", " + local.getNumero() : "")
+                    + ", " + getSharedPreferences("configApp", MODE_PRIVATE).getString("municipio", "")
+                    + " - " + getSharedPreferences("configApp", MODE_PRIVATE).getString("estado", "");
+
+            Uri geo = Uri.parse("geo:0,0?q=" + Uri.encode(busca));
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, geo));
+            } catch (ActivityNotFoundException e) {
+                // sem app de mapas: abre no navegador
+                Uri web = Uri.parse("https://www.google.com/maps/search/?api=1&query=" + Uri.encode(busca));
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, web));
+                } catch (ActivityNotFoundException ex) {
+                    Toast.makeText(this, "Nenhum aplicativo encontrado para abrir o mapa", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        bindingDescarteEletronicos.rvDescarteEletronicos.setAdapter(adapterLocais);
+
+        SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
+        String estado = prefs.getString("estado", "");
+        String municipio = prefs.getString("municipio", "");
+        // use o mesmo tratamento (minúsculo, espaços, etc.) que você já faz no ActivityLoginAdmin
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+
+        DatabaseReference locaisRef = FirebaseDatabase.getInstance(urlBanco).getReference("descarte_eletronicos");
+        locaisRef.keepSynced(true);
+
+        ValueEventListener locaisListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int antigos = listaLocais.size();
+                listaLocais.clear();
+                adapterLocais.notifyItemRangeRemoved(0, antigos);
+
+                for (DataSnapshot filho : snapshot.getChildren()) {
+                    ClassDescarteConsciente item = filho.getValue(ClassDescarteConsciente.class);
+                    if (item != null) listaLocais.add(item);
+                }
+                adapterLocais.notifyItemRangeInserted(0, listaLocais.size());
+
+                bindingDescarteEletronicos.txtlocalEntregaEletronicos.setVisibility(
+                        listaLocais.isEmpty() ? View.GONE : View.VISIBLE);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "Erro ao buscar locais: " + error.getMessage());
+            }
+        };
+        locaisRef.addValueEventListener(locaisListener);
     }
 
     @Override
@@ -276,14 +346,15 @@ public class DescarteEletronicos extends AppCompatActivity {
         File arquivo = new File(getFilesDir(), ARQUIVO_CACHE_HTML);
         if (!arquivo.exists()) return null;
 
-        try (FileInputStream fis = new FileInputStream(arquivo);
-             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[8192];
+        try (InputStreamReader reader = new InputStreamReader(
+                new FileInputStream(arquivo), StandardCharsets.UTF_8)) {
+            StringBuilder sb = new StringBuilder();
+            char[] buffer = new char[8192];
             int lidos;
-            while ((lidos = fis.read(buffer)) != -1) {
-                bos.write(buffer, 0, lidos);
+            while ((lidos = reader.read(buffer)) != -1) {
+                sb.append(buffer, 0, lidos);
             }
-            String html = bos.toString("UTF-8");
+            String html = sb.toString();
             return html.trim().isEmpty() ? null : html;
         } catch (IOException e) {
             Log.e(TAG, "Erro ao ler cópia local", e);
