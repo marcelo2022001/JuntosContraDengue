@@ -137,19 +137,6 @@
                     android:autofillHints="Confirme email" />
 
                 <EditText
-                    android:id="@+id/edtTelefoneCriarCadAgenteAdmin"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:background="@drawable/border_rounded_gray"
-                    android:hint="@string/telefone"
-                    android:inputType="phone"
-                    android:minHeight="48dp"
-                    android:padding="12dp"
-                    android:autofillHints="Senha" />
-
-                <EditText
                     android:id="@+id/edtSenhaCriarCadAgenteAdmin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

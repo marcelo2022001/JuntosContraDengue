@@ -56,4 +56,8 @@
         <item name="android:textColor">@color/error_red</item>
     </style>
 
+    <style name="ShapeAppearance.App.CircleImage" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
+
 </resources>

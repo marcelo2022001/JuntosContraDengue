@@ -1,6 +1,6 @@
 package com.example.juntoscontradengue.database.classes_database;
 
-public class ClassListarReclamacoes {
+public class ClassListarReclamacoesUsuarios {
 
     private Long data_envio;
     private String data_resposta;
@@ -11,10 +11,10 @@ public class ClassListarReclamacoes {
     private String idReclamacao;
     private String tokenUsuario;
 
-    public ClassListarReclamacoes() {
+    public ClassListarReclamacoesUsuarios() {
     }
 
-    public ClassListarReclamacoes(Long data_envio, String data_resposta, String reclamacao, String status, String respondida_por, String uid, String idReclamacao, String tokenUsuario) {
+    public ClassListarReclamacoesUsuarios(Long data_envio, String data_resposta, String reclamacao, String status, String respondida_por, String uid, String idReclamacao, String tokenUsuario) {
         this.data_envio = data_envio;
         this.data_resposta = data_resposta;
         this.reclamacao = reclamacao;

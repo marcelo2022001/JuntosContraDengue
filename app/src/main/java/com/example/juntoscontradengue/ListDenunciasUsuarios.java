@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.juntoscontradengue.database.adapters.AdapterReclamacaoUsuarios;
-import com.example.juntoscontradengue.database.classes_database.ClassReclamacoes;
+import com.example.juntoscontradengue.database.classes_database.ClassReclamacoesAdminsAgentes;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,10 +30,10 @@ public class ListDenunciasUsuarios extends AppCompatActivity {
     private DatabaseReference databaseDenunciasUsers;
     private ChildEventListener childEventListenerDenunciasUsers;
     private AdapterReclamacaoUsuarios adapterDenunciasUsers;
-
+    private FirebaseDatabase databaseMunicipio;
     RecyclerView recyclerViewDenunciasUsers;
     private com.example.juntoscontradengue.databinding.ActivityListDenunciasUsuariosBinding bindigDenunciasUsers;
-    private final List<ClassReclamacoes> classReclamacoes = new ArrayList<>();
+    private final List<ClassReclamacoesAdminsAgentes> classReclamacoeAdminsAgentes = new ArrayList<>();
     String estado, municipio;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +46,9 @@ public class ListDenunciasUsuarios extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         // Exemplo em Java
         Bundle extras = getIntent().getExtras();
@@ -68,10 +71,8 @@ public class ListDenunciasUsuarios extends AppCompatActivity {
     }
 
     private void initializeFirebaseDenunciasUsers() {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        databaseDenunciasUsers = database.getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+
+        databaseDenunciasUsers = databaseMunicipio.getReference()
                 .child("reclamacoes");
     }
 
@@ -84,12 +85,12 @@ public class ListDenunciasUsuarios extends AppCompatActivity {
         databaseDenunciasUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                classReclamacoes.clear();
+                classReclamacoeAdminsAgentes.clear();
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                    ClassReclamacoes contact = childSnapshot.getValue(ClassReclamacoes.class);
+                    ClassReclamacoesAdminsAgentes contact = childSnapshot.getValue(ClassReclamacoesAdminsAgentes.class);
                     if (contact != null) {
                         contact.setIdReclamacao(childSnapshot.getKey());
-                        classReclamacoes.add(contact);
+                        classReclamacoeAdminsAgentes.add(contact);
                     }
                 }
 
@@ -119,10 +120,10 @@ public class ListDenunciasUsuarios extends AppCompatActivity {
         childEventListenerDenunciasUsers = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
-                ClassReclamacoes contact = snapshot.getValue(ClassReclamacoes.class);
+                ClassReclamacoesAdminsAgentes contact = snapshot.getValue(ClassReclamacoesAdminsAgentes.class);
                 if (contact != null) {
                     contact.setIdReclamacao(snapshot.getKey());
-                    classReclamacoes.add(contact);
+                    classReclamacoeAdminsAgentes.add(contact);
                     if (adapterDenunciasUsers != null) {
                      //   adapterDenunciasUsers.updateListExcluir(classReclamacoes);
                     }
@@ -131,14 +132,14 @@ public class ListDenunciasUsuarios extends AppCompatActivity {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, String previousChildName) {
-                ClassReclamacoes updated = snapshot.getValue(ClassReclamacoes.class);
+                ClassReclamacoesAdminsAgentes updated = snapshot.getValue(ClassReclamacoesAdminsAgentes.class);
                 if (updated == null) return;
 
                 updated.setConjunto_reclamacao(snapshot.getKey());
 
-                for (int i = 0; i < classReclamacoes.size(); i++) {
-                    if (classReclamacoes.get(i).getReclamante().equals(updated.getReclamante())) {
-                        classReclamacoes.set(i, updated);
+                for (int i = 0; i < classReclamacoeAdminsAgentes.size(); i++) {
+                    if (classReclamacoeAdminsAgentes.get(i).getReclamante().equals(updated.getReclamante())) {
+                        classReclamacoeAdminsAgentes.set(i, updated);
                         if (adapterDenunciasUsers != null) {
                            // adapterDenunciasUsers.updateListExcluir(classReclamacoes);
                         }
@@ -151,9 +152,9 @@ public class ListDenunciasUsuarios extends AppCompatActivity {
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
                 String removedId = snapshot.getKey();
 
-                for (int i = 0; i < classReclamacoes.size(); i++) {
-                    if (classReclamacoes.get(i).getReclamante().equals(removedId)) {
-                        classReclamacoes.remove(i);
+                for (int i = 0; i < classReclamacoeAdminsAgentes.size(); i++) {
+                    if (classReclamacoeAdminsAgentes.get(i).getReclamante().equals(removedId)) {
+                        classReclamacoeAdminsAgentes.remove(i);
                         if (adapterDenunciasUsers != null) {
                         //   adapterDenunciasUsers.updateListExcluir(classReclamacoes);
                         }

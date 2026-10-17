@@ -39,7 +39,6 @@ public class ClassAgentesDiffCallback extends DiffUtil.Callback {
 
         return oldAgente.getNome().equals(newAgente.getNome()) &&
                 oldAgente.getFuncao().equals(newAgente.getFuncao()) &&
-                oldAgente.getTelefone().equals(newAgente.getTelefone()) &&
                 oldAgente.getUrlImagem().equals(newAgente.getUrlImagem()) &&
                 oldAgente.getCpf().equals(newAgente.getCpf()) && // Inclui o CPF
                 oldAgente.getEmail().equals(newAgente.getEmail()); // Inclui o Email

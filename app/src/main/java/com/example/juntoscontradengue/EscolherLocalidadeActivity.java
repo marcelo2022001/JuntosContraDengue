@@ -82,7 +82,7 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private MaterialButton btnSalvarLocalidade;
     private TextView tvLocalizacaoAutomatica;
-
+    private String estadoSalvo, municipioSalvo;
     private String estadoSelecionado, municipioSelecionado;
     private final List<String> listaEstados = new ArrayList<>();
     private final List<String> listaMunicipios = new ArrayList<>();
@@ -95,6 +95,8 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityEscolherLocalidadeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        tratarNotificacaoRecebida(getIntent());
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         executorService = Executors.newSingleThreadExecutor();
@@ -109,18 +111,73 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
         carregarEstados();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        tratarNotificacaoRecebida(intent);
+    }
+    private void tratarNotificacaoRecebida(Intent intent) {
+        if (intent == null) return;
+        String titulo = intent.getStringExtra("titulo");
+        String mensagem = intent.getStringExtra("mensagem");
+        if (titulo != null || mensagem != null) {
+            Intent it = new Intent(this, ActivityVisualizarNotificacao.class);
+            it.putExtra(ActivityVisualizarNotificacao.EXTRA_TITULO, titulo);
+            it.putExtra(ActivityVisualizarNotificacao.EXTRA_MENSAGEM, mensagem);
+            startActivity(it);
+            intent.removeExtra("titulo");
+            intent.removeExtra("mensagem");
+
+        }
+    }
+
     // agora retorna boolean: true = já redirecionou
     private boolean verificarLocalizacaoSalva() {
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
-        String estadoSalvo = prefs.getString("estado", null);
-        String municipioSalvo = prefs.getString("municipio", null);
+         estadoSalvo = prefs.getString("estado", null);
+         municipioSalvo = prefs.getString("municipio", null);
 
         if (estadoSalvo != null && municipioSalvo != null) {
+
+
+            verificaSeAppAtivo();
+
             startActivity(new Intent(this, VideoIniciarAppActivity.class));
             finish();
             return true;
         }
         return false;
+    }
+
+    private void verificaSeAppAtivo() {
+
+        String urlBanco = "https://juntos-contra-dengue-" + estadoSalvo + "-" + municipioSalvo + "-db.firebaseio.com/";
+        FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
+        DatabaseReference configRef = databaseMunicipio.getReference()
+                .child("config")
+                .child("app_ativo");
+
+        configRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Boolean appAtivo = snapshot.getValue(Boolean.class);
+
+                if (appAtivo != null && !appAtivo) {
+                    // Se for false, redireciona para a tela de bloqueio
+                    Intent intent = new Intent(EscolherLocalidadeActivity.this, AppDesativadoActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Impede o usuário de voltar
+                    startActivity(intent);
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Tratar erro se necessário
+            }
+        });
     }
 
     private void initViews() {
@@ -481,8 +538,8 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
         SharedPreferences.Editor editor =
                 getSharedPreferences("configApp", MODE_PRIVATE).edit();
 
-        editor.putString("estado", estadoSelecionado.toLowerCase().trim());
-        editor.putString("municipio", municipioSelecionado.toLowerCase().trim());
+        editor.putString("estado", paraChaveFirebase(estadoSelecionado));
+        editor.putString("municipio",paraChaveFirebase(municipioSelecionado));
         editor.apply();
 
         Toast.makeText(this,
@@ -492,6 +549,13 @@ public class EscolherLocalidadeActivity extends AppCompatActivity {
         setLoading(false);
         startActivity(new Intent(this, VideoIniciarAppActivity.class));
         finish();
+    }
+
+    private String paraChaveFirebase(String input) {
+        String normalizado = normalizeString(input);
+        return normalizado
+                .replaceAll("\\s+", "_")        // espaços -> "_"
+                .replaceAll("[^a-z0-9_]", "");  // remove qualquer sobra (hífen, apóstrofo, etc.)
     }
 
     private boolean isGPSEnabled() {

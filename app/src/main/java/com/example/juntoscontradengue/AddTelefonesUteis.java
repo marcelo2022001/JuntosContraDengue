@@ -15,6 +15,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.example.juntoscontradengue.databinding.ActivityAddTelefonesUteisBinding;
 import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TelefoneUtil;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -27,6 +28,7 @@ public class AddTelefonesUteis extends AppCompatActivity {
     private ActivityAddTelefonesUteisBinding bindingAddTelefonesuteis;
     private EditText local_add_telefone, telefone_add_telefone;
     String estado, municipio;
+    private FirebaseDatabase databaseMunicipio;
 
 
     @Override
@@ -50,6 +52,9 @@ public class AddTelefonesUteis extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         setupToolbar();
         initializeViews();
@@ -91,14 +96,14 @@ public class AddTelefonesUteis extends AppCompatActivity {
         String local = local_add_telefone.getText().toString().trim();
         String telefone = telefone_add_telefone.getText().toString().trim();
 
+        if (!TelefoneUtil.telefoneValido(telefone_add_telefone.getText().toString())) {
+            telefone_add_telefone.setError("Telefone inválido");
+            return;
+        }
+
         if (!(local.isEmpty()) && !(telefone.isEmpty())) {
 
-            FirebaseDatabase mdatabaseTelefonesUteis = FirebaseDatabase.getInstance();
-
-            DatabaseReference ref_telefones_uteis = mdatabaseTelefonesUteis
-                    .getReference("cadastros")
-                    .child(estado)
-                    .child(municipio)
+            DatabaseReference ref_telefones_uteis = databaseMunicipio.getReference()
                     .child("telefones_uteis");
 
             //pegar info. salvar no real time database

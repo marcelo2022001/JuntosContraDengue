@@ -35,4 +35,25 @@
     <color name="button_text">#FFFFFF</color>
     <color name="error_red">#D93025</color>
     <color name="success_green">#34A853</color>
+
+    <!-- Cores Gerais Tela Sobre-->
+    <color name="bg_app">#F0F4F8</color>
+    <color name="text_primary_about">#0F172A</color>
+    <color name="text_secondary_about">#334155</color>
+    <color name="text_subtle">#64748B</color>
+
+    <!-- Usuários (Azul) -->
+    <color name="card_user_bg">#EBF3FE</color>
+    <color name="card_user_stroke">#3B82F6</color>
+    <color name="card_user_primary">#1D4ED8</color>
+
+    <!-- Administrador (Verde) -->
+    <color name="card_admin_bg">#ECFDF5</color>
+    <color name="card_admin_stroke">#10B981</color>
+    <color name="card_admin_primary">#047857</color>
+
+    <!-- Agentes (Amarelo/Laranja) -->
+    <color name="card_agent_bg">#FEFCE8</color>
+    <color name="card_agent_stroke">#F59E0B</color>
+    <color name="card_agent_primary">#B45309</color>
 </resources>

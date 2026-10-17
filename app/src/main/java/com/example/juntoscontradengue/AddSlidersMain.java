@@ -29,7 +29,7 @@ import java.util.Objects;
 public class AddSlidersMain extends AppCompatActivity {
 
     private final List<ClassAddSliders> classAddSliders = new ArrayList<>();
-    private AdapterSliders adapterSliders; // Make adapter a field to access it throughout the class
+    private AdapterSliders adapterSliders;
     String estado, municipio;
     boolean isConnected;
 
@@ -44,69 +44,51 @@ public class AddSlidersMain extends AppCompatActivity {
 
         isConnected = NetworkUtils.isNetworkAvailable(AddSlidersMain.this);
         if (!isConnected) {
-
             Intent itente = new Intent(this, SemInternetActivity.class);
             itente.putExtra("id_activity", "add_slider");
             startActivity(itente);
-
         }
-
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         RecyclerView recyclerView = findViewById(R.id.rvAddSliders);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapterSliders = new AdapterSliders(this, (ArrayList<ClassAddSliders>) classAddSliders);
         recyclerView.setAdapter(adapterSliders);
 
-        DatabaseReference databaseReferenceAddSliders = FirebaseDatabase
-                .getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference databaseReferenceAddSliders = databaseMunicipio.getReference()
                 .child("config")
                 .child("sliders_main");
 
         databaseReferenceAddSliders.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                // Valida se o snapshot possui filhos/estrutura de objeto e não é apenas uma String solta
-                if (snapshot.exists() && snapshot.hasChildren()) {
-                    ClassAddSliders sliders = snapshot.getValue(ClassAddSliders.class);
-                    if (sliders != null) {
-                        try {
-                            String key = snapshot.getKey();
-                            if (key != null) {
-                                sliders.setId(Long.valueOf(key));
-                            }
-                        } catch (NumberFormatException e) {
-                            Log.e("FirebaseError", "Chave não numérica: " + snapshot.getKey());
-                        }
-
-                        classAddSliders.add(sliders);
-                        adapterSliders.notifyItemInserted(classAddSliders.size() - 1);
-
-                        Log.d("IMG_DEBUG EXCLUIR", "URL da imagem carregada com sucesso.");
-                    }
-                } else {
-                    Log.w("FirebaseError", "O nó " + snapshot.getKey() + " não é um objeto válido para ClassAddSliders.");
+                String url = extrairUrl(snapshot);
+                if (url == null) {
+                    Log.w("FirebaseError", "Slider sem URL no nó " + snapshot.getKey());
+                    return;
                 }
+
+                ClassAddSliders sliders = new ClassAddSliders();
+                sliders.setUrl_imagem(url); // ajuste para o setter real da sua classe
+                sliders.setId(idDaChave(snapshot.getKey()));
+
+                classAddSliders.add(sliders);
+                adapterSliders.notifyItemInserted(classAddSliders.size() - 1);
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.exists() && snapshot.hasChildren()) {
-                    ClassAddSliders slidersExcluir = snapshot.getValue(ClassAddSliders.class);
-                    if (slidersExcluir != null) {
-                        int index = findAgenteIndexById(snapshot.getKey());
-                        if (index != -1) {
-                            classAddSliders.set(index, slidersExcluir);
-                            adapterSliders.notifyItemChanged(index);
-                        }
-                    }
+                String url = extrairUrl(snapshot);
+                int index = findAgenteIndexById(snapshot.getKey());
+                if (url != null && index != -1) {
+                    classAddSliders.get(index).setUrl_imagem(url); // mesmo setter de cima
+                    adapterSliders.notifyItemChanged(index);
                 }
             }
 
@@ -132,31 +114,41 @@ public class AddSlidersMain extends AppCompatActivity {
         });
     }
 
+    // Lê a URL do nó, seja o próprio valor ou o primeiro filho String (image_1, image_2...)
+    private String extrairUrl(DataSnapshot snapshot) {
+        Object direto = snapshot.getValue();
+        if (direto instanceof String) return (String) direto;
+
+        for (DataSnapshot filho : snapshot.getChildren()) {
+            Object v = filho.getValue();
+            if (v instanceof String && !((String) v).isEmpty()) return (String) v;
+        }
+        return null;
+    }
+
+    // Pega só os dígitos da chave: "3" -> 3, "image_3" -> 3
+    private Long idDaChave(String key) {
+        if (key == null) return null;
+        String digitos = key.replaceAll("\\D", "");
+        return digitos.isEmpty() ? null : Long.valueOf(digitos);
+    }
+
+    private int findAgenteIndexById(String key) {
+        Long id = idDaChave(key);
+        if (id == null) return -1;
+        for (int i = 0; i < classAddSliders.size(); i++) {
+            ClassAddSliders item = classAddSliders.get(i);
+            if (item != null && Objects.equals(item.getId(), id)) return i;
+        }
+        return -1;
+    }
+
     @Override
     public boolean onSupportNavigateUp() {
-        // Volta para a MainActivity
         Intent intent = new Intent(this, AdminActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
         finish();
         return true;
     }
-
-    private int findAgenteIndexById(String key) {
-        if (key == null) return -1;
-        try {
-            Long keyLong = Long.valueOf(key);
-            for (int i = 0; i < classAddSliders.size(); i++) {
-                if (classAddSliders.get(i).getId() != null && classAddSliders.get(i).getId().equals(keyLong)) {
-                    return i;
-                }
-            }
-        } catch (NumberFormatException e) {
-            Log.e("FirebaseError", "Chave inválida para conversão: " + key);
-        }
-        return -1;
-    }
-
-
-
 }

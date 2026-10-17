@@ -13,7 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.juntoscontradengue.databinding.ActivityAddLocaisDescartesPneusEletronicosBinding;
 import com.example.juntoscontradengue.extras.Alertas;
+import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TelefoneUtil;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -31,6 +33,7 @@ public class AddLocalDescartesPneusEletronicos extends AppCompatActivity {
     Button btnCancelDescartes;
     ActivityAddLocaisDescartesPneusEletronicosBinding bindingDescartes;
     String estado, municipio;
+    private FirebaseDatabase databaseMunicipio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +43,21 @@ public class AddLocalDescartesPneusEletronicos extends AppCompatActivity {
 
         bindingDescartes = ActivityAddLocaisDescartesPneusEletronicosBinding.inflate(getLayoutInflater());
         setContentView(bindingDescartes.getRoot());
-        
+
+        temInternet();
+
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
          estado = prefs.getString("estado", null);
          municipio = prefs.getString("municipio", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
          edtTxtDescartesLocais = bindingDescartes.edtTxtDescartesLocais;
          edtTxtDescartesEndereco = bindingDescartes.edtTxtDescartesEndereco;
          edtTxtDescartesNumero = bindingDescartes.edtTxtDescartesNumero;
          edtTxtDescartesTelefone = bindingDescartes.edtTxtDescartesTelefone;
+         edtTxtDescartesTelefone.addTextChangedListener(MaskEditUtil.maskTelefone());
          edtTxtDescartesHorarios = bindingDescartes.edtTxtDescartesHorarios;
 
          rbDescarteEletronico = bindingDescartes.radioButtonAddLocalEletronicos;
@@ -59,6 +68,11 @@ public class AddLocalDescartesPneusEletronicos extends AppCompatActivity {
         Button btnOkDescartes = bindingDescartes.btnOkDescartes;
         btnOkDescartes.setOnClickListener(v -> {
 
+            if (!TelefoneUtil.telefoneValido(edtTxtDescartesTelefone.getText().toString())) {
+                edtTxtDescartesTelefone.setError("Telefone inválido");
+                return;
+            }
+
             if (rbDescarteEletronico.isChecked()) {
                 cadastraEletronicos();
             } else {
@@ -68,7 +82,7 @@ public class AddLocalDescartesPneusEletronicos extends AppCompatActivity {
 
     }
 
-    private boolean temInternet() {
+    private void temInternet() {
         boolean isConnected = NetworkUtils.isNetworkAvailable(AddLocalDescartesPneusEletronicos.this);
         if (!isConnected) {
             Intent intent = new Intent(this, SemInternetActivity.class);
@@ -76,17 +90,11 @@ public class AddLocalDescartesPneusEletronicos extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
-        return isConnected;
     }
 
     private void cadastraPneus() {
 
-        FirebaseDatabase mdatabaseDescartes = FirebaseDatabase.getInstance();
-
-        DatabaseReference ref_descartes = mdatabaseDescartes
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference ref_descartes = databaseMunicipio.getReference()
                 .child("descarte_pneus");
 
         String local = edtTxtDescartesLocais.getText().toString();
@@ -126,12 +134,7 @@ public class AddLocalDescartesPneusEletronicos extends AppCompatActivity {
 
     private void cadastraEletronicos() {
 
-        FirebaseDatabase mdatabaseDescartes = FirebaseDatabase.getInstance();
-
-        DatabaseReference ref_descartes = mdatabaseDescartes
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference ref_descartes = databaseMunicipio.getReference()
                 .child("descarte_eletronicos");
 
         String local = edtTxtDescartesLocais.getText().toString();

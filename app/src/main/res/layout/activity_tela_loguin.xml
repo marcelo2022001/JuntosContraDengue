@@ -83,6 +83,7 @@
                         android:maxWidth="320dp"
                         android:background="@drawable/border_rounded_gray"
                         android:hint="@string/cpf"
+                        android:inputType="phone"
                         android:imeOptions="actionDone"
                         android:padding="8dp"
                         android:selectAllOnFocus="true"

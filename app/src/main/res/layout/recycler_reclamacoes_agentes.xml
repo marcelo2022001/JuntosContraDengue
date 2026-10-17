@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/cardView_reclamacoes_agentes"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="16dp"
     android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    app:cardCornerRadius="8dp"
-    android:background="#AEABAF"
-    app:cardElevation="8dp">
+    android:layout_marginEnd="8dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardView_reclamacoes_agentes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="8dp"
+        app:strokeColor="@android:color/transparent"
+        android:background="#AEABAF"
+        app:cardElevation="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -36,7 +41,7 @@
                 </TextView>
 
                 <TextView
-                    android:id="@+id/txt_dt_reclamacao"
+                    android:id="@+id/txt_dt_reclamacao_agentes"
                     android:layout_width="190dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
@@ -55,7 +60,7 @@
                 </TextView>
 
                 <TextView
-                    android:id="@+id/txt_titulo_reclamacao"
+                    android:id="@+id/txt_titulo_reclamacao_agentes"
                     android:layout_width="190dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
@@ -75,7 +80,7 @@
                 </TextView>
 
                 <TextView
-                    android:id="@+id/txt_reclamante"
+                    android:id="@+id/txt_reclamante_agentes"
                     android:layout_width="190dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
@@ -95,7 +100,7 @@
                 </TextView>
 
                 <TextView
-                    android:id="@+id/txt_fone_reclamante"
+                    android:id="@+id/txt_fone_reclamante_agentes"
                     android:layout_width="190dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
@@ -115,7 +120,7 @@
                 </TextView>
 
                 <TextView
-                    android:id="@+id/txt_status_reclamacao"
+                    android:id="@+id/txt_status_reclamacao_agentes"
                     android:layout_width="190dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
@@ -126,7 +131,7 @@
                 </TextView>
 
                 <TextView
-                    android:id="@+id/txtView_respondido_por"
+                    android:id="@+id/txtView_respondido_por_agentes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
@@ -137,7 +142,7 @@
                 </TextView>
 
                 <TextView
-                    android:id="@+id/txt_respondido_por"
+                    android:id="@+id/txt_respondido_por_agentes"
                     android:layout_width="190dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
@@ -162,4 +167,6 @@
 
         </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
+
+</FrameLayout>

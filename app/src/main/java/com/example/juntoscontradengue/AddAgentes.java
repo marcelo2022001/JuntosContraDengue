@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -40,13 +38,15 @@ public class AddAgentes extends AppCompatActivity {
     RadioButton rbSelecione, rbAdmin, rbAgente, rbOutro;
     CheckBox chkBoxMostrarImagemAgente;
     EditText edtCpfAgenteCad, edtOutroAgenteCad, edtNomeCad;
-    TextView imgCadastroApareceraTelaAgentes;
-    String estado, municipio, db_salvar_pre_cadastro, sCpf, sNomeCad;
+    TextView imgCadastroApareceraTelaAgentes, totalAdminsPossivelCadastro, totalAgentesPossivelCadastro;
+    String estado, municipio, db_salvar_pre_cadastro, sCpf, sNomeCad, autoriza_uso_imagem;
     String decrementarOnde, verifica_outro_pre_cadastro, funcao_pre_cadastro;
     Long data_atual;
-    Boolean autoriza_uso_imagem, radioButtomsel = false;
+    Boolean radioButtomsel = false;
     Long totalAdminPodeCadastrar, totalAgentePodeCadastrar;
     private String sFuncao_agente = ""; // agente ou admin
+    private FirebaseDatabase databaseMunicipio;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,13 +64,13 @@ public class AddAgentes extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
+
         edtCpfAgenteCad = findViewById(R.id.edtCpfCadAgentes);
         edtCpfAgenteCad.addTextChangedListener(MaskEditUtil.mask(MaskEditUtil.FORMAT_CPF));
         edtNomeCad = findViewById(R.id.edtNomeCadAgentes);
-
-        // No firebase verifica se total_admins e total_agentes, outros é igual a 0, se não pode cadastrar
-        verificarPossibilidadeNovoCadastroAdmin();
-        verificarPossibilidadeNovoCadastroAgentes();
 
 
         radioGroup = findViewById(R.id.rdGroup);
@@ -81,6 +81,12 @@ public class AddAgentes extends AppCompatActivity {
         edtOutroAgenteCad = findViewById(R.id.edtOutrosCadAgentes);
         chkBoxMostrarImagemAgente = findViewById(R.id.chekBoxMostrarImagemAgente);
         imgCadastroApareceraTelaAgentes = findViewById(R.id.msgSobreFotoSeAparecera);
+        totalAdminsPossivelCadastro = findViewById(R.id.TextViewTotalAdmins);
+        totalAgentesPossivelCadastro = findViewById(R.id.TextViewTotalAgentes);
+        // No firebase verifica se total_admins e total_agentes, outros é igual a 0, se não pode cadastrar
+        verificarPossibilidadeNovoCadastroAdmin();
+        verificarPossibilidadeNovoCadastroAgentes();
+
 
         // Define o ouvinte de mudança de seleção
         radioGroup.setOnCheckedChangeListener( (group, checkedId) -> {
@@ -91,6 +97,7 @@ public class AddAgentes extends AppCompatActivity {
                 chkBoxMostrarImagemAgente.setChecked(false);
                 chkBoxMostrarImagemAgente.setVisibility(View.GONE);
                 edtOutroAgenteCad.setVisibility(View.GONE);
+                imgCadastroApareceraTelaAgentes.setVisibility(View.GONE);
                 radioButtomsel = false;
 
             } else if(checkedId == R.id.radioButtonAdmin) {
@@ -98,6 +105,7 @@ public class AddAgentes extends AppCompatActivity {
                 edtOutroAgenteCad.setVisibility(View.GONE);
                 chkBoxMostrarImagemAgente.setVisibility(View.GONE);
                 edtOutroAgenteCad.setVisibility(View.GONE);
+                imgCadastroApareceraTelaAgentes.setVisibility(View.GONE);
                     db_salvar_pre_cadastro = "pre_cadastro_admins";
                     decrementarOnde = "total_admins";
                      radioButtomsel = false;
@@ -106,6 +114,7 @@ public class AddAgentes extends AppCompatActivity {
 
                 chkBoxMostrarImagemAgente.setVisibility(View.VISIBLE);
                 chkBoxMostrarImagemAgente.setChecked(true);
+                imgCadastroApareceraTelaAgentes.setVisibility(View.GONE);
                    chkBoxMostrarImagemAgente.setEnabled(false);
                    edtOutroAgenteCad.setVisibility(View.GONE);
                    db_salvar_pre_cadastro = "pre_cadastro_agentes";
@@ -141,77 +150,48 @@ public class AddAgentes extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_toolbar_add_agentes_info, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-
-        if (item.getItemId() == R.id.menu_info) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Informações")
-                    .setMessage("Total de cadastro de administrador possível: " + totalAdminPodeCadastrar + "\n" +
-                            "Total de cadastro de agentes ou outros possível: " + totalAgentePodeCadastrar )
-                    .setPositiveButton("OK", null)
-                    .show();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     private void verificarPossibilidadeNovoCadastroAdmin() {
 
-            String pathConfig = "cadastros/" + estado + "/" + municipio + "/config/total_admins";
+        String pathConfig = "/config/total_admins";
 
-            FirebaseDatabase.getInstance().getReference(pathConfig)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.exists()) {
-
-                                totalAdminPodeCadastrar = snapshot.getValue(Long.class);
-                            }
-
+        databaseMunicipio.getReference(pathConfig)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            totalAdminPodeCadastrar = snapshot.getValue(Long.class);
+                            totalAdminsPossivelCadastro.setText(
+                                    String.format("Total de administrador para cadastro: %s", totalAdminPodeCadastrar));
                         }
+                    }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                        }
-                    });
-
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                    }
+                });
     }
 
     private void verificarPossibilidadeNovoCadastroAgentes() {
 
-            String pathConfig = "cadastros/" + estado + "/" + municipio + "/config/total_agentes";
+        String pathConfig = "/config/total_agentes";
 
-            FirebaseDatabase.getInstance().getReference(pathConfig)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                            if (snapshot.exists()) {
-
-                                totalAgentePodeCadastrar = snapshot.getValue(Long.class);
-
-                            }
-
+        databaseMunicipio.getReference(pathConfig)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            totalAgentePodeCadastrar = snapshot.getValue(Long.class);
+                            totalAgentesPossivelCadastro.setText(
+                                    String.format("Total de agentes para cadastro: %s", totalAgentePodeCadastrar));
                         }
+                    }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                        }
-                    });
-        }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                    }
+                });
+    }
 
     private void checkNetworkConnection() {
         boolean isConnected = NetworkUtils.isNetworkAvailable(this);
@@ -229,7 +209,7 @@ public class AddAgentes extends AppCompatActivity {
             AlertDialog alertDialog = new AlertDialog.Builder(AddAgentes.this).create();
 
             alertDialog.setTitle("Limite atingido");
-            alertDialog.setMessage("O limite de agentes foi atingido.\n\n" +
+            alertDialog.setMessage("O limite de administradores foi atingido.\n\n" +
                     "Remova um profissional ou um pré-cadastro não finalizado.\n\n" +
                     "Deseja conhecer nossos planos para cadastrar novos administradores?");
 
@@ -300,7 +280,6 @@ public class AddAgentes extends AppCompatActivity {
 
                    @Override
                    public void onNotExists() {
-                       autoriza_uso_imagem = chkBoxMostrarImagemAgente.isChecked();
                        salvar_dados_db();
                    }
 
@@ -332,9 +311,7 @@ public class AddAgentes extends AppCompatActivity {
         }
 
 
-        FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        databaseMunicipio.getReference()
                 .child("config")
                 .child(db_salvar_pre_cadastro)
                 .child(sCpf)
@@ -371,9 +348,7 @@ public class AddAgentes extends AppCompatActivity {
 
     private void verificaOutroPreCadastro(CadastroCallback callback) {
 
-        FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        databaseMunicipio.getReference()
                 .child("config")
                 .child(verifica_outro_pre_cadastro)
                 .child(sCpf)
@@ -457,29 +432,56 @@ public class AddAgentes extends AppCompatActivity {
             db_salvar_pre_cadastro = "pre_cadastro_agentes";
         }
 
+        verificarPossibilidadeNovoCadastroAdmin();
+        verificarPossibilidadeNovoCadastroAgentes();
+
         return true; // Retorno final de sucesso
 
 
     }
 
     private void salvar_dados_db() {
+
+        if (rbOutro.isChecked() && !chkBoxMostrarImagemAgente.isChecked()) {
+            AlertDialog alertDialog = new AlertDialog.Builder(AddAgentes.this).create();
+
+            alertDialog.setTitle("Aviso");
+            alertDialog.setMessage("Mostrar imagem do agente não foi selecionado, este cadastro não aparecera na tela Agentes de Vigilância em Saúde.");
+
+            // Botão SIM
+            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "CONTINUAR",
+                    (dialog, which) -> {
+                        autoriza_uso_imagem = "false";
+                        contiuar_salvar_dados_db();
+                        dialog.dismiss();
+                    });
+
+            // Botão NÃO
+            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "SAIR",
+                    (dialog, which) -> dialog.dismiss());
+
+            alertDialog.show();
+        }
+        else {
+            autoriza_uso_imagem = "true";
+            contiuar_salvar_dados_db();
+
+        }
+    }
+
+    private void contiuar_salvar_dados_db() {
         // 2. Salvar Dados no Realtime Database
+
+
         DateTimeSaver dateSaver = new DateTimeSaver();
         data_atual = dateSaver.saveCurrentDateTime();
 
-        DatabaseReference userRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        DatabaseReference userRef = databaseMunicipio.getReference()
                 .child("config")
                 .child(db_salvar_pre_cadastro)
                 .child(sCpf);
 
-        Map<String, Object> dados = new HashMap<>();
-        dados.put("nome_pre_cadastro", sNomeCad);
-        dados.put("funcao_pre_cadastro", sFuncao_agente);
-        dados.put("autoriza_uso_imagem", autoriza_uso_imagem);
-        dados.put("data_pre_cadastro", data_atual);
+        Map<String, Object> dados = getStringObjectMap();
 
         userRef.setValue(dados).addOnSuccessListener(aVoid -> {
             decrementarContador();
@@ -501,12 +503,28 @@ public class AddAgentes extends AppCompatActivity {
 
     }
 
+    private Map<String, Object> getStringObjectMap() {
+        Map<String, Object> dados = new HashMap<>();
+        dados.put("nome_pre_cadastro", sNomeCad);
+        dados.put("funcao_pre_cadastro", sFuncao_agente);
+        dados.put("data_pre_cadastro", data_atual);
+
+        if(rbAgente.isChecked()){
+            dados.put("autoriza_uso_imagem", "true");
+        }
+
+        if(rbOutro.isChecked() ){
+            dados.put("autoriza_uso_imagem", autoriza_uso_imagem);
+        }
+        return dados;
+    }
+
     private void decrementarContador() {
 
-        DatabaseReference configRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
+        DatabaseReference configRef = databaseMunicipio.getReference()
                 .child("config")
                 .child(decrementarOnde);
 
@@ -524,6 +542,9 @@ public class AddAgentes extends AppCompatActivity {
             @Override
             public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
                 Toast.makeText(AddAgentes.this, "Dados salvo com sucesso", Toast.LENGTH_SHORT).show();
+                verificarPossibilidadeNovoCadastroAdmin();
+                verificarPossibilidadeNovoCadastroAgentes();
+
             }
         });
     }

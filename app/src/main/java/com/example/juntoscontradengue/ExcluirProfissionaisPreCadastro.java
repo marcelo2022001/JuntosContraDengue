@@ -28,6 +28,7 @@ public class ExcluirProfissionaisPreCadastro extends AppCompatActivity {
 
     private static final String TAG = "ContagemCadastros";
     private DatabaseReference databaseReference;
+    private FirebaseDatabase databaseMunicipio;
     Toolbar toolbarExcluirAgentes;
     private Button btnExcluirAdmin, btnExcluirAgentes, btnExcluirPreCadAdmins, btnExcluirPreCadAgentes;
     private ImageView exclamacaoButtonAdmin;
@@ -75,6 +76,9 @@ public class ExcluirProfissionaisPreCadastro extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+
         contarCadastrosAdmins();
         contarCadastrosAgentes();
         contarPreCadastroAdmins();
@@ -90,11 +94,8 @@ public class ExcluirProfissionaisPreCadastro extends AppCompatActivity {
 
     private void contarCadastrosAdmins() {
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("admins");
+         databaseReference = databaseMunicipio.getReference()
+                 .child("logins").child("admins");
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -127,11 +128,8 @@ public class ExcluirProfissionaisPreCadastro extends AppCompatActivity {
     }
 
     private void contarCadastrosAgentes() {
-        databaseReference = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("agentes");
+        databaseReference = databaseMunicipio.getReference()
+                .child("logins").child("agentes");
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -166,10 +164,7 @@ public class ExcluirProfissionaisPreCadastro extends AppCompatActivity {
 
 // Conta quantos cadastros/nós tem no bd
 private void contarPreCadastroAdmins() {
-    databaseReference = FirebaseDatabase.getInstance()
-            .getReference("cadastros")
-            .child(estado)
-            .child(municipio)
+    databaseReference = databaseMunicipio.getReference()
             .child("config")
             .child("pre_cadastro_admins");
     databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -205,9 +200,7 @@ private void contarPreCadastroAdmins() {
 }
 //Conta quantos cadastros/nós tem no bd
     private void contarPreCadastroAgentes() {
-        databaseReference = FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        databaseReference = databaseMunicipio.getReference()
                 .child("config")
                 .child("pre_cadastro_agentes");
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -251,12 +244,12 @@ private void contarPreCadastroAdmins() {
 
     private void excluir_admin() {
         Intent itente = new Intent(this, ExcluirAgentesActivity.class);
-        itente.putExtra("local_db", "admins");
+        itente.putExtra("local_db", "logins/admins");
         startActivity(itente);
     }
     private void excluir_agentes() {
         Intent it = new Intent(this, ExcluirAgentesActivity.class);
-        it.putExtra("local_db", "agentes");
+        it.putExtra("local_db", "logins/agentes");
         startActivity(it);
     }
     private void excluir_pre_cad_admins() {

@@ -24,7 +24,7 @@ public class SobreAplicativo extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sobre_aplicativo);
+       // setContentView(R.layout.activity_sobre_aplicativo);
 
         com.example.juntoscontradengue.databinding.ActivitySobreAplicativoBinding bidingSobre = ActivitySobreAplicativoBinding.inflate(getLayoutInflater());
         setContentView(bidingSobre.getRoot());

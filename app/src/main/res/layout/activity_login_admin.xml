@@ -110,9 +110,18 @@
                     android:id="@+id/txtRecupSenhaLoguinAdmin"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginBottom="12dp"
                     android:text="@string/esqueci_minha_senha"
                     android:textStyle="bold" />
+
+            <!-- Esqueci meu e-mail -->
+            <TextView
+                android:id="@+id/txtRecupEmailAdmin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="@string/recuperar_email"
+                android:textStyle="bold" />
 
                 <!-- Separador OU -->
                 <LinearLayout
@@ -160,7 +169,7 @@
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/border_rounded_gray"
                     android:hint="@string/digite_seu_cpf"
-                    android:inputType="number"
+                    android:inputType="phone"
                     android:minHeight="48dp"
                     android:padding="12dp"
                     android:textSize="16sp" />
@@ -173,7 +182,7 @@
                     android:layout_marginBottom="16dp">
 
                     <Button
-                        android:id="@+id/btnContinuarPreCadastro"
+                        android:id="@+id/btnContinuarPreCadastroAdmin"
                         android:layout_width="0dp"
                         android:layout_height="48dp"
                         android:layout_marginEnd="8dp"
@@ -184,7 +193,7 @@
                         android:textAllCaps="false" />
 
                     <Button
-                        android:id="@+id/btnCancelarPreCadastro"
+                        android:id="@+id/btnCancelarPreCadastroAdmin"
                         android:layout_width="0dp"
                         android:layout_height="48dp"
                         android:layout_marginStart="8dp"
@@ -210,5 +219,11 @@
         </androidx.cardview.widget.CardView>
 
     </ScrollView>
+
+    <!-- Coloque este container para fragment -->
+    <FrameLayout
+        android:id="@+id/fragment_container_recup_email_admin"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

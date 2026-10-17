@@ -60,7 +60,7 @@
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/border_rounded_gray"
                     android:hint="@string/nome_completo"
-                    android:inputType="textAutoComplete"
+                    android:inputType="textCapCharacters"
                     android:minHeight="48dp"
                     android:padding="8dp">
                 </EditText>
@@ -75,7 +75,7 @@
                     android:autofillHints="@string/cpf"
                     android:background="@drawable/border_rounded_gray"
                     android:hint="@string/cpf"
-                    android:inputType="number"
+                    android:inputType="phone|number"
                     android:minHeight="48dp"
                     android:padding="8dp">
                 </EditText>
@@ -105,8 +105,7 @@
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/border_rounded_gray"
                     android:hint="@string/endereco"
-                    android:inputType="textAutoComplete"
-                    android:minHeight="48dp"
+                    android:inputType="textCapCharacters"                    android:minHeight="48dp"
                     android:padding="8dp">
                 </EditText>
 
@@ -135,7 +134,7 @@
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/border_rounded_gray"
                     android:hint="@string/conjunto"
-                    android:inputType="textAutoComplete"
+                    android:inputType="textCapCharacters"
                     android:minHeight="48dp"
                     android:padding="8dp">
                 </EditText>

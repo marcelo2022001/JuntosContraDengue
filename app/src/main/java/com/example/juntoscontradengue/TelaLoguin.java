@@ -25,16 +25,17 @@ import com.example.juntoscontradengue.databinding.ActivityTelaLoguinBinding;
 import com.example.juntoscontradengue.extras.AppConfig;
 import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TopicHelper;
 import com.example.juntoscontradengue.extras.ValidaCpf;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
@@ -52,9 +53,9 @@ public class TelaLoguin extends AppCompatActivity {
     ProgressBar progressBar;
     private ActivityTelaLoguinBinding loguinBinding;
     String estado, municipio, nomeShared, mensagem, emailPendente;
-
+    private FirebaseDatabase databaseMunicipio;
     //shared prefers dados usuario estiver null
-    String nome, email,endereco, cpf, cpf_prefes, num_casa, conjunto, dataCadastro, telefone, updateAt;
+    String nome, email,endereco, cpf, cpf_prefes, num_casa, conjunto, telefone;
 
     // ✅ Construtor padrão obrigatório para Activities
     public TelaLoguin() {
@@ -113,6 +114,9 @@ public class TelaLoguin extends AppCompatActivity {
     private void initializeViews() {
         estado = AppConfig.getEstado(this);
         municipio = AppConfig.getMunicipio(this);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         SharedPreferences prefsUser = getSharedPreferences("UserData", MODE_PRIVATE);
         cpf_prefes = prefsUser.getString("cpf", null);
@@ -174,13 +178,48 @@ public class TelaLoguin extends AppCompatActivity {
     private void recuperarSenhaComEmail(String emailDestino) {
         mAuth.sendPasswordResetEmail(emailDestino)
                 .addOnCompleteListener(task -> {
+                    String email_seguro = mascararEmail(emailDestino);
                     hideLoading();
                     if (task.isSuccessful()) {
-                        Toast.makeText(this, "E-mail de recuperação enviado para:\n" + emailDestino, Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "E-mail de recuperação enviado para:\n" + email_seguro, Toast.LENGTH_LONG).show();
                     } else {
                         tratarErroFirebase(task.getException());
                     }
                 });
+    }
+
+    private String mascararEmail(String emailDestino) {
+        if (emailDestino == null || !emailDestino.contains("@")) return "";
+        int arroba = emailDestino.indexOf("@");
+        String usuario = emailDestino.substring(0, arroba);
+        String dominio = emailDestino.substring(arroba); // inclui @
+
+        int len = usuario.length();
+
+        if (len < 1){
+            return "Email inválido no banco de dados";
+        }
+        if (len == 1) {
+            return "*****" + dominio;
+        }
+        if (len == 2) {
+            return usuario.charAt(0) + "*****" + dominio;
+        }
+        if (len == 3) {
+            return usuario.charAt(0) + "*****" + usuario.charAt(2) + dominio;
+        }
+        if (len == 4) {
+            return usuario.charAt(0) + "****" + usuario.charAt(3) + dominio;
+        }
+        if (len == 5) {
+            return usuario.charAt(0) + "*****" + usuario.charAt(4) + dominio;
+        }
+
+        // len >= 6: 2 primeiras + (len-4) asteriscos + 2 últimas
+        String inicio = usuario.substring(0, 2);
+        String fim = usuario.substring(len - 2);
+        String mascara = "*".repeat(len - 4);
+        return inicio + mascara + fim + dominio;
     }
 
     private void tratarErroFirebase(Exception exception) {
@@ -193,8 +232,7 @@ public class TelaLoguin extends AppCompatActivity {
             Toast.makeText(this, "Usuário não encontrado", Toast.LENGTH_SHORT).show();
         } else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
             Toast.makeText(this, "Credenciais inválidas", Toast.LENGTH_SHORT).show();
-        } else if (exception instanceof FirebaseAuthException) {
-            FirebaseAuthException authEx = (FirebaseAuthException) exception;
+        } else if (exception instanceof FirebaseAuthException authEx) {
             if ("ERROR_TOO_MANY_REQUESTS".equals(authEx.getErrorCode())) {
                 Toast.makeText(this, "Muitas tentativas. Tente novamente mais tarde.", Toast.LENGTH_LONG).show();
             } else {
@@ -251,70 +289,64 @@ public class TelaLoguin extends AppCompatActivity {
         });
     }
 
+
     private void loginComEmail(String emailLogin, String senha) {
         mAuth.signInWithEmailAndPassword(emailLogin, senha)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        salvarDadosLocalmente();
                         irParaActivityPrincipal(nome);
-                    } else {
-                        // Se falhou o login com o email principal, tenta autenticar usando o novoEmail pendente (se houver)
-                        if (emailPendente != null && !emailPendente.isEmpty() && !emailPendente.equals(emailLogin)) {
-                            mAuth.signInWithEmailAndPassword(emailPendente, senha)
-                                    .addOnCompleteListener(taskNovo -> {
+                    } else if (emailPendente != null && !emailPendente.isEmpty()
+                            && !emailPendente.equalsIgnoreCase(emailLogin)) {
+                        // Falhou com o e-mail antigo: tenta com o novoEmail
+                        mAuth.signInWithEmailAndPassword(emailPendente, senha)
+                                .addOnCompleteListener(taskNovo -> {
+                                    if (taskNovo.isSuccessful()) {
+                                        efetivarTrocaDeEmail(emailPendente);
+                                        irParaActivityPrincipal(nome);
+                                    } else {
                                         hideLoading();
-                                        if (taskNovo.isSuccessful()) {
-                                            // Atualiza o banco principal efetivando a troca de email e limpando o novoEmail
-                                            atualizarEmailNoBancoEEfetivar(emailPendente);
-                                        } else {
-                                            tratarErroFirebase(taskNovo.getException());
-                                        }
-                                    });
-                        } else {
-                            hideLoading();
-                            tratarErroFirebase(task.getException());
-                        }
+                                        tratarErroFirebase(taskNovo.getException());
+                                    }
+                                });
+                    } else {
+                        hideLoading();
+                        tratarErroFirebase(task.getException());
                     }
                 });
     }
 
-    private void atualizarEmailNoBancoEEfetivar(String novoEmailEfetivado) {
-        DatabaseReference refCpfIndex = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("cpf_index");
+    private void efetivarTrocaDeEmail(String novoEmailEfetivado) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            irParaActivityPrincipal(nome);
+            return;
+        }
+        String uid = user.getUid();
 
-        Query query = refCpfIndex.orderByChild("cpf").equalTo(cpf);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                    String uidEncontrado = userSnapshot.getKey();
-                    if (uidEncontrado != null) {
-                        Map<String, Object> atualizacao = new HashMap<>();
-                        atualizacao.put("email", novoEmailEfetivado);
-                        atualizacao.put("novoEmail", null);
+        // 1) logins/usuarios/{uid}: email = novo, novoEmail apagado
+        Map<String, Object> upUsuario = new HashMap<>();
+        upUsuario.put("email", novoEmailEfetivado);
+        upUsuario.put("novoEmail", null); // null no updateChildren remove o campo
 
-                        refCpfIndex.child(uidEncontrado).updateChildren(atualizacao);
-
-                        // Atualiza a variável local e salva nas preferências
-                        email = novoEmailEfetivado;
-                        salvarDadosLocalmente();
+        databaseMunicipio.getReference("logins/usuarios/" + uid)
+                .updateChildren(upUsuario)
+                .addOnCompleteListener(t1 -> {
+                    if (t1.isSuccessful()) {
+                        email = novoEmailEfetivado;   // salvarDadosLocalmente usa este valor
+                        emailPendente = null;
+                    } else {
+                        Log.e("TROCA_EMAIL", "Falha em logins/usuarios", t1.getException());
                     }
-                }
-                irParaActivityPrincipal(nome);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                irParaActivityPrincipal(nome);
-            }
-        });
+                });
     }
-
     private void irParaActivityPrincipal(String nomeOpcional) {
         hideLoading();
+
+        salvarDadosLocalmente();
+
+        TopicHelper.inscreverNoTopicoDoPerfil(this, "usuarios");
+
         mensagem = "Bem vindo, ";
 
         if (nomeOpcional != null && !nomeOpcional.isEmpty()) {
@@ -340,19 +372,20 @@ public class TelaLoguin extends AppCompatActivity {
         editor.putString("num_casa", num_casa);
         editor.putString("conjunto", conjunto);
         editor.putString("telefone", telefone);
-        editor.putString("dataCadastro", dataCadastro);
-        editor.putString("updateAt", updateAt);
+        // Esta tela é exclusiva de usuários comuns (agentes/admins fazem login em outra tela)
         editor.putString("perfil", "usuarios");
         editor.apply();
+
+        TopicHelper.inscreverNoTopicoDoPerfil(this, "usuarios");
+
+        hideLoading();
+        Log.e("Shared_1 UserData", "Dados salvo Localmente");
+        navigateBackToMainActivity();
     }
 
     private void buscarEmailPorCpf(String cpf_user, EmailCallback callback) {
-        DatabaseReference refCpfIndex = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("cpf_index")
-                .child(cpf_user); // Acessa diretamente a chave do CPF
+        DatabaseReference refCpfIndex = databaseMunicipio
+                .getReference("cpf_index/" + cpf_user); // Acessa diretamente a chave do CPF
 
         refCpfIndex.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -380,38 +413,25 @@ public class TelaLoguin extends AppCompatActivity {
         });
     }
 
+    /**
+     * Esta tela (TelaLoguin) é exclusiva para usuários comuns — agentes e admins
+     * fazem login em outra tela. Por isso a busca fica restrita a
+     * "logins/usuarios/{uid}"; se o CPF pertencer a um agente/admin (ou não
+     * existir), mostramos uma mensagem clara em vez de falhar silenciosamente.
+     */
     private void buscarDadosUsuarioPorUid(String uidEncontrado, EmailCallback callback) {
-        DatabaseReference refUsuario = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child("usuarios")
-                .child(uidEncontrado);
+        DatabaseReference refUsuario = databaseMunicipio
+                .getReference("logins/usuarios/" + uidEncontrado);
 
         refUsuario.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot userSnapshot) {
                 if (userSnapshot.exists()) {
-                    cpf = userSnapshot.child("cpf").getValue(String.class);
-                    nome = userSnapshot.child("nome").getValue(String.class);
-                    email = userSnapshot.child("email").getValue(String.class);
-                    endereco = userSnapshot.child("endereco").getValue(String.class);
-                    num_casa = userSnapshot.child("num_casa").getValue(String.class);
-                    conjunto = userSnapshot.child("conjunto").getValue(String.class);
-                    telefone = userSnapshot.child("telefone").getValue(String.class);
-                    emailPendente = userSnapshot.child("novoEmail").getValue(String.class);
-
-                    Long dataCadastroLong = userSnapshot.child("dataCadastro").getValue(Long.class);
-                    dataCadastro = (dataCadastroLong != null) ? String.valueOf(dataCadastroLong) : null;
-
-                    Long updateAtLong = userSnapshot.child("updateAt").getValue(Long.class);
-                    updateAt = (updateAtLong != null) ? String.valueOf(updateAtLong) : null;
-
+                    preencherDadosUsuario(userSnapshot);
                     callback.onEmailEncontrado(email, nome);
                 } else {
                     hideLoading();
-                    callback.onErro("Dados do usuário não encontrados.");
+                    callback.onErro("Usuário não encontrado. Se você é agente ou administrador, use a tela de login de agentes/admins.");
                 }
             }
 
@@ -422,6 +442,18 @@ public class TelaLoguin extends AppCompatActivity {
             }
         });
     }
+
+    private void preencherDadosUsuario(DataSnapshot userSnapshot) {
+        cpf = userSnapshot.child("cpf").getValue(String.class);
+        nome = userSnapshot.child("nome").getValue(String.class);
+        email = userSnapshot.child("email").getValue(String.class);
+        endereco = userSnapshot.child("endereco").getValue(String.class);
+        num_casa = userSnapshot.child("num_casa").getValue(String.class);
+        conjunto = userSnapshot.child("conjunto").getValue(String.class);
+        telefone = userSnapshot.child("telefone").getValue(String.class);
+        emailPendente = userSnapshot.child("novoEmail").getValue(String.class);
+
+  }
 
     private String removerPontuacaoCPF(String cpfStr) {
         if (cpfStr == null) return "";

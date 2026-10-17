@@ -3,6 +3,7 @@ package com.example.juntoscontradengue;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -18,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.juntoscontradengue.database.adapters.AdapterExcluirAgentes;
 import com.example.juntoscontradengue.database.classes_database.ClassAgentes;
 import com.example.juntoscontradengue.databinding.ActivityExcluirAgentesBinding;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,10 +37,13 @@ import java.util.List;
 import java.util.Objects;
 
 public class ExcluirAgentesActivity extends AppCompatActivity {
-    private String estado, municipio, local_database, db_total_cadastro;
+    private String local_database;
+    private String db_total_cadastro;
     private final List<ClassAgentes> classAgentesExcluir = new ArrayList<>();
     private AdapterExcluirAgentes adapterAgentesExcluir;
     private DatabaseReference databaseReferenceExcluirAgentes;
+    private FirebaseDatabase databaseMunicipio;
+    private String uidLogado, uuid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +57,9 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
         setSupportActionBar(toolbarAgentesExcluir);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
+        FirebaseUser usuarioLogado = FirebaseAuth.getInstance().getCurrentUser();
+        uidLogado = usuarioLogado != null ? usuarioLogado.getUid() : null;
+
         //Pega os dados trazidos da intent ExcluirProfissionaisPreCadastro
         Intent intent = getIntent();
         local_database = intent.getStringExtra("local_db"); // P
@@ -58,8 +67,11 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
 
         // Recupera localização dos SharedPreferences
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
-        estado = prefs.getString("estado", null);
-        municipio = prefs.getString("municipio", null);
+        String estado = prefs.getString("estado", null);
+        String municipio = prefs.getString("municipio", null);
+
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         // Configuração do RecyclerView e do Listener de Clique do Adapter
         RecyclerView recyclerView = bindingExcluirAgentes.rvAgentesExcluir;
@@ -76,16 +88,22 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
         });
 
         // Referência do Realtime Database
-        databaseReferenceExcluirAgentes = FirebaseDatabase.getInstance().getReference("cadastros")
-                .child(estado).child(municipio).child(local_database);
+        databaseReferenceExcluirAgentes = databaseMunicipio.getReference().child(local_database);
 
         ouvirEventosBanco();
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        irParaMain();
         return true;
+    }
+
+    private void irParaMain() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
     }
 
     private void confirmarExclusao(ClassAgentes agente) {
@@ -99,71 +117,182 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void executarExclusaoCompleta(ClassAgentes agente) {
-        String uuid = agente.getUuid(); // Captura o UUID do objeto
+    private interface UrlCallback {
+        void onUrl(String urlImagem);
+    }
 
-        // 1. EXCLUIR DO AUTHENTICATION (Via Cloud Function)
-        // É necessário criar a função 'recursiveDelete' ou 'deleteUser' no Firebase Functions
+    private interface CpfCallback {
+        void onCpf(String cpfSemMascara);
+    }
+
+    private void executarExclusaoCompleta(ClassAgentes agente) {
+         uuid = agente.getUuid();
+
+        if (ehOProprioAdmin(uuid)) return;
+
+        boolean isAgente = "logins/agentes".equals(local_database);
+
+        SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
+
+        java.util.Map<String, Object> dados = new java.util.HashMap<>();
+        dados.put("uid", uuid);
+        dados.put("estado", prefs.getString("estado", null));
+        dados.put("municipio", prefs.getString("municipio", null));
+
+        // Se a função estiver em outra região: FirebaseFunctions.getInstance("southamerica-east1")
         FirebaseFunctions.getInstance()
                 .getHttpsCallable("deleteUser")
-                .call(uuid)
-                .addOnFailureListener(e -> Log.e("AUTH_DELETE", "Erro Auth: " + e.getMessage()));
+                .call(dados)
+                .addOnSuccessListener(result -> {
+                    // Auth apagado: agora limpa o resto
+                    obterCpf(uuid, cpf ->
+                            obterUrlImagem(agente, isAgente, urlImagem -> databaseReferenceExcluirAgentes.child(uuid).removeValue()
+                                    .addOnSuccessListener(aVoid -> {
+                                        if (isAgente) {
+                                            databaseMunicipio.getReference()
+                                                    .child("agentes_publico").child(uuid).removeValue();
+                                        }
+                                        excluirIndices(cpf, isAgente);
+                                        excluirImagemStorage(urlImagem);
 
-        // 2. EXCLUIR DO REALTIME DATABASE
-        databaseReferenceExcluirAgentes.child(uuid).removeValue()
-                .addOnSuccessListener(aVoid -> {
+                                        db_total_cadastro = local_database.equals("logins/admins")
+                                                ? "total_admins" : "total_agentes";
+                                        atualizarContador();
+                                    })
+                                    .addOnFailureListener(e ->
+                                            Toast.makeText(this, "Erro ao excluir: " + e.getMessage(),
+                                                    Toast.LENGTH_SHORT).show()))
+                    );
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("AUTH_DELETE", "Erro Auth: " + e.getMessage(), e);
+                    Toast.makeText(this, "Não foi possível excluir a conta de login: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
+    }
 
-                    // 3. EXCLUIR DO STORAGE
-                    // Caminho conforme sua regra: estado/municipio/imgAgentes/uuid
-                    StorageReference storageRef = FirebaseStorage.getInstance().getReference()
-                            .child(estado)
-                            .child(municipio)
-                            .child("imgAgentes")
-                            .child(uuid);
+    private void obterCpf(String uuid, CpfCallback callback) {
+        databaseReferenceExcluirAgentes.child(uuid).child("cpf")
+                .get()
+                .addOnCompleteListener(task -> {
+                    String cpf = null;
+                    if (task.isSuccessful() && task.getResult().exists()) {
+                        String bruto = task.getResult().getValue(String.class);
+                        if (bruto != null) {
+                            cpf = bruto.replaceAll("\\D", ""); // remove máscara
+                        }
+                    }
+                    callback.onCpf(cpf);
+                });
+    }
 
-                    storageRef.delete().addOnCompleteListener(task -> Toast.makeText(this, "Agente removido com sucesso!", Toast.LENGTH_SHORT).show());
+    private void excluirIndices(String cpf, boolean isAgente) {
+        if (TextUtils.isEmpty(cpf)) {
+            Log.e("INDEX_DELETE", "CPF não encontrado, índices não removidos");
+            return;
+        }
 
-                    if (local_database.equals("pre_cadastro_admins")) {
-                        db_total_cadastro = "total_admins";
-                    } else {
-                        db_total_cadastro = "total_agentes";
+        DatabaseReference raiz = databaseMunicipio.getReference();
+        String noEmail = isAgente ? "index_email_agentes" : "index_email_admin";
+
+        raiz.child("cpf_index").child(cpf).removeValue()
+                .addOnFailureListener(e ->
+                        Log.e("INDEX_DELETE", "Erro cpf_index: " + e.getMessage()));
+
+        raiz.child(noEmail).child(cpf).removeValue()
+                .addOnFailureListener(e ->
+                        Log.e("INDEX_DELETE", "Erro " + noEmail + ": " + e.getMessage()));
+    }
+
+    private void obterUrlImagem(ClassAgentes agente, boolean isAgente, UrlCallback callback) {
+        if (!TextUtils.isEmpty(agente.getUrlImagem())) {
+            callback.onUrl(agente.getUrlImagem());
+            return;
+        }
+        if (!isAgente) {          // admin não tem imagem
+            callback.onUrl(null);
+            return;
+        }
+        // Alternativa: agentes antigos podem ter a URL só em agentes_publico
+        databaseMunicipio.getReference()
+                .child("agentes_publico").child(agente.getUuid()).child("urlImagem")
+                .get()
+                .addOnCompleteListener(task -> {
+                    String url = null;
+                    if (task.isSuccessful() && task.getResult().exists()) {
+                        url = task.getResult().getValue(String.class);
+                    }
+                    callback.onUrl(url);
+                });
+    }
+
+    private void excluirImagemStorage(String urlImagem) {
+        if (TextUtils.isEmpty(urlImagem)) {
+            excluirImagemPorUuid(uuid, () ->
+                    Toast.makeText(this, "Agente removido com sucesso!", Toast.LENGTH_SHORT).show());
+            return;
+        }
+        try {
+            FirebaseStorage.getInstance().getReferenceFromUrl(urlImagem).delete()
+                    .addOnSuccessListener(unused ->
+                            Toast.makeText(this, "Agente removido com sucesso!", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(e -> {
+                        Log.e("STORAGE_DELETE", "Erro ao excluir imagem: " + e.getMessage());
+                        Toast.makeText(this, "Agente removido, mas houve erro ao excluir a imagem",
+                                Toast.LENGTH_SHORT).show();
+                    });
+        } catch (IllegalArgumentException e) {
+            Log.e("STORAGE_DELETE", "URL de imagem inválida: " + e.getMessage());
+            Toast.makeText(this, "Agente removido, mas a URL da imagem é inválida",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void excluirImagemPorUuid(String uuid, Runnable aoFinal) {
+        SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
+        String estado = prefs.getString("estado", null);
+        String municipio = prefs.getString("municipio", null);
+
+        FirebaseStorage.getInstance().getReference()
+                .child(estado + "/" + municipio + "/imgAgentes")
+                .listAll()
+                .addOnSuccessListener(lista -> {
+                    for (StorageReference item : lista.getItems()) {
+                        if (item.getName().endsWith("_" + uuid)) {
+                            item.delete()
+                                    .addOnFailureListener(e -> Log.e("STORAGE_DELETE", e.getMessage()));
+                        }
+                    }
+                    aoFinal.run();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("STORAGE_DELETE", "listAll falhou: " + e.getMessage());
+                    aoFinal.run();
+                });
+    }
+
+    private void atualizarContador() {
+        databaseMunicipio.getReference().child("config").child(db_total_cadastro)
+                .runTransaction(new Transaction.Handler() {
+                    @NonNull
+                    @Override
+                    public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                        Long valorAtual = currentData.getValue(Long.class);
+                        if (valorAtual == null) return Transaction.success(currentData);
+                        currentData.setValue(valorAtual + 1);   // libera uma vaga
+                        return Transaction.success(currentData);
                     }
 
-                    DatabaseReference preCadastroSoma = FirebaseDatabase.getInstance()
-                            .getReference("cadastros")
-                            .child(estado)
-                            .child(municipio)
-                            .child(local_database)
-                            .child(db_total_cadastro);
-
-                    preCadastroSoma.runTransaction(new Transaction.Handler() {
-                        @NonNull
-                        @Override
-                        public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                            Integer valorAtual = currentData.getValue(Integer.class);
-
-                            if (valorAtual == null) {
-                                return Transaction.success(currentData);
-                            }
-
-                            currentData.setValue(valorAtual - 1);
-                            return Transaction.success(currentData);
+                    @Override
+                    public void onComplete(@Nullable DatabaseError error, boolean committed,
+                                           @Nullable DataSnapshot currentData) {
+                        if (committed) {
+                            startActivity(new Intent(ExcluirAgentesActivity.this,
+                                    ExcluirProfissionaisPreCadastro.class));
+                        } else {
+                            Log.e("TOTAL_UPDATE", "Erro ao atualizar total");
                         }
-
-                        @Override
-                        public void onComplete(@Nullable DatabaseError error,
-                                               boolean committed,
-                                               @Nullable DataSnapshot currentData) {
-
-                            if (committed) {
-                                startActivity(new Intent(ExcluirAgentesActivity.this, ExcluirProfissionaisPreCadastro.class));
-                                Log.d("TOTAL_UPDATE", "Total atualizado com sucesso");
-                            } else {
-                                Log.e("TOTAL_UPDATE", "Erro ao atualizar total");
-                            }
-
-                        }
-                    });
+                    }
                 });
     }
 
@@ -171,6 +300,8 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
         databaseReferenceExcluirAgentes.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (ehOProprioAdmin(snapshot.getKey())) return;   // <- não mostra o próprio cadastro
+
                 ClassAgentes agente = snapshot.getValue(ClassAgentes.class);
                 if (agente != null) {
                     classAgentesExcluir.add(agente);
@@ -180,6 +311,8 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (ehOProprioAdmin(snapshot.getKey())) return;   // <- idem
+
                 ClassAgentes agenteEditado = snapshot.getValue(ClassAgentes.class);
                 int index = findAgenteIndexById(snapshot.getKey());
                 if (index != -1 && agenteEditado != null) {
@@ -200,6 +333,13 @@ public class ExcluirAgentesActivity extends AppCompatActivity {
             @Override public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {}
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
+    }
+
+    // Só esconde o próprio cadastro na lista de admins
+    private boolean ehOProprioAdmin(String key) {
+        return "logins/admins".equals(local_database)
+                && uidLogado != null
+                && uidLogado.equals(key);
     }
 
     private int findAgenteIndexById(String key) {

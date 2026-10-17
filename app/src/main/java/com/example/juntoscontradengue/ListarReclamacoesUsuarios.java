@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -16,9 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.juntoscontradengue.database.adapters.AdapterReclamacaoUsuarios;
-import com.example.juntoscontradengue.database.classes_database.ClassListarReclamacoes;
+import com.example.juntoscontradengue.database.classes_database.ClassListarReclamacoesUsuarios;
 import com.example.juntoscontradengue.databinding.ActivityReclamacoesUsuariosBinding;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -33,12 +33,12 @@ import java.util.Objects;
 
 public class ListarReclamacoesUsuarios extends AppCompatActivity {
 
-    ArrayList<ClassListarReclamacoes> listClassReclamacoes;
+    ArrayList<ClassListarReclamacoesUsuarios> listClassReclamacoes;
     AdapterReclamacaoUsuarios adapterReclamacaoUsuarios;
     String uid, estado, municipio;
     DatabaseReference databaseReference;
     ImageView imageViewSemReclamacao;
-    ImageButton btnFazerReclamacao;
+    FloatingActionButton fabNovaReclamacao;
     RecyclerView recyclerViewReclamacaoUsers;
     Boolean isConnected;
     @Override
@@ -49,6 +49,8 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         ActivityReclamacoesUsuariosBinding bindingUsers = ActivityReclamacoesUsuariosBinding.inflate(getLayoutInflater());
          setContentView(bindingUsers.getRoot());
@@ -71,8 +73,9 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
 
         recyclerViewReclamacaoUsers = bindingUsers.recyclerViewReclamacoesUsers;
         imageViewSemReclamacao = bindingUsers.imageViewSemReclamacao;
-        btnFazerReclamacao = bindingUsers.imageButtonSemReclamacao;
-        btnFazerReclamacao.setOnClickListener(v -> startActivity(new Intent(ListarReclamacoesUsuarios.this, Denunciar.class)));
+        fabNovaReclamacao = bindingUsers.fabNovaReclamacao;
+        fabNovaReclamacao.setOnClickListener(v ->
+                startActivity(new Intent(ListarReclamacoesUsuarios.this, Denunciar.class)));
 
         // Initialize Firebase Auth
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -99,11 +102,7 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
         recyclerViewReclamacoes.setAdapter(adapterReclamacaoUsuarios);
 
         // Initialize database reference
-        databaseReference = FirebaseDatabase
-                .getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
+        databaseReference = databaseMunicipio.getReference()
                 .child("reclamacoes")
                 .child(uid);
 
@@ -112,10 +111,9 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 try {
-                    ClassListarReclamacoes complaint = snapshot.getValue(ClassListarReclamacoes.class);
+                    ClassListarReclamacoesUsuarios complaint = snapshot.getValue(ClassListarReclamacoesUsuarios.class);
                     if (complaint != null) {
                         imageViewSemReclamacao.setVisibility(View.GONE);
-                        btnFazerReclamacao.setVisibility(View.GONE);
                         recyclerViewReclamacaoUsers.setVisibility(View.VISIBLE);
                         complaint.setIdReclamacao(snapshot.getKey());
                         listClassReclamacoes.add(complaint);
@@ -127,7 +125,7 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
 
                     // Handle string values by creating a basic complaint
                     if (snapshot.getValue() instanceof String) {
-                        ClassListarReclamacoes tempComplaint = new ClassListarReclamacoes();
+                        ClassListarReclamacoesUsuarios tempComplaint = new ClassListarReclamacoesUsuarios();
                         tempComplaint.setIdReclamacao(snapshot.getKey());
                         tempComplaint.setReclamacao(snapshot.getValue(String.class));
                         tempComplaint.setStatus("Pending");
@@ -140,10 +138,9 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 try {
-                    ClassListarReclamacoes complaint = snapshot.getValue(ClassListarReclamacoes.class);
+                    ClassListarReclamacoesUsuarios complaint = snapshot.getValue(ClassListarReclamacoesUsuarios.class);
                     if (complaint != null) {
                         imageViewSemReclamacao.setVisibility(View.GONE);
-                        btnFazerReclamacao.setVisibility(View.GONE);
                         recyclerViewReclamacaoUsers.setVisibility(View.VISIBLE);
                         complaint.setIdReclamacao(snapshot.getKey());
                         int index = findComplaintIndexById(snapshot.getKey());
@@ -161,21 +158,23 @@ public class ListarReclamacoesUsuarios extends AppCompatActivity {
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
                 int index = findComplaintIndexById(snapshot.getKey());
                 if (index != -1) {
-                    imageViewSemReclamacao.setVisibility(View.VISIBLE);
-                    btnFazerReclamacao.setVisibility(View.VISIBLE);
-                    recyclerViewReclamacaoUsers.setVisibility(View.GONE);
                     listClassReclamacoes.remove(index);
                     adapterReclamacaoUsuarios.notifyItemRemoved(index);
+
+                    // Só atualiza a UI se a lista ficou VAZIA
+                    if (listClassReclamacoes.isEmpty()) {
+                        imageViewSemReclamacao.setVisibility(View.VISIBLE);
+                        recyclerViewReclamacaoUsers.setVisibility(View.GONE);
+                    }
                 }
             }
 
             @Override
             public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                // Handle item reordering if needed
-                imageViewSemReclamacao.setVisibility(View.VISIBLE);
-                btnFazerReclamacao.setVisibility(View.VISIBLE);
-                recyclerViewReclamacaoUsers.setVisibility(View.GONE);
+                // Nada a fazer aqui — reordenação não altera a visibilidade
+                // Se quiser reordenar, implemente a lógica de mover o item na lista
             }
+
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {

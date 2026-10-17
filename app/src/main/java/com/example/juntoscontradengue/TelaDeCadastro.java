@@ -1,5 +1,6 @@
 package com.example.juntoscontradengue;
 
+import android.app.TaskStackBuilder;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -24,6 +25,8 @@ import com.example.juntoscontradengue.extras.AppConfig;
 import com.example.juntoscontradengue.extras.EmailValidator;
 import com.example.juntoscontradengue.extras.MaskEditUtil;
 import com.example.juntoscontradengue.extras.NetworkUtils;
+import com.example.juntoscontradengue.extras.TelefoneUtil;
+import com.example.juntoscontradengue.extras.TopicHelper;
 import com.example.juntoscontradengue.extras.ValidaCpf;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -35,7 +38,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -50,16 +52,15 @@ public class TelaDeCadastro extends AppCompatActivity {
     private Button btnCad;
     private FirebaseAuth auth;
     private String nome;
-    private String cpf, cpfLimpo;
+    private String cpfLimpo;
     private String endereco;
     private String num_casa;
     private String conjunto;
     private String email;
     private String telLimpo;
     private String senha;
-    private String estado, municipio;
-    private String uuid, tipoConta;
-    Long dataCadastro;
+    private String uuid;
+    private FirebaseDatabase databaseMunicipio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,27 +72,11 @@ public class TelaDeCadastro extends AppCompatActivity {
         // Inicialize o FirebaseAuth aqui
         auth = FirebaseAuth.getInstance();
 
-        estado = AppConfig.getEstado(this);
-        municipio = AppConfig.getMunicipio(this);
+        String estado = AppConfig.getEstado(this);
+        String municipio = AppConfig.getMunicipio(this);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            tipoConta = extras.getString("tipo_conta");
-            cpf = extras.getString("cpf");
-            nome = extras.getString("nome");
-
-        }
-        if (tipoConta != null && !tipoConta.isEmpty()) {
-
-            if (tipoConta.equals("admin")) {
-
-                tipoConta = "admins";
-
-            } else {
-
-                tipoConta = "usuarios";
-            }
-        }
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
 
         initializeComponents(activityTelaDeCadastroBinding);
         checkNetworkConnection();
@@ -132,33 +117,24 @@ public class TelaDeCadastro extends AppCompatActivity {
         termos = binding.lerTermos;
         btnCad = binding.btnCriarConta;
 
+        setupCheckBoxListener();
+
         cpfCad.addTextChangedListener(MaskEditUtil.mask(MaskEditUtil.FORMAT_CPF));
         telefoneCad.addTextChangedListener(MaskEditUtil.maskTelefone());
 
-        if (tipoConta.equals("admins")) {
-
-            nomeCad.setText(nome);
-
-            nomeCad.setEnabled(false);
-
-            cpfCad.setText(cpf);
-
-            cpfCad.setEnabled(false);
-
-            enderecoCad.setVisibility(View.GONE);
-
-            num_casaCad.setVisibility(View.GONE);
-
-            conjuntoCad.setVisibility(View.GONE);
-
-        }
-
-
-        checkBoxCad.setOnCheckedChangeListener((buttonView, isChecked) -> verificarCampo());
-
         termos.setOnClickListener(v -> startActivity(new Intent(TelaDeCadastro.this, TermosDeUsoActivity.class)));
 
-        btnCad.setOnClickListener(view -> criar_conta_email_senha());
+        btnCad.setOnClickListener(view -> {
+            if (!checkBoxCad.isChecked()) {
+                Toast.makeText(TelaDeCadastro.this,
+                        "Você precisa aceitar os termos de uso para continuar.",
+                        Toast.LENGTH_LONG).show();
+                btnCad.setEnabled(false); // garante consistência
+                return;
+            }
+
+                criar_conta_email_senha();
+        });
 
         edtSenha.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -180,6 +156,30 @@ public class TelaDeCadastro extends AppCompatActivity {
             return false;
         });
 
+    }
+
+    private void setupCheckBoxListener() {
+        checkBoxCad.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!isChecked) {
+                btnCad.setEnabled(false);
+
+                nomeCad.setEnabled(true);
+                cpfCad.setEnabled(true);
+                enderecoCad.setEnabled(true);
+                num_casaCad.setEnabled(true);
+                conjuntoCad.setEnabled(true);
+                telefoneCad.setEnabled(true);
+                emailCad.setEnabled(true);
+                confEmailCad.setEnabled(true);
+                edtSenha.setEnabled(true);
+                confSenhaCad.setEnabled(true);
+
+                return;
+            }
+            // Se marcou, valida tudo. Só ativa o botão ao final, se tudo OK.
+            btnCad.setEnabled(false); // garante desativado durante a validação
+            verificarCampo();
+        });
     }
 
     private void senhaTogglePasswordVisibility() {
@@ -219,8 +219,14 @@ public class TelaDeCadastro extends AppCompatActivity {
         num_casa = num_casaCad.getText().toString().trim();
         conjunto = conjuntoCad.getText().toString().trim();
 
-        if (tipoConta.equals("admins")) {
-            if (nomeUsuario.isEmpty() || cpfUsuario.isEmpty() || email.isEmpty() || confEmail.isEmpty() || telefone.isEmpty() || senha.isEmpty() || confSenha.isEmpty()) {
+        // ✅ Sempre recalcula
+        cpfLimpo = cpfUsuario.replaceAll("[^0-9]", "");
+        telLimpo = telefoneCad.getText().toString().trim().replaceAll("[^0-9]", "");
+
+
+            if (nomeUsuario.isEmpty() || cpfUsuario.isEmpty() || email.isEmpty() || confEmail.isEmpty() || telefone.isEmpty() || senha.isEmpty() || confSenha.isEmpty()
+                    || endereco.isEmpty() || num_casa.isEmpty() || conjunto.isEmpty()) {
+
                 Toast.makeText(TelaDeCadastro.this, "Preencha todos os campos!", Toast.LENGTH_LONG).show();
                 checkBoxCad.setChecked(false);
                 return;
@@ -229,34 +235,27 @@ public class TelaDeCadastro extends AppCompatActivity {
                 cpfLimpo = cpfUsuario.replaceAll("[^0-9]", "");
                 telLimpo = telefone.replaceAll("[^0-9]", "");
             }
-        }
-        if (tipoConta.equals("usuarios")) {
-            if (nomeUsuario.isEmpty() || cpfUsuario.isEmpty() || email.isEmpty() || confEmail.isEmpty() || telefone.isEmpty() || senha.isEmpty() || confSenha.isEmpty()
-                    || endereco.isEmpty() || num_casa.isEmpty() || conjunto.isEmpty()) {
 
-                Toast.makeText(TelaDeCadastro.this, "Preencha todos os campos!", Toast.LENGTH_LONG).show();
-
-                return;
-            } else {
-                nome = nomeUsuario;
-                cpfLimpo = cpfUsuario.replaceAll("[^0-9]", "");
-                telLimpo = telefone.replaceAll("[^0-9]", "");
-            }
-        }
 
 
         if (!ValidaCpf.validaCPF(cpfLimpo)) {
             Toast.makeText(TelaDeCadastro.this, "Digite um número de CPF válido!", Toast.LENGTH_LONG).show();
+            checkBoxCad.setChecked(false);
+
         } else if (!EmailValidator.getInstance().validate(email)) {
             Toast.makeText(TelaDeCadastro.this, "Digite um email válido!", Toast.LENGTH_LONG).show();
+            checkBoxCad.setChecked(false);
+
         } else if (!email.equals(confEmail)) {
             Toast.makeText(TelaDeCadastro.this, "Os emails não conferem!", Toast.LENGTH_LONG).show();
+            checkBoxCad.setChecked(false);
         } else if (!senha.equals(confSenha)) {
             Toast.makeText(TelaDeCadastro.this, "As senhas não conferem!", Toast.LENGTH_LONG).show();
+            checkBoxCad.setChecked(false);
         } else if (senha.length() < 6) {
             Toast.makeText(TelaDeCadastro.this, "A senha deve ter 6 ou mais caracteres!", Toast.LENGTH_LONG).show();
+            checkBoxCad.setChecked(false);
         } else {
-
 
             verificarCpfAntesCadastro(new CadastroCallback() {
                 @Override
@@ -274,18 +273,30 @@ public class TelaDeCadastro extends AppCompatActivity {
     }
 
     private void verificarFoneAntesCadastro() {
+
+         if (!TelefoneUtil.telefoneValido(telefoneCad.getText().toString())) {
+             Toast.makeText(this, "Telefone inválido", Toast.LENGTH_SHORT).show();
+             checkBoxCad.setChecked(false);
+             return;
+         }
+
         verificarTelefoneAntesCadastro(new CadastroCallback() {
             @Override
             public void onLiberado() {
                 Log.e("Liberado Fone", "Fone OK");
 
-                // REMOVE o listener temporariamente para evitar o loop
-                checkBoxCad.setOnCheckedChangeListener(null);
-
                 btnCad.setEnabled(true);
+                nomeCad.setEnabled(false);
+                cpfCad.setEnabled(false);
+                enderecoCad.setEnabled(false);
+                num_casaCad.setEnabled(false);
+                conjuntoCad.setEnabled(false);
+                telefoneCad.setEnabled(false);
+                emailCad.setEnabled(false);
+                confEmailCad.setEnabled(false);
+                edtSenha.setEnabled(false);
+                confSenhaCad.setEnabled(false);
 
-                // RESTAURA o listener caso o usuário mude o checkbox depois
-                checkBoxCad.setOnCheckedChangeListener((buttonView, isChecked) -> verificarCampo());
             }
 
             @Override
@@ -299,13 +310,10 @@ public class TelaDeCadastro extends AppCompatActivity {
     }
 
     private void verificarTelefoneAntesCadastro(CadastroCallback cadastroCallback) {
-        DatabaseReference baseRefFone = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio);
 
-        // Verifica telefone
-        baseRefFone.child("telefone_index").child(telLimpo)
+        DatabaseReference baseRefFone = databaseMunicipio.getReference("telefone_index");
+
+        baseRefFone.child(telLimpo)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snap) {
@@ -329,12 +337,9 @@ public class TelaDeCadastro extends AppCompatActivity {
 
     private void verificarCpfAntesCadastro(CadastroCallback callback) {
 
-        DatabaseReference baseRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio);
+        DatabaseReference baseRef = databaseMunicipio.getReference("cpf_index");
 
-        baseRef.child("cpf_index").child(cpfLimpo)
+        baseRef.child(cpfLimpo)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -403,73 +408,70 @@ public class TelaDeCadastro extends AppCompatActivity {
     }
 
     private void salvarDadosUsuario() {
-        Calendar c = Calendar.getInstance();
 
-        dataCadastro = c.getTimeInMillis();
-
-
-        DatabaseReference userRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("logins")
-                .child(tipoConta)
+        DatabaseReference userRef =  databaseMunicipio.getReference("logins/usuarios")
                 .child(uuid); // Já referencia o nó
 
         Map<String, Object> dados = new HashMap<>();
         dados.put("nome", nome);
         dados.put("cpf", cpfLimpo);
-        dados.put("endereco", endereco);
+        dados.put("email", email);
+         dados.put("endereco", endereco);
         dados.put("num_casa", num_casa);
         dados.put("conjunto", conjunto);
         dados.put("telefone", telLimpo);
-        dados.put("email", email);
-        dados.put("dataCadastro", dataCadastro);
         dados.put("uuid", uuid);
-        dados.put("updatedAt", "");
 
         userRef.setValue(dados)
                 .addOnSuccessListener(aVoid -> {
 
-                    DatabaseReference baseRef = FirebaseDatabase.getInstance()
-                            .getReference("cadastros")
-                            .child(estado)
-                            .child(municipio);
+// 1. Crie um mapa com os caminhos relativos à raiz do banco
+                    Map<String, Object> atualizacoes = new HashMap<>();
+                    atualizacoes.put("cpf_index/" + cpfLimpo, uuid);
 
-                    baseRef.child("cpf_index").child(cpfLimpo).setValue(uuid);
-                    baseRef.child("telefone_index").child(telLimpo).setValue(uuid);
+                    atualizacoes.put("telefone_index/" + telLimpo, uuid);
 
-                    if (tipoConta.equals("admins")) {
-                        deletar_pre_cadastro();
-                    }
+
+// 2. Grava os dois índices numa única operação atômica
+                    databaseMunicipio.getReference().updateChildren(atualizacoes)
+                    .addOnSuccessListener(v -> Log.d("Firebase", "Índices gravados"))
+                    .addOnFailureListener(e -> Log.e("Firebase", "Falha ao gravar índices", e));
+
+                    TopicHelper.inscreverNoTopicoDoPerfil(this, "usuarios");
+
+
                     salvarSharedPrefsUsuarios();
                     hideLoading();
                     limparCampos();
 
-                    if ("admins".equals(tipoConta)) {
                         Alertas.showSuccessDialog(TelaDeCadastro.this, "Sucesso", "Cadastro realizado com sucesso! Faça login para entrar na conta.", (dialog, which) -> {
                             // Roda APENAS quando clica em OK:
-                            Intent intent = new Intent(TelaDeCadastro.this, ActivityLoginAdmin.class);
-                            startActivity(intent);
+                            // 1) encerra a sessão criada no cadastro
+                            auth.signOut();
+
+                            // 2) monta a pilha: Main (base) -> Login (topo)
+                            Intent main  = new Intent(this, MainActivity.class);
+                            Intent login = new Intent(this, TelaLoguin.class);
+                            TaskStackBuilder.create(this)
+                                    .addNextIntent(main)
+                                    .addNextIntent(login)
+                                    .startActivities();
+
                             finish(); // Fecha a tela de cadastro
                         });
-                    } else {
-                        Alertas.showSuccessDialog(TelaDeCadastro.this, "Sucesso", "Cadastro realizado com sucesso! Faça login para entrar na conta. ", (dialog, which) -> {
-                            // Usuário comum volta para a tela de login padrão
-                            finish(); // Fecha a tela de cadastro e retorna
-                        });
-                    }
+
 
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     Log.e("Firebase", "Erro ao salvar", e);
+                    checkBoxCad.setChecked(false);
                     finish();
                 });
     }
 
     private void salvarSharedPrefsUsuarios() {
-        // Salvar no SharedPreferences (AGORA SIM, com dados carregados)
+        // Salvar no SharedPreferences (AGORA, SIM, com dados carregados)
         SharedPreferences pref = getSharedPreferences("UserData", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putString("nome", nome);
@@ -479,21 +481,8 @@ public class TelaDeCadastro extends AppCompatActivity {
         editor.putString("num_casa", num_casa);
         editor.putString("conjunto", conjunto);
         editor.putString("telefone", telLimpo);
-        editor.putString("dataCadastro", String.valueOf(dataCadastro));
-        editor.putString("perfil", tipoConta);
+
         editor.apply();
-    }
-
-    private void deletar_pre_cadastro() {
-        DatabaseReference usersRef = FirebaseDatabase.getInstance()
-                .getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("config")
-                .child("pre_cadastro_admins")
-                .child(cpfLimpo);
-
-        usersRef.removeValue();
     }
 
     private void limparCampos() {

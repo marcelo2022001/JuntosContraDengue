@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -47,21 +48,23 @@ public class ExcluirLocaisDescartesPneus extends AppCompatActivity {
         boolean isConnected = NetworkUtils.isNetworkAvailable(ExcluirLocaisDescartesPneus.this);
 
         if (!isConnected) {
-
             Intent itente = new Intent(this, SemInternetActivity.class);
             itente.putExtra("id_activity", "excluir_locais_pneus");
             startActivity(itente);
-
+            finish();
+            return;
         }
 
         SharedPreferences prefs = getSharedPreferences("configApp", MODE_PRIVATE);
         estado = prefs.getString("estado", null);
         municipio = prefs.getString("municipio", null);
 
+        String urlBanco = "https://juntos-contra-dengue-" + estado + "-" + municipio + "-db.firebaseio.com/";
+        FirebaseDatabase databaseMunicipio = FirebaseDatabase.getInstance(urlBanco);
+        databaseDescartesPneus = databaseMunicipio.getReference().child("descarte_pneus");
+
         setupToolbarDescartesPneus();
-        initializeFirebaseDescartesPneus();
         setupRecyclerViewDescartesPneus();
-        loadInitialData(); // Adicionado para carregar dados iniciais
     }
 
     private void setupToolbarDescartesPneus() {
@@ -71,50 +74,11 @@ public class ExcluirLocaisDescartesPneus extends AppCompatActivity {
         toolbar.setTitle("Excluir locais de descarte de pneus");
     }
 
-    private void initializeFirebaseDescartesPneus() {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        databaseDescartesPneus = database.getReference("cadastros")
-                .child(estado)
-                .child(municipio)
-                .child("descarte_pneus");
-    }
-
     private void setupRecyclerViewDescartesPneus() {
         recyclerViewDescartesPneus = bindingDescartesPneus.rvExcluirLocaisDescartesPneus;
         recyclerViewDescartesPneus.setLayoutManager(new LinearLayoutManager(this));
-
-        // CORREÇÃO: Usando a variável de instância corretamente
         adapterDescartesPneus = new AdapterExcluirLocaisDescartesPneus(this, ListDescartesPneus);
         recyclerViewDescartesPneus.setAdapter(adapterDescartesPneus);
-    }
-
-    private void loadInitialData() {
-        databaseDescartesPneus.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                ListDescartesPneus.clear();
-                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                    ClassDescarteConsciente contact = childSnapshot.getValue(ClassDescarteConsciente.class);
-                    if (contact != null) {
-                        contact.setId(childSnapshot.getKey());
-                        ListDescartesPneus.add(contact);
-                    }
-                }
-                // CORREÇÃO: Notificar o adapter que os dados mudaram
-                if (adapterDescartesPneus != null) {
-                    adapterDescartesPneus.updateListExcluir(ListDescartesPneus);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                if (!isFinishing() && !isDestroyed()) {
-                    Toast.makeText(ExcluirLocaisDescartesPneus.this,
-                            "Erro ao carregar dados: " + error.getMessage(),
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
 
     @Override
@@ -124,6 +88,12 @@ public class ExcluirLocaisDescartesPneus extends AppCompatActivity {
     }
 
     private void attachChildListener() {
+        // Evita itens duplicados ao voltar para a tela (onStop -> onStart)
+        ListDescartesPneus.clear();
+        if (adapterDescartesPneus != null) {
+            adapterDescartesPneus.updateListExcluir(ListDescartesPneus);
+        }
+
         childEventListenerDescartesPneus = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, String previousChildName) {
@@ -134,6 +104,7 @@ public class ExcluirLocaisDescartesPneus extends AppCompatActivity {
                     if (adapterDescartesPneus != null) {
                         adapterDescartesPneus.updateListExcluir(ListDescartesPneus);
                     }
+                    atualizarEstadoVazio();
                 }
             }
 
@@ -165,6 +136,7 @@ public class ExcluirLocaisDescartesPneus extends AppCompatActivity {
                         if (adapterDescartesPneus != null) {
                             adapterDescartesPneus.updateListExcluir(ListDescartesPneus);
                         }
+                        atualizarEstadoVazio();
                         break;
                     }
                 }
@@ -185,6 +157,27 @@ public class ExcluirLocaisDescartesPneus extends AppCompatActivity {
         };
 
         databaseDescartesPneus.addChildEventListener(childEventListenerDescartesPneus);
+
+        // Dispara depois de todos os onChildAdded iniciais (inclusive com o nó vazio)
+        databaseDescartesPneus.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                atualizarEstadoVazio();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                atualizarEstadoVazio();
+            }
+        });
+    }
+
+    private void atualizarEstadoVazio() {
+        if (bindingDescartesPneus == null) return;
+
+        boolean vazio = ListDescartesPneus.isEmpty();
+        bindingDescartesPneus.layoutEmptyState.setVisibility(vazio ? View.VISIBLE : View.GONE);
+        bindingDescartesPneus.rvExcluirLocaisDescartesPneus.setVisibility(vazio ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -223,7 +216,6 @@ public class ExcluirLocaisDescartesPneus extends AppCompatActivity {
     }
 
     public void deletarLocalDescartePneusPeloId(String id) {
-        // CORREÇÃO: Verificar se a Activity ainda está ativa
         if (isFinishing() || isDestroyed()) {
             return;
         }

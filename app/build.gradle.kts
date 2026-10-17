@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    namespace = "com.example.juntoscontradengue"
+    namespace = "br.com.casaestrela.juntoscontradengue"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.juntoscontradengue"
-        minSdk = 23
+        applicationId = "br.com.casaestrela.juntoscontradengue"
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -26,8 +26,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -38,7 +38,8 @@ android {
 dependencies {
     // Firebase BoM (Gerencia as versões automaticamente para evitar conflitos)
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
-    implementation("androidx.activity:activity-ktx:1.8.0") // Versão estável 2026
+    implementation("androidx.activity:activity-ktx:1.8.0")
+    implementation("androidx.cardview:cardview:1.0.0") // Versão estável 2026
 
     // Firebase (Sem versão manual, o BoM resolve)
     implementation("com.google.firebase:firebase-analytics")

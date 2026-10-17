@@ -26,7 +26,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:clipToPadding="false"
-        android:paddingBottom="16dp"
+        android:paddingBottom="88dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -46,18 +46,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbarReclamacoesUsers" />
 
-    <ImageButton
-        android:id="@+id/imageButtonSemReclamacao"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabNovaReclamacao"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/imageViewSemReclamacao"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:contentDescription="@string/fazer_uma_reclamacao"
-        android:src="@drawable/baseline_add"
-        app:layout_constraintEnd_toEndOf="@+id/imageViewSemReclamacao"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewSemReclamacao" />
+        app:srcCompat="@drawable/baseline_add"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 
